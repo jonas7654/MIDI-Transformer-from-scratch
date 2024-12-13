@@ -1,2 +1,1 @@
-# NN
-NN from scratch
+# NN-transformer-from-scratch
