@@ -107,7 +107,7 @@ class GoePT():
         for block in self.transformer['h']:
             x = block.forward(x)
         x = self.transformer['ln_f'].forward(x)
-
+        
         # Compute loss and return
         if targets is not None:
             # if we are given some desired targets also calculate the loss<
@@ -137,10 +137,9 @@ class GoePT():
         
         x = self.transformer['drop'].backward(x)
         # TODO: To we need backward for positional encodings??
-        #x = self.transformer['wpe'].backward(x)
+
         x = self.transformer['wte'].backward(x)
         
-        #raise NotImplementedError("Implement the nanoGPT backward path")
 
 
     def update(self):
@@ -150,10 +149,8 @@ class GoePT():
             block.update()
         
         # TODO: Do we need this?
-        #self.transformer['drop'].update()
-        #self.transformer['wpe'].update()
+
         self.transformer['wte'].update()
-        #raise NotImplementedError("Implement the nanoGPT update")
 
     def state_dict(self):
 
@@ -239,13 +236,14 @@ def main():
     # Training settings
     parser = argparse.ArgumentParser(description='NanoGPT from scratch')
     parser.add_argument('--data-dir', type=str,
-                            default='/home/jv/GitHub/NN-from-scratch/datasets/tokenized/',
+                            default='/home/jv/GitHub/NN/datasets/tokenized',
                             help='Dataset directory')
     parser.add_argument('--checkpoint-dir', type=str,
                                 default='checkpoints/',
                                 help='Checkpoint directory')
     parser.add_argument('--vocab-file', type=str,
-                                default='../models/tokenizers/goe_pt/goe_pt_tokenizer.json',
+                                default='../tokenizers/goe_pt/goe_pt_tokenizer.json',
+
 
                                 help='Vocabulary file')
 
@@ -268,9 +266,7 @@ def main():
     args = parser.parse_args()
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
-
-    # TODO
-    args.vocab_file = "/home/jv/GitHub/NN-from-scratch/models/tokenizers/goe_pt/goe_pt_tokenizer.json"
+    args.vocab_file = "/home/jv/GitHub/NN/models/tokenizers/goe_pt/goe_pt_tokenizer.json"
     tokenizer = Tokenizer.from_file(args.vocab_file)
 
     ic(tokenizer)
