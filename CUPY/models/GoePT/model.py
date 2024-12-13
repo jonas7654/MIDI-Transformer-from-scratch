@@ -5,6 +5,7 @@ import time
 import argparse
 from functools import partial
 import json
+import wandb
 
 # TODO
 import numpy as np
@@ -270,6 +271,9 @@ def main():
                         help='how many batches to wait before logging training status')
 
     args = parser.parse_args()
+    
+    
+
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
@@ -280,6 +284,24 @@ def main():
 
     cp.random.seed(args.seed)
 
+      # Initialize Weights & Biases (wandb)
+    wandb.init(
+        project="GoePT-Training", 
+        config={
+            "data_dir": args.data_dir,
+            "checkpoint_dir": args.checkpoint_dir,
+            "vocab_file": args.vocab_file,
+            "batch_size": args.batch_size,
+            "context_length": args.context_length,
+            "epochs": args.epochs,
+            "gradient_accumulation_steps": args.gradient_accumulation_steps,
+            "eval_iters": args.eval_iters,
+            "lr": args.lr,
+            "seed": args.seed,
+            "log_interval": args.log_interval,
+            "eval_interval": args.eval_interval,
+        }
+    )
     
     model = GoePT(batch_size=args.batch_size, lr=args.lr)
 
@@ -343,6 +365,8 @@ def main():
 
                 progress_step.console.print(f"Current local training loss: {loss:.5e}")
                 progress_step.advance(task_id)
+                
+                wandb.log({"loss": loss.item()})
 
             progress_step.remove_task(task_id)
 
@@ -396,6 +420,12 @@ def main():
 
                     best_val_loss = losses_dataset['val']
 
+                # Log evaluation metrics to W&B
+                wandb.log({
+                            "train_loss": float(losses_dataset['train'].item()),
+                            "val_loss": float(losses_dataset['val'].item()),
+                          })
+                
                 status.update(f'[bold green]Training...\tstep {iter_num}: train loss {losses_dataset["train"]:.4f}\tval loss {losses_dataset["val"]:.4f}')
 
             # timing and logging
@@ -406,6 +436,8 @@ def main():
             if iter_num % args.log_interval == 0:
                 lossf = loss.item()*args.gradient_accumulation_steps
 
+                 # Log step-wise loss to W&B
+                wandb.log({"step_loss": lossf, "step_time_ms": dt * 1000})
                 status.update(f'[bold green]Training...\tstep {iter_num}: loss {lossf:.4f}\ttime {dt*1000.:.2f} ms')
 
             iter_num += 1
@@ -413,7 +445,9 @@ def main():
             # termination conditions
             if iter_num > args.epochs:
                 break
-
+            
+ # Finish W&B logging
+    wandb.finish()
 
 if __name__ == '__main__':
     main()
