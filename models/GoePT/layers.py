@@ -299,10 +299,12 @@ class LayerNorm():
         Perform backpropagation to compute gradients of input, weight, and bias.
         """
         doutput = np.asanyarray(doutput)
-        output_forward = self.weight * self.x_centered*self.stddev_inv
+
         # Calculate gradient of bias and weight
-        self.grad_bias = np.sum(doutput, axis=(0,1)) 
-        self.grad_weight = np.sum(doutput * output_forward, axis=(0,1))
+        self.grad_bias = np.mean(doutput, axis = (0,1)) 
+        self.grad_weight = np.mean(doutput * (self.x_centered * self.stddev_inv), axis = (0,1))
+        
+        
         # Calculate gradient of the normalized output (dhat_x)
         dx_hat = doutput * self.weight  # Backpropagate through the scaling
         dvar = np.sum(dx_hat * self.x_centered, axis=self.axis, keepdims=True) * (-0.5) * (self.stddev_inv ** 3)
@@ -342,6 +344,7 @@ class GELU():
     def backward(self, grad_output: ArrayLike) -> np.ndarray:
         grad_output = np.asarray(grad_output)
         input_grad = self.gelu_grad(self.input)
+        
         return grad_output * input_grad
 
 
@@ -391,8 +394,6 @@ class MLP():
         return x
 
     def update(self) -> None:
-        # TODO
-        #self.dropout.update()
         self.c_proj.update()
         self.c_fc.update()
 
@@ -541,11 +542,8 @@ class MultiHeadAttention():
 
         grad = self.resid_dropout.backward(grad)
         grad = self.c_proj.backward(grad)
+        
 
-        #grad = np.ascontiguousarray(grad)
-        # OLD
-        #grad = grad.reshape((B, T, self.n_heads, -1))
-        #grad = grad.transpose(0,2,1,3) 
 
         # NEW
         grad = np.ascontiguousarray(grad).reshape(B, self.n_heads, T, -1) # B, n_heads, T, C // n_heads
@@ -556,9 +554,13 @@ class MultiHeadAttention():
 
         grad = self.attn_dropout.backward(grad)
         grad = self.softmax_attn.backward(grad)
-
-        grad = np.where(self.mask == 0, -1e9, grad)
-
+        
+        
+        # :TODO Here we dont need to set the upper triangular part to -infinity. This is only used before softmax in forward pass!
+        # We need to zero out the triangular matrix. 
+        # grad = np.where(self.mask == 0, -1e9, grad)
+        grad = grad * self.mask
+        
         grad_ktrans = ((1.0/math.sqrt(self.k.shape[-1])) * (self.q.transpose(0, 1, 3, 2) @ grad))
         grad_k = grad_ktrans.transpose(0, 1, 3, 2)
         grad_q = (1.0/math.sqrt(self.k.shape[-1]))  * (grad @ self.k)
@@ -569,9 +571,12 @@ class MultiHeadAttention():
         
         # We need to tranpose to the shape (batch_size, seq_len, 3* d_model)
         grad = np.concatenate([grad_q, grad_k, grad_v], axis=2)
-
+        
+        
+        
         grad_downstream = self.c_attn.backward(grad)
-
+        
+        
         return grad_downstream
 
 
