@@ -126,7 +126,6 @@ class GoePT():
 
         return logits, loss
 
-        # We need dL/dLoss and pass it to the first backward
 
     def backward(self, x):
         x = self.lm_head.backward(x)
@@ -136,8 +135,6 @@ class GoePT():
             x = block.backward(x)
         
         x = self.transformer['drop'].backward(x)
-        # TODO: To we need backward for positional encodings??
-
         x = self.transformer['wte'].backward(x)
         
 
@@ -148,8 +145,6 @@ class GoePT():
         for block in self.transformer['h']:
             block.update()
         
-        # TODO: Do we need this?
-
         self.transformer['wte'].update()
 
     def state_dict(self):
@@ -236,7 +231,7 @@ def main():
     # Training settings
     parser = argparse.ArgumentParser(description='NanoGPT from scratch')
     parser.add_argument('--data-dir', type=str,
-                            default='/home/jv/GitHub/NN/datasets/tokenized',
+                            default='/datasets/tokenized',
                             help='Dataset directory')
     parser.add_argument('--checkpoint-dir', type=str,
                                 default='checkpoints/',
@@ -266,7 +261,7 @@ def main():
     args = parser.parse_args()
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
-    args.vocab_file = "/home/jv/GitHub/NN/models/tokenizers/goe_pt/goe_pt_tokenizer.json"
+
     tokenizer = Tokenizer.from_file(args.vocab_file)
 
     ic(tokenizer)
