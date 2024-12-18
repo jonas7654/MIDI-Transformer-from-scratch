@@ -7,7 +7,6 @@ from functools import partial
 import json
 import wandb
 
-# TODO
 import numpy as np
 import cupy as cp
 
@@ -140,7 +139,6 @@ class GoePT():
             x = block.backward(x)
         
         x = self.transformer['drop'].backward(x)
-        # TODO: To we need backward for positional encodings??
 
         x = self.transformer['wte'].backward(x)
         
@@ -152,8 +150,6 @@ class GoePT():
         for block in self.transformer['h']:
             block.update()
         
-        # TODO: Do we need this?
-
         self.transformer['wte'].update()
 
     def state_dict(self):
@@ -212,17 +208,14 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
     # https://stackoverflow.com/questions/45132940/numpy-memmap-memory-usage-want-to-iterate-once/61472122#61472122
 
     if split == 'train':
-        #data = npnp.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
-        # TODO CUPY implementation (https://docs.cupy.dev/en/stable/reference/generated/cupy.fromfile.html)
-        data = cp.fromfile(os.path.join(data_dir, 'train.bin'), dtype=cp.uint16)
+        data = np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
     else:
-        #data = npnp.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
-        data = cp.asarray(cp.fromfile(os.path.join(data_dir, 'val.bin'), dtype=cp.uint16))
+        data = np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
 
     ix = rng.integers(len(data) - context_length, size=(batch_size,))
 
-    x = cp.stack([(data[i:i+context_length].astype(cp.int64)) for i in ix])
-    y = cp.stack([(data[i+1:i+1+context_length].astype(cp.int64)) for i in ix])
+    x = np.stack([(data[i:i+context_length].astype(np.int64)) for i in ix])
+    y = np.stack([(data[i+1:i+1+context_length].astype(np.int64)) for i in ix])
 
     return x, y
 
@@ -359,7 +352,8 @@ def main():
                 
                 # Continue backward
                 grad = loss * raw_grad
-            
+
+           
                 model.backward(grad)
                 model.update()
 

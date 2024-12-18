@@ -525,9 +525,6 @@ class MultiHeadAttention():
         """
         We reshape x to the original Input shape which is (B, T, C) => concat heads
         -1 tells python to calculate the remaining dimension to fit (i.e returning T in this case)
-        
-        I don't know why they wrote: self.n_heads*self.depth 
-        This is just a non readible way of using C from the beginning
         """
         x = np.ascontiguousarray(x).transpose(0, 2, 1, 3).reshape(self.batch_size, -1, self.n_heads*self.depth)
         x = self.c_proj.forward(x)
