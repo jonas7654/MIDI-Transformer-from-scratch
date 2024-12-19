@@ -211,14 +211,9 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
 
     if split == 'train':
         data = np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
-        # TODO CUPY implementation (https://docs.cupy.dev/en/stable/reference/generated/cupy.fromfile.html)
-        #data = cp.fromfile(os.path.join(data_dir, 'train.bin'), dtype=cp.uint16)
     else:
         data = np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
-        #data = cp.asarray(cp.fromfile(os.path.join(data_dir, 'val.bin'), dtype=cp.uint16))
-        
     
-
     ix = rng.integers(len(data) - context_length, size=(batch_size,))
     
     
