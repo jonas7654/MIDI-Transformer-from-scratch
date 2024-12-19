@@ -1,7 +1,5 @@
 # Transformer Model from Scratch
 
-This repository contains the implementation of a Transformer model written in Python, built from scratch. It is designed to be executed on clusters for efficient computation, with support for SLURM workload manager.
-
 ## Repository Contents
 - **Core Model Code**: Python files implementing the Transformer model.
 - 
