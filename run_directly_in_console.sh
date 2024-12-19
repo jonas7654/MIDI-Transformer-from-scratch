@@ -1,0 +1,1 @@
+srun --mem=5G --cpus-per-task=1 --gres gpu:1 --partition=exercise-eml --pty python3 /csghome/hpdc04/Jonas/CUPY/models/GoePT/wandb_model.py --vocab-file /csghome/hpdc04/Jonas/CUPY/models/tokenizers/goe_pt/goe_pt_tokenizer.json --data-dir /csghome/hpdc04/Jonas/CUPY/datasets/tokenized --checkpoint-dir /csghome/hpdc04/Jonas/CUPY/models/checkpoints
