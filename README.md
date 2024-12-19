@@ -11,5 +11,4 @@
     - Within the file `model_py_GPU.log` are the console outputs
 
 ## Wandb
-- Currently logging is processed here
-- - https://wandb.ai/me322-university-of-heidelberg/GoePT-Training?nw=nwuserme322
+- Currently logging is processed here: https://wandb.ai/me322-university-of-heidelberg/GoePT-Training?nw=nwuserme322
