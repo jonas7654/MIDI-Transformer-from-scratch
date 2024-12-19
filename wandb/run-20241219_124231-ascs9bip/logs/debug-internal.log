@@ -1,0 +1,16 @@
+{"time":"2024-12-19T12:42:31.22583964+01:00","level":"INFO","msg":"using version","core version":"0.18.6"}
+{"time":"2024-12-19T12:42:31.225860791+01:00","level":"INFO","msg":"created symlink","path":"/csghome/hpdc04/Transformer_Code/wandb/run-20241219_124231-ascs9bip/logs/debug-core.log"}
+{"time":"2024-12-19T12:42:31.337864201+01:00","level":"INFO","msg":"created new stream","id":"ascs9bip"}
+{"time":"2024-12-19T12:42:31.337892661+01:00","level":"INFO","msg":"stream: started","id":"ascs9bip"}
+{"time":"2024-12-19T12:42:31.338761227+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"ascs9bip"}}
+{"time":"2024-12-19T12:42:31.338806008+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"ascs9bip"}}
+{"time":"2024-12-19T12:42:31.33891009+01:00","level":"INFO","msg":"sender: started","stream_id":"ascs9bip"}
+{"time":"2024-12-19T12:42:31.562236577+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-12-19T12:42:36.228405175+01:00","level":"INFO","msg":"stream: closing","id":"ascs9bip"}
+{"time":"2024-12-19T12:42:36.228426585+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-12-19T12:42:36.229192549+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-12-19T12:42:36.885768085+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-12-19T12:42:37.062757029+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"ascs9bip"}}
+{"time":"2024-12-19T12:42:37.06281288+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"ascs9bip"}}
+{"time":"2024-12-19T12:42:37.062973133+01:00","level":"INFO","msg":"sender: closed","stream_id":"ascs9bip"}
+{"time":"2024-12-19T12:42:37.065377736+01:00","level":"INFO","msg":"stream: closed","id":"ascs9bip"}

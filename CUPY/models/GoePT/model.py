@@ -53,6 +53,7 @@ class GoePT():
         # Change this for cupy compatibility
         self.rng = cp.random
 
+
         def weight_init(size):
             return self.rng.normal(size=size, loc=0.0, scale=0.02).astype(cp.float32)
 
@@ -118,6 +119,7 @@ class GoePT():
 
             ic(logits.shape, targets.shape)
             logits_for_loss = logits.reshape(-1, logits.shape[-1])
+            
             targets_for_loss = cp.expand_dims(targets.reshape(-1), 1)
             targets_for_loss = scr.one_hot(targets_for_loss, 8192)
 
@@ -209,15 +211,26 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
 
     if split == 'train':
         data = np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
+        # TODO CUPY implementation (https://docs.cupy.dev/en/stable/reference/generated/cupy.fromfile.html)
+        #data = cp.fromfile(os.path.join(data_dir, 'train.bin'), dtype=cp.uint16)
     else:
         data = np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
+        #data = cp.asarray(cp.fromfile(os.path.join(data_dir, 'val.bin'), dtype=cp.uint16))
+        
+    
 
     ix = rng.integers(len(data) - context_length, size=(batch_size,))
-
+    
+    
     x = np.stack([(data[i:i+context_length].astype(np.int64)) for i in ix])
     y = np.stack([(data[i+1:i+1+context_length].astype(np.int64)) for i in ix])
+    
+    # Load batches directly to GPU memory
+    x = cp.asarray(x)
+    y = cp.asarray(y)
 
     return x, y
+
 
 
 def compute_gradient(target, prediction, one_hot_lookup):
@@ -309,7 +322,7 @@ def main():
 
     # training loop
 
-    rng = cp.random.default_rng()
+    rng =  np.random.default_rng()
 
     get_batch = partial(read_datasets,
                             data_dir=args.data_dir,

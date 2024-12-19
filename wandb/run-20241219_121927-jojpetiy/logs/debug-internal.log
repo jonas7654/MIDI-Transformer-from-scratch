@@ -1,0 +1,16 @@
+{"time":"2024-12-19T12:19:27.530077732+01:00","level":"INFO","msg":"using version","core version":"0.18.6"}
+{"time":"2024-12-19T12:19:27.530096302+01:00","level":"INFO","msg":"created symlink","path":"/csghome/hpdc04/Transformer_Code/wandb/run-20241219_121927-jojpetiy/logs/debug-core.log"}
+{"time":"2024-12-19T12:19:27.642499966+01:00","level":"INFO","msg":"created new stream","id":"jojpetiy"}
+{"time":"2024-12-19T12:19:27.642528737+01:00","level":"INFO","msg":"stream: started","id":"jojpetiy"}
+{"time":"2024-12-19T12:19:27.643470103+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"jojpetiy"}}
+{"time":"2024-12-19T12:19:27.643521644+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"jojpetiy"}}
+{"time":"2024-12-19T12:19:27.643632466+01:00","level":"INFO","msg":"sender: started","stream_id":"jojpetiy"}
+{"time":"2024-12-19T12:19:27.868551125+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-12-19T12:19:28.243227358+01:00","level":"INFO","msg":"stream: closing","id":"jojpetiy"}
+{"time":"2024-12-19T12:19:28.243265639+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-12-19T12:19:28.244127354+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-12-19T12:19:29.183079355+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-12-19T12:19:29.361705818+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"jojpetiy"}}
+{"time":"2024-12-19T12:19:29.361730789+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"jojpetiy"}}
+{"time":"2024-12-19T12:19:29.361876171+01:00","level":"INFO","msg":"sender: closed","stream_id":"jojpetiy"}
+{"time":"2024-12-19T12:19:29.364024519+01:00","level":"INFO","msg":"stream: closed","id":"jojpetiy"}
