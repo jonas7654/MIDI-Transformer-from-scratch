@@ -1,0 +1,16 @@
+Starting epoch: 1
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 🚶  Training epoch 1 ...                                                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
+Traceback (most recent call last):
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 447, in <module>
+    main()
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 339, in main
+    X, Y = get_batch('train')
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 217, in read_datasets
+    x = np.stack([(data[i:i+context_length].astype(np.int64)) for i in ix])
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 217, in <listcomp>
+    x = np.stack([(data[i:i+context_length].astype(np.int64)) for i in ix])
+  File "/opt/csg/anaconda/envs/eml/lib/python3.10/site-packages/numpy/core/memmap.py", line 335, in __getitem__
+    res = super().__getitem__(index)
+TypeError: slice indices must be integers or None or have an __index__ method

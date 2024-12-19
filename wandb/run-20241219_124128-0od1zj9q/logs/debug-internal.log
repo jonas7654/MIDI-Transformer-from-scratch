@@ -1,0 +1,16 @@
+{"time":"2024-12-19T12:41:28.862744926+01:00","level":"INFO","msg":"using version","core version":"0.18.6"}
+{"time":"2024-12-19T12:41:28.862755916+01:00","level":"INFO","msg":"created symlink","path":"/csghome/hpdc04/Transformer_Code/wandb/run-20241219_124128-0od1zj9q/logs/debug-core.log"}
+{"time":"2024-12-19T12:41:28.974748927+01:00","level":"INFO","msg":"created new stream","id":"0od1zj9q"}
+{"time":"2024-12-19T12:41:28.974788337+01:00","level":"INFO","msg":"stream: started","id":"0od1zj9q"}
+{"time":"2024-12-19T12:41:28.975975058+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"0od1zj9q"}}
+{"time":"2024-12-19T12:41:28.976021029+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"0od1zj9q"}}
+{"time":"2024-12-19T12:41:28.976126421+01:00","level":"INFO","msg":"sender: started","stream_id":"0od1zj9q"}
+{"time":"2024-12-19T12:41:29.193532595+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-12-19T12:41:29.56709553+01:00","level":"INFO","msg":"stream: closing","id":"0od1zj9q"}
+{"time":"2024-12-19T12:41:29.567122041+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-12-19T12:41:29.567805033+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-12-19T12:41:30.463678232+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-12-19T12:41:30.649171772+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"0od1zj9q"}}
+{"time":"2024-12-19T12:41:30.649235463+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"0od1zj9q"}}
+{"time":"2024-12-19T12:41:30.649469417+01:00","level":"INFO","msg":"sender: closed","stream_id":"0od1zj9q"}
+{"time":"2024-12-19T12:41:30.651836079+01:00","level":"INFO","msg":"stream: closed","id":"0od1zj9q"}

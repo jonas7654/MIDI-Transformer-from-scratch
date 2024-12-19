@@ -1,0 +1,16 @@
+{"time":"2024-12-19T12:08:34.972704686+01:00","level":"INFO","msg":"using version","core version":"0.18.6"}
+{"time":"2024-12-19T12:08:34.972724806+01:00","level":"INFO","msg":"created symlink","path":"/csghome/hpdc04/Transformer_Code/wandb/run-20241219_120834-ap94dgu4/logs/debug-core.log"}
+{"time":"2024-12-19T12:08:35.084978255+01:00","level":"INFO","msg":"created new stream","id":"ap94dgu4"}
+{"time":"2024-12-19T12:08:35.085014186+01:00","level":"INFO","msg":"stream: started","id":"ap94dgu4"}
+{"time":"2024-12-19T12:08:35.086211407+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"ap94dgu4"}}
+{"time":"2024-12-19T12:08:35.086256927+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"ap94dgu4"}}
+{"time":"2024-12-19T12:08:35.086360089+01:00","level":"INFO","msg":"sender: started","stream_id":"ap94dgu4"}
+{"time":"2024-12-19T12:08:35.335511561+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-12-19T12:08:35.711093021+01:00","level":"INFO","msg":"stream: closing","id":"ap94dgu4"}
+{"time":"2024-12-19T12:08:35.711117211+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-12-19T12:08:35.711755893+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-12-19T12:08:36.566763404+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-12-19T12:08:36.73564364+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"ap94dgu4"}}
+{"time":"2024-12-19T12:08:36.735688841+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"ap94dgu4"}}
+{"time":"2024-12-19T12:08:36.735835764+01:00","level":"INFO","msg":"sender: closed","stream_id":"ap94dgu4"}
+{"time":"2024-12-19T12:08:36.738837087+01:00","level":"INFO","msg":"stream: closed","id":"ap94dgu4"}

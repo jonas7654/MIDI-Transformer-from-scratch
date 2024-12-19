@@ -12,5 +12,5 @@ eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
 conda activate eml
 
 echo "Running Training (with CUPY)"
-python CUPY/models/GoePT/model.py --vocab-file /csghome/hpdc04/Jonas/CUPY/models/tokenizers/goe_pt/goe_pt_tokenizer.json --data-dir /csghome/hpdc04/Jonas/CUPY/datasets/tokenized --checkpoint-dir /csghome/hpdc04/Jonas/CUPY/models/checkpoints
+python CUPY/models/GoePT/model.py --data-dir /csghome/hpdc04/Transformer_Code/CUPY/datasets/tokenized --vocab-file /csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/goe_pt/goe_pt_tokenizer.json --checkpoint-dir /csghome/hpdc04/Transformer_Code/checkpoints
 
