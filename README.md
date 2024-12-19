@@ -10,3 +10,6 @@
   - - After you can use `watch squeue -u $USER` in order to track the running time.
     - Within the file `model_py_GPU.log` are the console outputs
 
+## Wandb
+- Currently logging is processed here
+- - https://wandb.ai/me322-university-of-heidelberg/GoePT-Training?nw=nwuserme322
