@@ -7,4 +7,3 @@
   - `run_directly_in_console.sh`: Script for running the code directly in the console.
   - `run_script_GPU.sh`: Script for submitting the job via `sbatch`.
 
-# NN-transformer-from-scratch
