@@ -10,8 +10,10 @@
     \section*{miditok}
     \begin{itemize}
         \item Specify the data
-        \item train the tokenizer (Do we need this? I think yes) 
+        \item train the tokenizer (Do we need this? I think yes for efficiency)
+        \item use Byte Pair Encoding (BPE) 
         \item save the tokenizer and vocabulary
+        \item NOTE: our goePT expects integers as tokens
     \end{itemize}
     
     \subsection*{Different tokenizers}
@@ -21,6 +23,7 @@
         \item For structured MIDI data: Use Structured or TSD.
         \item For music generation: REMI or MIDI-Like might work well.
     \end{itemize}
+
     
 
 
