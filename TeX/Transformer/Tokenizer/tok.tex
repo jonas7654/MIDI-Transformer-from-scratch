@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage{enumitem}
+
+\title{MIDI Transformer Tokenization}
+\author{Jonas Veit, NAMEN EINFÜGEN }
+\date{\today}
+
+\begin{document}
+    \maketitle
+    \section*{miditok}
+    \begin{itemize}
+        \item Specify the data
+        \item train the tokenizer (Do we need this? I think yes) 
+        \item save the tokenizer and vocabulary
+    \end{itemize}
+    
+    \subsection*{Different tokenizers}
+    \begin{itemize}
+        \item For simple melodies: REMI or MelodyTokenizer.
+        \item For more complex, polyphonic data: Consider PolyphonyTokenizer or NoteTokenizer.
+        \item For structured MIDI data: Use Structured or TSD.
+        \item For music generation: REMI or MIDI-Like might work well.
+    \end{itemize}
+    
+
+
+\end{document}
