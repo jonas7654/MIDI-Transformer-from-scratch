@@ -9,6 +9,6 @@ conda activate eml
 current_dir=($pwd)
 
 echo "Generating Training, Validation and Test tokenized datasets"
-cd CUPY/models/utils/
+cd ../CUPY/models/utils/
 python3 generate_train_val_test_sets.py
 cd $current_dir

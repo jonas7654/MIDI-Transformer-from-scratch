@@ -9,6 +9,6 @@ conda activate eml
 current_dir=($pwd)
 
 echo "Generating Tokenizer with BPE"
-cd CUPY/models/utils/
+cd ../CUPY/models/utils/
 python3 generate_tokenizer.py
 cd $current_dir
