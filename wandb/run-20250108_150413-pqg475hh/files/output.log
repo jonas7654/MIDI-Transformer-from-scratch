@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 459, in <module>
+    main()
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 309, in main
+    model = GoePT(batch_size=args.batch_size,
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 84, in __init__
+    "h": [scr.Block(self.n_embd, self.context_length, self.n_heads, self.batch_size, self.lr, self.dropout, weight_init, c_proj_weight_init, bias_init) for _ in range(self.n_layer)],
+  File "/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/model.py", line 84, in <listcomp>
+    "h": [scr.Block(self.n_embd, self.context_length, self.n_heads, self.batch_size, self.lr, self.dropout, weight_init, c_proj_weight_init, bias_init) for _ in range(self.n_layer)],
+AttributeError: 'GoePT' object has no attribute 'n_heads'

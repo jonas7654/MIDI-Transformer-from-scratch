@@ -1,0 +1,16 @@
+{"time":"2025-01-08T15:06:56.784393249+01:00","level":"INFO","msg":"using version","core version":"0.18.6"}
+{"time":"2025-01-08T15:06:56.784413259+01:00","level":"INFO","msg":"created symlink","path":"/csghome/hpdc04/Transformer_Code/wandb/run-20250108_150656-ajqmwa1p/logs/debug-core.log"}
+{"time":"2025-01-08T15:06:56.89994995+01:00","level":"INFO","msg":"created new stream","id":"ajqmwa1p"}
+{"time":"2025-01-08T15:06:56.89999953+01:00","level":"INFO","msg":"stream: started","id":"ajqmwa1p"}
+{"time":"2025-01-08T15:06:56.901899902+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"ajqmwa1p"}}
+{"time":"2025-01-08T15:06:56.901999303+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"ajqmwa1p"}}
+{"time":"2025-01-08T15:06:56.902145406+01:00","level":"INFO","msg":"sender: started","stream_id":"ajqmwa1p"}
+{"time":"2025-01-08T15:06:57.162290565+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-01-08T15:08:24.460371291+01:00","level":"INFO","msg":"stream: closing","id":"ajqmwa1p"}
+{"time":"2025-01-08T15:08:24.460673776+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-01-08T15:08:24.461101053+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-01-08T15:08:26.813003504+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-01-08T15:08:27.006101089+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"ajqmwa1p"}}
+{"time":"2025-01-08T15:08:27.00614966+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"ajqmwa1p"}}
+{"time":"2025-01-08T15:08:27.006314943+01:00","level":"INFO","msg":"sender: closed","stream_id":"ajqmwa1p"}
+{"time":"2025-01-08T15:08:27.009163349+01:00","level":"INFO","msg":"stream: closed","id":"ajqmwa1p"}

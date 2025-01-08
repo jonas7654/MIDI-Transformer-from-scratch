@@ -6,6 +6,7 @@ import argparse
 from functools import partial
 import json
 import wandb
+from miditok import REMI, TokenizerConfig
 
 import numpy as np
 import cupy as cp
@@ -39,6 +40,7 @@ class GoePT():
                     batch_size: int=64,
                     n_layer: int=6,
                     n_embd: int=384, # d_model, 3 * d_model = 1152
+                    n_heads = 6,
                     dropout: float=0.2,
                     lr: float=1e-3) -> None:
 
@@ -79,7 +81,7 @@ class GoePT():
             "wte": scr.Embedding(self.vocab_size, self.n_embd, self.batch_size, self.lr, weight_external=self.lm_head.weight_transposed),
             "wpe": scr.Embedding(self.context_length, self.n_embd, self.batch_size, self.lr, init_func=weight_init),
             "drop": scr.Dropout(self.dropout),
-            "h": [scr.Block(self.n_embd, self.context_length, 6, self.batch_size, self.lr, self.dropout, weight_init, c_proj_weight_init, bias_init) for _ in range(self.n_layer)],
+            "h": [scr.Block(self.n_embd, self.context_length, n_heads, self.batch_size, self.lr, self.dropout, weight_init, c_proj_weight_init, bias_init) for _ in range(self.n_layer)],
             "ln_f": scr.LayerNorm(self.n_embd, weight_init_func=weight_init),
             }
 
@@ -121,7 +123,7 @@ class GoePT():
             logits_for_loss = logits.reshape(-1, logits.shape[-1])
             
             targets_for_loss = cp.expand_dims(targets.reshape(-1), 1)
-            targets_for_loss = scr.one_hot(targets_for_loss, 8192)
+            targets_for_loss = scr.one_hot(targets_for_loss, self.vocab_size)
 
             loss = cross_entropy_loss(logits_for_loss, targets_for_loss)
         else:
@@ -250,7 +252,7 @@ def main():
                                 default='checkpoints/',
                                 help='Checkpoint directory')
     parser.add_argument('--vocab-file', type=str,
-                                default='/models/tokenizers/goe_pt/goe_pt_tokenizer.json',
+                                default='tokenizer.json',
 
 
                                 help='Vocabulary file')
@@ -278,8 +280,8 @@ def main():
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
-
-    tokenizer = Tokenizer.from_file(args.vocab_file)
+    # NOTE: CHANGE THIS IF THE TOKENIZER CHANGES
+    tokenizer = REMI(params = args.vocab_file)
 
     ic(tokenizer)
 
@@ -304,7 +306,9 @@ def main():
         }
     )
     
-    model = GoePT(batch_size=args.batch_size, lr=args.lr)
+    model = GoePT(batch_size=args.batch_size,
+                  lr=args.lr,
+                  vocab_size = tokenizer.vocab_size)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:
@@ -327,7 +331,7 @@ def main():
 
     # Pre-generate one-hot vectors using the vocab size
     # for gradient computation
-    one_hot_lookup = cp.eye(8192)
+    one_hot_lookup = cp.eye(tokenizer.vocab_size)
 
     t0 = time.time()
 
