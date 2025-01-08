@@ -9,9 +9,9 @@ from miditok.data_augmentation import augment_dataset
 from miditok.utils import split_files_for_training
 
 current_dir = os.getcwd()
-data_path = os.path.join(os.path.join("..", current_dir), "datasets")
-files_path = list(Path(data_path).glob("**/*.mid"))
-tokenizer_path = current_dir
+data_path = os.path.join(os.path.dirname(current_dir) , "datasets")
+files_path = list(Path(data_path, "midi_1/").glob("**/*.mid")) # NOTE: Specify the right directory for the raw data
+tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
 seq_length = 256
 
