@@ -7,14 +7,15 @@
 
 \begin{document}
     \maketitle
-    \section*{miditok}
-    \begin{itemize}
-        \item Specify the data
-        \item train the tokenizer (Do we need this? I think yes for efficiency)
-        \item use Byte Pair Encoding (BPE) 
-        \item save the tokenizer and vocabulary
-        \item NOTE: our goePT expects integers as tokens
-    \end{itemize}
+    \section*{Current workflow}
+    \begin{enumerate}
+        \item Specify the MIDI data
+        \item Select a suitable Tokenizer. Right now we use REMI
+        \item train the tokenizer with BPE
+        \item save the tokenizer and vocabulary as json
+        \item generate training, validation and test sets via generate\_train\_val\_test\_sets.py we already augment data witihin this process if we want to.
+        \item Our GoePT expects integers as tokens and np.memmap expects binary files. We use np.to\_file in order to create the right binaries
+    \end{enumerate}
     
     \subsection*{Different tokenizers}
     \begin{itemize}
@@ -24,7 +25,12 @@
         \item For music generation: REMI or MIDI-Like might work well.
     \end{itemize}
 
-    
+    \subsection*{Things to keep in mind}
+    \begin{itemize}
+        \item We need to specify the sequence length
+        \item We need to specify the embedding dimension
+        \item We need to specfy the vocab_size
+    \end{itemize}
 
 
 \end{document}
