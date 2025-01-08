@@ -289,7 +289,7 @@ def main():
 
       # Initialize Weights & Biases (wandb)
     wandb.init(
-        project="GoePT-Training", 
+        project="MIDI-Transformer", 
         config={
             "data_dir": args.data_dir,
             "checkpoint_dir": args.checkpoint_dir,

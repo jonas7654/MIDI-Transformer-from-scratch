@@ -13,4 +13,4 @@
   * To create tokenized train, validation and test datasets with that tokenizer we can do `./generate_train_val_test_set`
 
 ## Wandb
-- Currently logging is processed here: https://wandb.ai/me322-university-of-heidelberg/GoePT-Training?nw=nwuserme322
+- Currently logging is processed here: https://wandb.ai/me322-university-of-heidelberg/MIDI-Transformer?nw=nwuserme322
