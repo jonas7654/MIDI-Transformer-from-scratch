@@ -10,8 +10,10 @@ from pathlib import Path
 
 # Specify the directories and configs
 current_dir = os.getcwd()
-data_dir = os.path.join(os.path.join("..", current_dir), "datasets")
-files_path = list(Path(data_dir).glob("**/*.mid"))
+
+data_dir = os.path.join(os.path.dirname(current_dir) , "datasets")
+tokenizer_dir = os.path.join(os.path.dirname(current_dir), "tokenizers/")
+files_path = list(Path(data_dir, "midi_1/").glob("**/*.mid")) # NOTE: Specify the right directory for the raw data
 
 # Specify the vocab length
 """
@@ -45,6 +47,7 @@ tokenizer = REMI(config)
 # Train the tokenizer
 tokenizer.train(vocab_size = vocab_size, files_paths = files_path)
 ic(tokenizer.vocab_size)
+
 # Save the tokenizer
-tokenizer.save(Path(current_dir,"tokenizer.json"))
+tokenizer.save(Path(tokenizer_dir,"tokenizer.json"))
 
