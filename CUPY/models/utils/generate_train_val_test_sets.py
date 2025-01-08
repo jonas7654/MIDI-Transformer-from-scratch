@@ -10,17 +10,19 @@ from miditok.utils import split_files_for_training
 
 current_dir = os.getcwd()
 data_path = os.path.join(os.path.dirname(current_dir) , "datasets")
+
 files_path = list(Path(data_path, "midi_1/").glob("**/*.mid")) # NOTE: Specify the right directory for the raw data
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
-
 seq_length = 256
+
 
 # Load the pre-trained tokenizer
 tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
 ic(tokenizer.vocab_size)
 
 # Split the dataset into train/valid/test subsets, with 15% of the data for each of the two latter
-midi_paths = list(Path(data_path).glob("**/*.mid"))
+midi_paths = files_path
+
 total_num_files = len(midi_paths)
 num_files_valid = round(total_num_files * 0.15)
 num_files_test = round(total_num_files * 0.15)
@@ -30,13 +32,20 @@ midi_paths_test = midi_paths[num_files_valid:num_files_valid + num_files_test]
 midi_paths_train = midi_paths[num_files_valid + num_files_test:]
 
 # Chunk MIDIs and perform data augmentation on each subset independently
-if(True == False): # THIS IS HORRIBLE BUT FOR NOW ITS OK :TODO
+if(True == True): # THIS IS HORRIBLE BUT FOR NOW ITS OK :TODO
     for files_paths, subset_name in (
-        (midi_paths_train, "train"), (midi_paths_valid, "valid"), (midi_paths_test, "test")
+        (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
     ):
-
+        
         # Split the MIDIs into chunks of sizes approximately about 1024 tokens
+        
         subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
+        if not os.path.exists(subset_chunks_dir):
+            print(f"Creating directory: /dataset_{subset_name}")
+            os.makedirs(subset_chunks_dir)
+        
+        print(subset_chunks_dir)
+
         split_files_for_training(
             files_paths=files_paths,
             tokenizer=tokenizer,
@@ -79,7 +88,6 @@ def collator(input, seq_length):
 
 
 for subset_name in ("train", "val", "test"):
-    print(f"{data_path}/dataset_{subset_name}")
     files_paths = list(Path(f"{data_path}/dataset_{subset_name}").glob("**/*.mid"))
     dataset_tokenized = np.zeros((len(files_paths), seq_length))
     
@@ -92,7 +100,6 @@ for subset_name in ("train", "val", "test"):
     
     # Sanity check
     assert np.all(dataset_tokenized < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
-    print(f"{subset_name}:")
     ic(dataset_tokenized[:100])
 
     # SAVE
@@ -101,3 +108,5 @@ for subset_name in ("train", "val", "test"):
     dataset_tokenized.astype(np.uint16).tofile(save_dir)
 
 ic(tokenizer.vocab_size)
+
+
