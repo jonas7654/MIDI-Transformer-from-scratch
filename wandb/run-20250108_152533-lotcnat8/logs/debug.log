@@ -23,3 +23,4 @@ config: {'data_dir': '/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/toke
 2025-01-08 15:25:34,033 INFO    MainThread:597089 [wandb_run.py:_redirect():2364] Wrapping output streams.
 2025-01-08 15:25:34,033 INFO    MainThread:597089 [wandb_run.py:_redirect():2389] Redirects installed.
 2025-01-08 15:25:34,035 INFO    MainThread:597089 [wandb_init.py:init():911] run started, returning control to user process
+2025-01-08 15:26:59,951 WARNING MsgRouterThr:597089 [router.py:message_loop():75] message_loop has been closed
