@@ -78,7 +78,7 @@ def collator(input, seq_length):
 # Create train, val, test token datasets
 
 
-for subset_name in ("train", "valid", "test"):
+for subset_name in ("train", "val", "test"):
     print(f"{data_path}/dataset_{subset_name}")
     files_paths = list(Path(f"{data_path}/dataset_{subset_name}").glob("**/*.mid"))
     dataset_tokenized = np.zeros((len(files_paths), seq_length))
