@@ -49,5 +49,6 @@ tokenizer.train(vocab_size = vocab_size, files_paths = files_path)
 ic(tokenizer.vocab_size)
 
 # Save the tokenizer
+print(tokenizer_dir)
 tokenizer.save(Path(tokenizer_dir,"tokenizer.json"))
 
