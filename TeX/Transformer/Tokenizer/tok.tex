@@ -32,6 +32,7 @@
         \item We need to specfy the vocab\_size
         \item When specifying a $seq_len > 32$ the data generation process fails. I have to investigate this. This problem is related to the function: miditok.split\_files\_for\_training
         \item When we want to regenerate the train, val and test sets we need to manually delete the dataset\_ folders! I will write some code for that soon.
+        \item I think self.context\_length from GoePT can be larger than the actualy seq\_len specified within the tokenizer. What should we do here?
     \end{itemize}
 
 
