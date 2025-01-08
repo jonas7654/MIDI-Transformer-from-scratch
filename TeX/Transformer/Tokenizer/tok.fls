@@ -1,9 +1,9 @@
-PWD /home/jv/GitHub/Transformer_Code/TeX/Transformer/Tokenizer
+PWD /csghome/hpdc04/Transformer_Code/TeX/Transformer/Tokenizer
 INPUT /etc/texmf/web2c/texmf.cnf
 INPUT /usr/share/texmf/web2c/texmf.cnf
 INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT /home/jv/GitHub/Transformer_Code/TeX/Transformer/Tokenizer/tok.tex
+INPUT /csghome/hpdc04/Transformer_Code/TeX/Transformer/Tokenizer/tok.tex
 OUTPUT tok.log
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls

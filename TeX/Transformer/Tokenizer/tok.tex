@@ -25,11 +25,13 @@
         \item For music generation: REMI or MIDI-Like might work well.
     \end{itemize}
 
-    \subsection*{Things to keep in mind}
+    \subsection*{Things to keep in mind (Open Problems)}
     \begin{itemize}
         \item We need to specify the sequence length
         \item We need to specify the embedding dimension
-        \item We need to specfy the vocab_size
+        \item We need to specfy the vocab\_size
+        \item When specifying a $seq_len > 32$ the data generation process fails. I have to investigate this. This problem is related to the function: miditok.split\_files\_for\_training
+        \item When we want to regenerate the train, val and test sets we need to manually delete the dataset\_ folders! I will write some code for that soon.
     \end{itemize}
 
 

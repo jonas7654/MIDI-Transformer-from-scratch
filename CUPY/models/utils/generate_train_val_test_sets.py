@@ -13,7 +13,7 @@ data_path = os.path.join(os.path.dirname(current_dir) , "datasets")
 
 files_path = list(Path(data_path, "midi_1/").glob("**/*.mid")) # NOTE: Specify the right directory for the raw data
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
-seq_length = 256
+seq_length = 32
 
 
 # Load the pre-trained tokenizer
@@ -44,7 +44,9 @@ if(True == True): # THIS IS HORRIBLE BUT FOR NOW ITS OK :TODO
             print(f"Creating directory: /dataset_{subset_name}")
             os.makedirs(subset_chunks_dir)
         
-        print(subset_chunks_dir)
+        
+        print(f"{subset_name} : {files_paths[0]}")
+        print(f"Save_dir = {subset_chunks_dir}")
 
         split_files_for_training(
             files_paths=files_paths,
