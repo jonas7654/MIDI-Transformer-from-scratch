@@ -1,0 +1,16 @@
+{"time":"2025-01-08T15:06:16.694524594+01:00","level":"INFO","msg":"using version","core version":"0.18.6"}
+{"time":"2025-01-08T15:06:16.694537214+01:00","level":"INFO","msg":"created symlink","path":"/csghome/hpdc04/Transformer_Code/wandb/run-20250108_150616-vlgnu0xl/logs/debug-core.log"}
+{"time":"2025-01-08T15:06:16.810058165+01:00","level":"INFO","msg":"created new stream","id":"vlgnu0xl"}
+{"time":"2025-01-08T15:06:16.810107805+01:00","level":"INFO","msg":"stream: started","id":"vlgnu0xl"}
+{"time":"2025-01-08T15:06:16.812016697+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"vlgnu0xl"}}
+{"time":"2025-01-08T15:06:16.812126618+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"vlgnu0xl"}}
+{"time":"2025-01-08T15:06:16.812292191+01:00","level":"INFO","msg":"sender: started","stream_id":"vlgnu0xl"}
+{"time":"2025-01-08T15:06:17.084118842+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-01-08T15:06:17.494266359+01:00","level":"INFO","msg":"stream: closing","id":"vlgnu0xl"}
+{"time":"2025-01-08T15:06:17.494291019+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-01-08T15:06:17.49492867+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-01-08T15:06:18.331910886+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-01-08T15:06:18.514157294+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"vlgnu0xl"}}
+{"time":"2025-01-08T15:06:18.514183374+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"vlgnu0xl"}}
+{"time":"2025-01-08T15:06:18.514389178+01:00","level":"INFO","msg":"sender: closed","stream_id":"vlgnu0xl"}
+{"time":"2025-01-08T15:06:18.51698656+01:00","level":"INFO","msg":"stream: closed","id":"vlgnu0xl"}
