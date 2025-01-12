@@ -8,13 +8,27 @@ from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
 from miditok.utils import split_files_for_training
 
+"""
+@Author: Jonas
+Here we specify the folder structure.
+
+1) data_path is the path to the datasets folder located in CUPY/models/
+2) name_of_midi_data is the acutal name of the folder which contains the raw midi data. 
+3) tokenizer_path corresponds to the pre trained tokenizer
+4) :TODO how should we set seq_length?
+
+---------------------------------------------------------------
+
+In our current implementation we use the REMI tokenizer.
+"""
+
 current_dir = os.getcwd()
 data_path = os.path.join(os.path.dirname(current_dir) , "datasets")
+name_of_midi_data = "clean_midi"
 
-files_path = list(Path(data_path, "midi_1/").glob("**/*.mid")) # NOTE: Specify the right directory for the raw data
+files_path = list(Path(data_path, name_of_midi_data).glob("**/*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 seq_length = 32
-
 
 # Load the pre-trained tokenizer
 tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
@@ -43,7 +57,6 @@ if(True == True): # THIS IS HORRIBLE BUT FOR NOW ITS OK :TODO
         if not os.path.exists(subset_chunks_dir):
             print(f"Creating directory: /dataset_{subset_name}")
             os.makedirs(subset_chunks_dir)
-        
         
         print(f"{subset_name} : {files_paths[0]}")
         print(f"Save_dir = {subset_chunks_dir}")
