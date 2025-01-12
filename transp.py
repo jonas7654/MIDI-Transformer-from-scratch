@@ -108,11 +108,10 @@ def remove_bass_tracks(pretty_midi_stream):
     # Initialize the count of removed bass tracks
     rmv_bass_count = 0
     
-    # Filter out the instruments containing bass notes (pitch <= 53)
     new_instruments = []
     
     for instrument in pretty_midi_stream.instruments:
-        # Check if the instrument contains any bass notes (pitch <= 53)
+        # Check if the instrument contains any bass notes (pitch <= 40)
         if any(note.pitch <= 40 for note in instrument.notes):
             rmv_bass_count += 1  # Count this as a bass track removed
         else:
