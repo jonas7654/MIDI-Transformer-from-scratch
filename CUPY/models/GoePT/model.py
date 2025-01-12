@@ -252,8 +252,6 @@ def main():
                                 help='Checkpoint directory')
     parser.add_argument('--vocab-file', type=str,
                                 default='tokenizer.json',
-
-
                                 help='Vocabulary file')
 
     parser.add_argument('--batch-size', type=int, default=16, metavar='N',
