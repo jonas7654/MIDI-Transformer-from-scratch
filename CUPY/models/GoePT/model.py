@@ -133,7 +133,6 @@ class GoePT():
 
         return logits, loss
 
-        # We need dL/dLoss and pass it to the first backward
 
     def backward(self, x):
         x = self.lm_head.backward(x)
