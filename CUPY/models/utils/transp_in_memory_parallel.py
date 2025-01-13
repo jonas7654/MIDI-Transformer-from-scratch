@@ -214,7 +214,7 @@ def main():
     results = []
     with ProcessPoolExecutor(max_workers=96) as executor:
         futures = [
-            executor.submit(process_file, file, output_folder, idx + 1)
+            executor.submit(process_file, file, output_folder, idx + 1) # idx + 1 is the global counter
             for idx, file in enumerate(midi_files_list)
         ]
         for future in futures:
