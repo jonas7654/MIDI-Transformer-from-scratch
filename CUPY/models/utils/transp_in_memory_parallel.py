@@ -1,14 +1,17 @@
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor
 
 # These two are used for storing temporary midi files in main memory
 import io
-import pickle
 
 import os
 from music21 import converter, key, interval, tempo, midi, converter
 import pretty_midi
 
-def check_time_sig(pretty_midi_stream): #checks whether the time signature is 4/4 and doesn't change
+
+def check_time_sig(
+    pretty_midi_stream,
+):  # checks whether the time signature is 4/4 and doesn't change
     # Get the list of time signature changes
     time_signature_changes = pretty_midi_stream.time_signature_changes
     # Check if there are no time signature changes or only one constant time signature
@@ -20,6 +23,7 @@ def check_time_sig(pretty_midi_stream): #checks whether the time signature is 4/
     # If there are multiple time signatures or it's not 4/4, return False
     return False
 
+
 def filter_out_drums(pretty_midi_stream):
     filtered_midi = pretty_midi.PrettyMIDI()
     drum_count = 0
@@ -30,8 +34,9 @@ def filter_out_drums(pretty_midi_stream):
         filtered_midi.instruments.append(instr)
     return filtered_midi, drum_count
 
+
 def detect_transpose_interval(music21_stream):
-    key_signature = music21_stream.analyze('key')
+    key_signature = music21_stream.analyze("key")
     if key_signature.mode == "major":
         target_key = key.Key("C")
     elif key_signature.mode == "minor":
@@ -39,11 +44,16 @@ def detect_transpose_interval(music21_stream):
     else:
         return None  # Skip non-major/minor modes
     transpose_interval = interval.Interval(key_signature.tonic, target_key.tonic)
-    if transpose_interval.semitones > 6: #the closer way to C/Am is by using the reversed complement of the interval
+    if (
+        transpose_interval.semitones > 6
+    ):  # the closer way to C/Am is by using the reversed complement of the interval
         transpose_interval = transpose_interval.complement.reverse()
-    if transpose_interval.semitones < -6: #with descending intervals the complement is always automatically reversed
+    if (
+        transpose_interval.semitones < -6
+    ):  # with descending intervals the complement is always automatically reversed
         transpose_interval = transpose_interval.complement
     return transpose_interval.semitones
+
 
 def transpose_midi(pretty_midi_stream, interval):
     # Transpose the MIDI using pretty_midi
@@ -51,18 +61,21 @@ def transpose_midi(pretty_midi_stream, interval):
 
     # Loop over all instruments and transpose their notes
     for instrument in pretty_midi_stream.instruments:
-        transposed_instrument = pretty_midi.Instrument(instrument.program, is_drum=instrument.is_drum)
+        transposed_instrument = pretty_midi.Instrument(
+            instrument.program, is_drum=instrument.is_drum
+        )
         for note in instrument.notes:
             transposed_note = pretty_midi.Note(
                 velocity=note.velocity,
                 pitch=note.pitch + interval,
                 start=note.start,
-                end=note.end
+                end=note.end,
             )
             transposed_instrument.notes.append(transposed_note)
         transposed_midi.instruments.append(transposed_instrument)
 
     return transposed_midi
+
 
 def make_monophonic(pretty_midi_stream):
     for instrument in pretty_midi_stream.instruments:
@@ -106,104 +119,116 @@ def make_monophonic(pretty_midi_stream):
         # Replace the instrument's notes with the monophonic notes
         instrument.notes = monophonic_notes
 
+
 import pretty_midi
 
+
 def remove_bass_tracks(pretty_midi_stream):
-    
+
     # Initialize the count of removed bass tracks
     rmv_bass_count = 0
-    
+
     new_instruments = []
-    
+
     for instrument in pretty_midi_stream.instruments:
         # Check if the instrument contains any bass notes (pitch <= 40)
         if any(note.pitch <= 40 for note in instrument.notes):
             rmv_bass_count += 1  # Count this as a bass track removed
         else:
             new_instruments.append(instrument)  # Keep non-bass tracks
-    
+
     # Update the MIDI object's instruments list
     pretty_midi_stream.instruments = new_instruments
-    
+
     return rmv_bass_count
+
+
+def process_file(file, output_folder, counter):
+    try:
+        pretty_midi_stream = pretty_midi.PrettyMIDI(str(file))
+        
+        if not check_time_sig(pretty_midi_stream):
+            return {"counter": counter, "bad_time_sig": 1, "bad_mode_total": 0, "drum_total": 0, "rmv_bass_total": 0}
+
+        filtered_midi, drum_count = filter_out_drums(pretty_midi_stream)
+
+        # Save filtered MIDI to memory buffer
+        memory_buffer = io.BytesIO()
+        filtered_midi.write(memory_buffer)
+        memory_buffer.seek(0)
+
+        music21_stream = converter.parse(memory_buffer.read())
+        transpose_interval = detect_transpose_interval(music21_stream)
+
+        if transpose_interval is None:
+            return {"counter": counter, "bad_time_sig": 0, "bad_mode_total": 1, "drum_total": drum_count, "rmv_bass_total": 0}
+
+        transposed_stream = transpose_midi(filtered_midi, transpose_interval)
+        make_monophonic(transposed_stream)
+        rmv_bass_count = remove_bass_tracks(transposed_stream)
+
+        # Save the transposed file
+        output_path = output_folder / f"{file.stem}_transmon{counter}.mid"
+        transposed_stream.write(str(output_path))
+
+        return {
+            "counter": counter,
+            "bad_time_sig": 0,
+            "bad_mode_total": 0,
+            "drum_total": drum_count,
+            "rmv_bass_total": rmv_bass_count,
+        }
+    except Exception as e:
+        print(f"Skipping file {file}, due to exception: {e}")
+        return {"counter": counter, "bad_time_sig": 0, "bad_mode_total": 0, "drum_total": 0, "rmv_bass_total": 0}
 
 
 def main():
     current_dir = os.getcwd()
     name_of_raw_midi_folder = "clean_midi/"
-    folder_path = Path(os.path.dirname(current_dir) , "datasets", name_of_raw_midi_folder)
+    folder_path = Path(
+        os.path.dirname(current_dir), "datasets", name_of_raw_midi_folder
+    )
     output_folder = Path(os.path.dirname(current_dir), "datasets/transposed_midi")
     output_folder.mkdir(parents=True, exist_ok=True)
-   
+
     print(f"Input Folder: {folder_path}")
     print(f"Output Folder: {output_folder}")
-    
-    counter = 1
+
+    counter = 0
     drum_total = 0
     bad_mode_total = 0
     bad_time_sig = 0
     rmv_bass_total = 0
-    for file in folder_path.rglob("*.mid"): # :NOTE : we use rglob to go trough every subdirectory recursively
-        try:
-            pretty_midi_stream = pretty_midi.PrettyMIDI(str(file)) #open file as pretty midi stream
 
-            if check_time_sig(pretty_midi_stream):
+    midi_files_list = list(folder_path.rglob("*.mid"))
+    print(f"Found {len(midi_files_list)} MIDI files.")
 
-                filtered_midi, drum_count = filter_out_drums(pretty_midi_stream)
-                drum_total += drum_count #add number of removed drums to total
-                
-                
-                """
-                @Author: Jonas
-                
-                We want to save the temporary pretty midi output to the main memory instead of writing it to the Disk.
-                We do that by creating a buffer in main memory and writing the filtered_midi directly to that buffer.
-                
-                Docs: https://docs.python.org/3/library/io.html
-                Section: Binary I/O
-                """
-                # Generate a buffer in main memory
-                memory_buffer = io.BytesIO()
-                
-                # Write directly to the buffer to avoid Disk I/O 
-                filtered_midi.write(memory_buffer)
-                memory_buffer.seek(0) 
+    results = []
+    with ProcessPoolExecutor(max_workers=96) as executor:
+        futures = [
+            executor.submit(process_file, file, output_folder, idx + 1)
+            for idx, file in enumerate(midi_files_list)
+        ]
+        for future in futures:
+            results.append(future.result())
 
-                # Convert the stream to a music21 Stream
-                music21_stream = converter.parse(memory_buffer.read())
-                
+    # Aggregate results
 
-                transpose_interval = detect_transpose_interval(music21_stream)
-                if transpose_interval is None:
-                    bad_mode_total += 1
-                    continue
-                
-               # print(f"Transposing by {transpose_interval} semitones")
-                transposed_stream = transpose_midi(filtered_midi, transpose_interval)
 
-                make_monophonic(transposed_stream)
-                
-                rmv_bass_count = remove_bass_tracks(transposed_stream)
-                rmv_bass_total += rmv_bass_count
+    total_files = len(results)
+    total_bad_time_sig = sum(res["bad_time_sig"] for res in results)
+    total_bad_mode = sum(res["bad_mode_total"] for res in results)
+    total_drums_removed = sum(res["drum_total"] for res in results)
+    total_bass_removed = sum(res["rmv_bass_total"] for res in results)
 
-                # Save the transposed file
-                output_path = output_folder / f"{file.stem}_transmon{counter}.mid"
-                counter += 1
-                transposed_stream.write(str(output_path))
-                #print(f"Transposed MIDI saved to: {output_path}")
-            
-            else:
-                bad_time_sig += 1
-                #print(f"Time signature not accepted. Skipping file {counter}.")
-                counter += 1
-                continue
-        except Exception as e:
-            print(f"Skipping file, due to this exception: {e}")
-    print(f"\n{counter - 1} files processed.")
-    print(f"Skipped {bad_time_sig} files in total due to time signature.")
-    print(f"Removed {drum_total} drum tracks in total.")
-    print(f"Removed {bad_mode_total} midi files due to non-major/minor mode.")
-    print(f"Removed {rmv_bass_total} bass tracks in total.")
+    # Print aggregated statistics
+    print(f"\n{total_files} files processed.")
+    print(f"Skipped {total_bad_time_sig} files due to time signature.")
+    print(f"Skipped {total_bad_mode} files due to non-major/minor mode.")
+    print(f"Removed {total_drums_removed} drum tracks.")
+    print(f"Removed {total_bass_removed} bass tracks.")
+
 
 if __name__ == "__main__":
     main()

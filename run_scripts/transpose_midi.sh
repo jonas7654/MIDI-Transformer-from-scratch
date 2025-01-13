@@ -10,5 +10,5 @@ current_dir=($pwd)
 
 echo "Pre-processing raw midi files"
 cd ../CUPY/models/utils/
-python3 transp_in_memory.py
+python3 transp_in_memory_parallel.py
 cd $current_dir
