@@ -130,7 +130,7 @@ def remove_bass_tracks(pretty_midi_stream):
 
 def main():
     current_dir = os.getcwd()
-    name_of_raw_midi_folder = "clean_midi/2Boys"
+    name_of_raw_midi_folder = "clean_midi/"
     folder_path = Path(os.path.dirname(current_dir) , "datasets", name_of_raw_midi_folder)
     output_folder = Path(os.path.dirname(current_dir), "datasets/transposed_midi")
     output_folder.mkdir(parents=True, exist_ok=True)
