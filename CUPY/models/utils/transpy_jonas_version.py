@@ -1,5 +1,9 @@
 from pathlib import Path
+
+# These two are used for storing temporary midi files in main memory
 import io
+import pickle
+
 import os
 from music21 import converter, key, interval, tempo, midi, converter
 import pretty_midi
@@ -130,9 +134,9 @@ def main():
     folder_path = Path(os.path.dirname(current_dir) , "datasets", name_of_raw_midi_folder)
     output_folder = Path(os.path.dirname(current_dir), "datasets/transposed_midi")
     output_folder.mkdir(parents=True, exist_ok=True)
-    
-    print(folder_path)
-    print(output_folder)
+   
+    print(f"Input Folder: {folder_path}")
+    print(f"Output Folder: {output_folder}")
     
     counter = 1
     drum_total = 0
@@ -147,15 +151,26 @@ def main():
 
                 filtered_midi, drum_count = filter_out_drums(pretty_midi_stream)
                 drum_total += drum_count #add number of removed drums to total
-
-                # Generate a stream    
-                midi_data_no_drums = io.BytesIO()
-                # Write directly to the stream to avoid Disk I/O 
-                filtered_midi.write(midi_data_no_drums)
-                midi_data_no_drums.seek(0)  # Reset stream position for reading         
+                
+                
+                """
+                @Author: Jonas
+                
+                We want to save the temporary pretty midi output to the main memory instead of writing it to the Disk.
+                We do that by creating a buffer in main memory and writing the filtered_midi directly to that buffer.
+                
+                Docs: https://docs.python.org/3/library/io.html
+                Section: Binary I/O
+                """
+                # Generate a buffer in main memory
+                memory_buffer = io.BytesIO()
+                
+                # Write directly to the buffer to avoid Disk I/O 
+                filtered_midi.write(memory_buffer)
+                memory_buffer.seek(0) 
 
                 # Convert the stream to a music21 Stream
-                music21_stream = converter.parse(midi_data_no_drums)
+                music21_stream = converter.parse(memory_buffer.read())
                 
 
                 transpose_interval = detect_transpose_interval(music21_stream)
