@@ -152,6 +152,16 @@ def process_file(file, output_folder, counter):
 
         filtered_midi, drum_count = filter_out_drums(pretty_midi_stream)
 
+        """
+        @Author: Jonas
+                
+        We want to save the temporary pretty midi output to the main memory instead of writing it to the Disk.
+        We do that by creating a buffer in main memory and writing the filtered_midi directly to that buffer.
+                
+        Docs: https://docs.python.org/3/library/io.html
+        Section: Binary I/O
+        """
+        
         # Save filtered MIDI to memory buffer
         memory_buffer = io.BytesIO()
         filtered_midi.write(memory_buffer)
