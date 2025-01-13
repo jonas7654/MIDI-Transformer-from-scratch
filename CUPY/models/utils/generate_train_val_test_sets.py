@@ -28,6 +28,7 @@ name_of_midi_data = "clean_midi"
 
 files_path = list(Path(data_path, name_of_midi_data).glob("**/*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
+
 seq_length = 32
 
 # Load the pre-trained tokenizer
@@ -46,7 +47,7 @@ midi_paths_test = midi_paths[num_files_valid:num_files_valid + num_files_test]
 midi_paths_train = midi_paths[num_files_valid + num_files_test:]
 
 # Chunk MIDIs and perform data augmentation on each subset independently
-if(True == True): # THIS IS HORRIBLE BUT FOR NOW ITS OK :TODO
+if(True == False): # THIS IS HORRIBLE BUT FOR NOW ITS OK :TODO
     for files_paths, subset_name in (
         (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
     ):

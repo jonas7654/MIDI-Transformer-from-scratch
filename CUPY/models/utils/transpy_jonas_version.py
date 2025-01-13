@@ -1,7 +1,7 @@
 from pathlib import Path
 import io
 import os
-from music21 import converter, key, interval, tempo
+from music21 import converter, key, interval, tempo, midi, converter
 import pretty_midi
 
 def check_time_sig(pretty_midi_stream): #checks whether the time signature is 4/4 and doesn't change
@@ -147,13 +147,16 @@ def main():
 
                 filtered_midi, drum_count = filter_out_drums(pretty_midi_stream)
                 drum_total += drum_count #add number of removed drums to total
-                    
-                # Convert mido to music21 Stream
-                output_file = f"AP_Proj/non_drum_data/{file.stem}_non_drum_file{counter}.mid"
-                filtered_midi.write(filename=output_file)
 
-                # Load the saved MIDI file into a music21 Stream
-                music21_stream = converter.parse(output_file)
+                # Generate a stream    
+                midi_data_no_drums = io.BytesIO()
+                # Write directly to the stream to avoid Disk I/O 
+                filtered_midi.write(midi_data_no_drums)
+                midi_data_no_drums.seek(0)  # Reset stream position for reading         
+
+                # Convert the stream to a music21 Stream
+                music21_stream = converter.parse(midi_data_no_drums)
+                
 
                 transpose_interval = detect_transpose_interval(music21_stream)
                 if transpose_interval is None:
