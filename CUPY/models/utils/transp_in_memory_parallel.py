@@ -182,6 +182,13 @@ def process_file(file, output_folder, counter):
         print(f"Skipping file {file}, due to exception: {e}")
         return {"counter": counter, "bad_time_sig": 0, "bad_mode_total": 0, "drum_total": 0, "rmv_bass_total": 0}
 
+"""
+Author: Jonas
+
+NOTES:
+I removed the global counters since this could be a problem due to shared memory. 
+I locally count within the process_file() function and then aggregate these at the end
+"""
 
 def main():
     current_dir = os.getcwd()
