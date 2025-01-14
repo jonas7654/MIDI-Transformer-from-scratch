@@ -23,3 +23,10 @@ config: {'data_dir': '/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/toke
 2025-01-14 15:46:45,632 INFO    MainThread:846193 [wandb_run.py:_redirect():2364] Wrapping output streams.
 2025-01-14 15:46:45,632 INFO    MainThread:846193 [wandb_run.py:_redirect():2389] Redirects installed.
 2025-01-14 15:46:45,634 INFO    MainThread:846193 [wandb_init.py:init():911] run started, returning control to user process
+2025-01-14 15:55:48,557 INFO    MainThread:846193 [wandb_run.py:_finish():2146] finishing run me322-university-of-heidelberg/MIDI-Transformer/x3ir7bcy
+2025-01-14 15:55:48,557 INFO    MainThread:846193 [wandb_run.py:_atexit_cleanup():2414] got exitcode: 0
+2025-01-14 15:55:48,557 INFO    MainThread:846193 [wandb_run.py:_restore():2396] restore
+2025-01-14 15:55:48,558 INFO    MainThread:846193 [wandb_run.py:_restore():2402] restore done
+2025-01-14 15:55:52,603 INFO    MainThread:846193 [wandb_run.py:_footer_history_summary_info():3963] rendering history
+2025-01-14 15:55:52,604 INFO    MainThread:846193 [wandb_run.py:_footer_history_summary_info():3995] rendering summary
+2025-01-14 15:55:52,616 INFO    MainThread:846193 [wandb_run.py:_footer_sync_info():3922] logging synced files
