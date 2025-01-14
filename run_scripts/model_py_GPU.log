@@ -45,3 +45,17 @@ Current local training loss: 2.63559e-01
 Current local training loss: 2.62966e-01
 Current local training loss: 2.62415e-01
 Current local training loss: 2.61904e-01
+Starting epoch: 2
+Current local training loss: 2.70238e-01
+Current local training loss: 2.69607e-01
+Current local training loss: 2.69022e-01
+Current local training loss: 2.68394e-01
+Current local training loss: 2.67738e-01
+Current local training loss: 2.67158e-01
+Current local training loss: 2.66720e-01
+Current local training loss: 2.66097e-01
+Current local training loss: 2.65506e-01
+Current local training loss: 2.64995e-01
+Current local training loss: 2.64455e-01
+Current local training loss: 2.64026e-01
+slurmstepd-csg-brook01: error: *** JOB 64196 ON csg-brook01 CANCELLED AT 2025-01-14T16:32:43 ***
