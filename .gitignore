@@ -3,3 +3,4 @@ wandb/
 checkpoints/
 run_scripts/model_py_GPU.log
 run_scripts/wandb/
+.conda/
