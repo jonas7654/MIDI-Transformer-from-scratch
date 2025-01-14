@@ -106,12 +106,14 @@ def process_midi_file(midi_file, seq_length, tokenizer, collator):
 
 midi_path_dict = {
     "train" : midi_paths_train,
-    "valid" : midi_paths_valid,
+    "val" : midi_paths_valid,
     "test" : midi_paths_valid
 }
+size_dict = {}
 
 for subset in midi_path_dict:
     number_of_subset_files = len(midi_path_dict[subset])
+    size_dict[subset] = number_of_subset_files
     print(f"Generating {subset} binary data with length: {number_of_subset_files}")
 
     files_path = midi_path_dict[subset]
@@ -132,6 +134,7 @@ for subset in midi_path_dict:
     # Sanity check
     assert np.all(dataset_tokenized < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
     ic(dataset_tokenized[:100])
+    ic(dataset_tokenized.shape)
 
     # SAVE
     save_dir = os.path.join(output_path, f"{subset}.bin")
@@ -139,4 +142,6 @@ for subset in midi_path_dict:
     dataset_tokenized.astype(np.uint16).tofile(save_dir)
 
 ic(tokenizer.vocab_size)
+for subset in size_dict:
+    print(f"Size of {subset} set: {size_dict[subset]}")
 
