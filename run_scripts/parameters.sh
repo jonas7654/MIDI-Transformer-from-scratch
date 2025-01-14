@@ -1,5 +1,6 @@
-context_length=16
-epochs=32
-batch_size=128
-eval_interval=1
-lr=0.1
+export context_length=128
+export epochs=5
+export batch_size=16
+export eval_interval=1 # default : 100
+export lr=0.1
+export log_interval=1 # default : 100

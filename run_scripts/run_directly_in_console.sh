@@ -1,10 +1,11 @@
-source parameters.sh
+source /csghome/hpdc04/Transformer_Code/run_scripts/parameters.sh
 
 echo "context length: $context_length"
 echo "epochs: $epochs"
 echo "batch size: $batch_size"
 echo "eval_interval: $eval_interval"
 echo "learning rate: $lr"
+echo "log interval: $log_interval"
 
 srun --mem=5G --cpus-per-task=1 --gres gpu:2 --partition=exercise-eml --pty python ../CUPY/models/GoePT/model.py \
     --data-dir /csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized \
@@ -14,5 +15,6 @@ srun --mem=5G --cpus-per-task=1 --gres gpu:2 --partition=exercise-eml --pty pyth
     --epochs "$epochs" \
     --batch-size "$batch_size" \
     --eval-interval "$eval_interval" \
-    --lr "$lr"
+    --lr "$lr" \
+    --log-interval "$log_interval"
 

@@ -40,7 +40,7 @@ class GoePT():
                     batch_size: int=64,
                     n_layer: int=6,
                     n_embd: int=384, # d_model, 3 * d_model = 1152
-                    n_heads = 6,
+                    n_heads: int=6,
                     dropout: float=0.2,
                     lr: float=1e-3) -> None:
 
@@ -56,14 +56,14 @@ class GoePT():
         # Change this for cupy compatibility
         self.rng = cp.random
 
-        def print_cont_length():
-            print(self.context_length)
 
         def weight_init(size):
-            return self.rng.normal(size=size, loc=0.0, scale=0.02).astype(cp.float32)
+            # Using CuPy's random normal distribution generator
+            return cp.random.normal(loc=0.0, scale=0.02, size=size).astype(cp.float32)
 
         def c_proj_weight_init(size):
-            return self.rng.normal(size=size, loc=0.0, scale=0.02/math.sqrt(2 * self.n_layer)).astype(cp.float32)
+            # Using CuPy's random normal distribution generator
+            return cp.random.normal(loc=0.0, scale=0.02 / cp.sqrt(2 * cp.float32(n_layer)), size=size).astype(cp.float32)
 
         def bias_init(size):
             return cp.zeros(shape=size, dtype=cp.float32)
@@ -84,7 +84,16 @@ class GoePT():
             "wte": scr.Embedding(self.vocab_size, self.n_embd, self.batch_size, self.lr, weight_external=self.lm_head.weight_transposed),
             "wpe": scr.Embedding(self.context_length, self.n_embd, self.batch_size, self.lr, init_func=weight_init),
             "drop": scr.Dropout(self.dropout),
-            "h": [scr.Block(self.n_embd, self.context_length, self.n_heads, self.batch_size, self.lr, self.dropout, weight_init, c_proj_weight_init, bias_init) for _ in range(self.n_layer)],
+            "h": [scr.Block(
+                d_model = self.n_embd,
+                context_size = self.context_length,
+                n_heads =  self.n_heads,
+                batch_size = self.batch_size,
+                lr = self.lr,
+                dropout = self.dropout,
+                weight_init_func = weight_init,
+                c_proj_init_func = c_proj_weight_init,
+                bias_init_func = bias_init) for _ in range(self.n_layer)],
             "ln_f": scr.LayerNorm(self.n_embd, weight_init_func=weight_init),
             }
 
@@ -176,6 +185,7 @@ class GoePT():
             'batch_size': self.batch_size,
             'n_layer': self.n_layer,
             'n_embd': self.n_embd,
+            'n_heads': self.n_heads,
             'dropout': self.dropout,
             'lr': self.lr,
             'params': params_all}
@@ -190,6 +200,7 @@ class GoePT():
                             state_dict['batch_size'],
                             state_dict['n_layer'],
                             state_dict['n_embd'],
+                            state_dict['n_heads'],
                             state_dict['dropout'],
                             state_dict['lr'])
 
@@ -225,8 +236,8 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
     y = np.stack([(data[i+1:i+1+context_length].astype(np.int64)) for i in ix])
     
     # Load batches directly to GPU memory
-    #x = cp.asarray(x)
-    #y = cp.asarray(y)
+    x = cp.asarray(x)
+    y = cp.asarray(y)
 
     return x, y
 
