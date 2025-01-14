@@ -13,7 +13,7 @@ current_dir = os.getcwd()
 
 data_dir = os.path.join(os.path.dirname(current_dir) , "datasets")
 tokenizer_dir = os.path.join(os.path.dirname(current_dir), "tokenizers/")
-files_path = list(Path(data_dir, "clean_midi/").glob("**/*.mid")) # NOTE: Specify the right directory for the raw data
+files_path = list(Path(data_dir, "transposed_midi/").glob("*.mid")) # NOTE: Specify the right directory for the raw data
 
 # Specify the vocab length
 """

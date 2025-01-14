@@ -24,12 +24,12 @@ In our current implementation we use the REMI tokenizer.
 
 current_dir = os.getcwd()
 data_path = os.path.join(os.path.dirname(current_dir) , "datasets")
-name_of_midi_data = "clean_midi"
+name_of_midi_data = "transposed_midi"
 
-files_path = list(Path(data_path, name_of_midi_data).glob("**/*.mid")) 
+files_path = list(Path(data_path, name_of_midi_data).glob("*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
-seq_length = 32
+seq_length = 128
 
 # Load the pre-trained tokenizer
 tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
@@ -47,40 +47,36 @@ midi_paths_test = midi_paths[num_files_valid:num_files_valid + num_files_test]
 midi_paths_train = midi_paths[num_files_valid + num_files_test:]
 
 # Chunk MIDIs and perform data augmentation on each subset independently
-if(True == False): # THIS IS HORRIBLE BUT FOR NOW ITS OK :TODO
-    for files_paths, subset_name in (
-        (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
-    ):
+for files_paths, subset_name in (
+    (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
+):
         
-        # Split the MIDIs into chunks of sizes approximately about 1024 tokens
+    # Split the MIDIs into chunks of sizes approximately about 'seq_length' tokens
+    
+    subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
+    if not os.path.exists(subset_chunks_dir):
+        print(f"Creating directory: /dataset_{subset_name}")
+        os.makedirs(subset_chunks_dir)
         
-        subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
-        if not os.path.exists(subset_chunks_dir):
-            print(f"Creating directory: /dataset_{subset_name}")
-            os.makedirs(subset_chunks_dir)
-        
-        print(f"{subset_name} : {files_paths[0]}")
-        print(f"Save_dir = {subset_chunks_dir}")
+    print(f"{subset_name} : {files_paths}")
+    print(f"Save_dir = {subset_chunks_dir}")
 
-        split_files_for_training(
-            files_paths=files_paths,
-            tokenizer=tokenizer,
-            save_dir=subset_chunks_dir,
-            max_seq_len=seq_length,
-            num_overlap_bars=2,
-        )
+    split_files_for_training(
+        files_paths=files_paths,
+        tokenizer=tokenizer,
+        save_dir=subset_chunks_dir,
+        max_seq_len=seq_length,
+        num_overlap_bars=2,
+    )
 
-        # Perform data augmentation
-        augment_dataset(
-            subset_chunks_dir,
-            pitch_offsets=[-12, 12],
-            velocity_offsets=[-4, 4],
-            duration_offsets=[-0.5, 0.5],
-        )    
-        
-    
-    
-    
+    # Perform data augmentation
+    augment_dataset(
+        subset_chunks_dir,
+        pitch_offsets=[-12, 12],
+        velocity_offsets=[-4, 4],
+        duration_offsets=[-0.5, 0.5],
+    )    
+
     
 """
 @Author: Jonas
@@ -126,3 +122,4 @@ for subset_name in ("train", "val", "test"):
 ic(tokenizer.vocab_size)
 
 
+print("WARNING: make sure that the dataset_ folders were empty before")
