@@ -233,7 +233,8 @@ class Dropout():
         self.input = input
 
         if train:
-            self.mask = self.rng.binomial(1, 1 - self.p, size=input.shape).astype(input.dtype)*self.scale
+            # use CUPY
+            self.mask = cp.random.binomial(1, 1 - self.p, size=input.shape).astype(input.dtype) * self.scale
         else:
             self.mask = 1
 
@@ -432,7 +433,6 @@ class MultiHeadAttention():
         self.n_heads = n_heads
         self.scale = math.sqrt(d_model)
         self.batch_size = batch_size
-
         self.attn_dropout = Dropout(dropout)
         self.resid_dropout = Dropout(dropout)
         self.softmax_attn = Softmax(axis=-1)
@@ -636,8 +636,8 @@ class Embedding():
             if self.init_func:
                 self.weight = cp.asanyarray(self.init_func((num_embeddings, embedding_dim)))
             else:
-                self.weight = self.rng.standard_normal((num_embeddings, embedding_dim), dtype=cp.float32)
-
+                # use CUPY
+                self.weight = cp.random.standard_normal((num_embeddings, embedding_dim), dtype=cp.float32)                
         else:
             self.weight = weight_external
 
@@ -649,6 +649,7 @@ class Embedding():
 
     def forward(self, input: ArrayLike) -> cp.ndarray:
         self.input = cp.asanyarray(input) # (Batch size, seq len)
+        # :TODO : Doesnt work in inference
         return self.weight[self.input.astype(cp.int32), :]
 
 
