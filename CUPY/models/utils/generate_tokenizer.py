@@ -26,15 +26,23 @@ vocab_size = 4096
 
 # Create the Tokenizer
 # :TODO : This is just random right now
+
+"""
+pitch range: The General MIDI 2 (GM2) specifications indicate the recommended ranges of pitches per MIDI program (instrument)
+beat_res: determines the level of timing detail
+
+use_programs: will use Program tokens to specify the instrument/MIDI program of the notes
+
+"""
 TOKENIZER_PARAMS = {
-    "pitch_range": (21, 109),
+    "pitch_range": (21, 109), 
     "beat_res": {(0, 4): 8, (4, 12): 4},
     "num_velocities": 32,
     "special_tokens": ["PAD", "BOS", "EOS", "MASK"],
-    "use_chords": True,
+    "use_chords": False,
     "use_rests": False,
     "use_tempos": True,
-    "use_time_signatures": False,
+    "use_time_signatures": True,
     "use_programs": False,
     "num_tempos": 32,  # number of tempo bins
     "tempo_range": (40, 250),  # (min, max)

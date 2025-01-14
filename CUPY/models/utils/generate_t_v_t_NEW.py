@@ -3,6 +3,8 @@ import os
 import numpy as np
 from icecream import ic
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
@@ -58,8 +60,6 @@ for files_paths, subset_name in (
         print(f"Creating directory: /dataset_{subset_name}")
         os.makedirs(subset_chunks_dir)
         
-    print(f"{subset_name} : {files_paths}")
-    print(f"Save_dir = {subset_chunks_dir}")
 
     #split_files_for_training(
     #    files_paths=files_paths,
@@ -94,22 +94,31 @@ def collator(input, seq_length):
     return np.array(input[:seq_length], dtype=np.uint16)
         
     
-    
+
+def process_midi_file(midi_file, seq_length, tokenizer, collator):
+    midi_file_tokenized = tokenizer(Path(midi_file))[0].ids
+    return collator(midi_file_tokenized)
     
 # Create train, val, test token datasets
 
 
-for subset_name in ("train", "val", "test"):
-    files_paths = list(Path(f"{data_path}/dataset_{subset_name}").glob("**/*.mid"))
+for subset_name in ("train", "valid", "test"):
+    files_path = f"midi_paths_{subset_name}"
+    print(f"test: {files_path[0]}")
     dataset_tokenized = np.zeros((len(files_paths), seq_length))
     
-    # Iterate over all midi files and tokenize them
-    for i, midi_file in enumerate(files_paths):
-        midi_file_tokenized = tokenizer(Path(midi_file))[0].ids        
-        midi_processed = collator(midi_file_tokenized, seq_length)
-    
-        dataset_tokenized[i, :] = midi_processed
-    
+    # Iterate over all midi files and tokenize them in parallel
+    with ThreadPoolExecutor() as executor:
+        future_to_idx = {executor.submit(process_midi_file, midi_file, seq_length, tokenizer, collator): i for i, midi_file in enumerate(files_path)}
+
+
+        for future in as_completed(future_to_idx):
+            i = future_to_idx[future]
+            try:
+                dataset_tokenized[i, :] = future.result()
+            except Exception as e:
+                print(f"Error with file : {files_path[i]}")
+
     # Sanity check
     assert np.all(dataset_tokenized < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
     ic(dataset_tokenized[:100])
