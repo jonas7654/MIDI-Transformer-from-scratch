@@ -1,4 +1,4 @@
-source parameter.sh
+source parameters.sh
 
 echo "context length: $context_length"
 echo "epochs: $epochs"

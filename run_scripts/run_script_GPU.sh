@@ -12,7 +12,7 @@ eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
 conda activate eml
 
 # load model parameters
-source parameters.sh
+source /csghome/hpdc04/Transformer_Code/run_scripts/parameters.sh
 
 echo "Running Training (with CUPY)"
 
