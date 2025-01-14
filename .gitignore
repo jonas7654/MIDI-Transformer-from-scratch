@@ -1,4 +1,4 @@
 CUPY/models/datasets/
 wandb/
 checkpoints/
-/csghome/hpdc04/Transformer_Code/run_scripts/model_py_GPU.log
+run_scripts/model_py_GPU.log
