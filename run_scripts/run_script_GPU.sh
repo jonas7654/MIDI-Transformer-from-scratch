@@ -11,10 +11,8 @@
 eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
 conda activate eml
 
-context_length=128
-epochs=32
-batch_size=32 # default is 16
-eval_interval=1 # How frequent should the validation loss be calculated and checkpoints be saved
+# load model parameters
+source parameters.sh
 
 echo "Running Training (with CUPY)"
 
@@ -22,6 +20,7 @@ echo "context length: $context_length"
 echo "epochs: $epochs"
 echo "batch size: $batch_size"
 echo "eval_interval: $eval_interval"
+echo "learning rate: $lr"
 
 
 python ../CUPY/models/GoePT/model.py \
@@ -31,5 +30,6 @@ python ../CUPY/models/GoePT/model.py \
     --context-length "$context_length" \
     --epochs "$epochs" \
     --batch-size "$batch_size" \
-    --eval-interval "$eval_interval"
+    --eval-interval "$eval_interval" \
+    --lr "$lr"
                                      
