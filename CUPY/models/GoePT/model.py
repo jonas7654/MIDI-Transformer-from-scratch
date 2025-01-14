@@ -284,7 +284,7 @@ def main():
 
     cp.random.seed(args.seed)
 
-      # Initialize Weights & Biases (wandb)
+    # Initialize Weights & Biases (wandb)
     wandb.init(
         project="MIDI-Transformer", 
         config={
@@ -305,7 +305,8 @@ def main():
     
     model = GoePT(batch_size=args.batch_size,
                   lr=args.lr,
-                  vocab_size = tokenizer.vocab_size)
+                  vocab_size = tokenizer.vocab_size,
+                  context_length=args.context_length)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:

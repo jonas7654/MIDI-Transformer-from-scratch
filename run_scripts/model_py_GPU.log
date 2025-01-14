@@ -1,0 +1,43 @@
+Running Training (with CUPY)
+context length 128
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: me322 (me322-university-of-heidelberg). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.18.6
+wandb: Run data is saved locally in /csghome/hpdc04/Transformer_Code/run_scripts/wandb/run-20250114_161633-5dj2w06t
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run glad-night-12
+wandb: ⭐️ View project at https://wandb.ai/me322-university-of-heidelberg/MIDI-Transformer
+wandb: 🚀 View run at https://wandb.ai/me322-university-of-heidelberg/MIDI-Transformer/runs/5dj2w06t
+Starting epoch: 1
+Current local training loss: 2.97577e-01
+Current local training loss: 2.73576e-01
+Current local training loss: 2.69441e-01
+Current local training loss: 2.66455e-01
+Current local training loss: 2.63784e-01
+Current local training loss: 2.61365e-01
+Current local training loss: 2.58860e-01
+Current local training loss: 2.56834e-01
+Current local training loss: 2.54656e-01
+Current local training loss: 2.52752e-01
+Current local training loss: 2.50992e-01
+Current local training loss: 2.49115e-01
+Current local training loss: 2.47464e-01
+Current local training loss: 2.45922e-01
+Current local training loss: 2.44165e-01
+Current local training loss: 2.42406e-01
+Current local training loss: 2.40776e-01
+Current local training loss: 2.39115e-01
+Current local training loss: 2.37514e-01
+Current local training loss: 2.36240e-01
+Current local training loss: 2.34861e-01
+Current local training loss: 2.33395e-01
+Current local training loss: 2.31734e-01
+Current local training loss: 2.30143e-01
+Current local training loss: 2.28159e-01
+Current local training loss: 2.26637e-01
+Current local training loss: 2.25159e-01
+Current local training loss: 2.23556e-01
+Current local training loss: 2.22324e-01
+Current local training loss: 2.20750e-01
+Current local training loss: 2.19097e-01
+Current local training loss: 2.17260e-01
