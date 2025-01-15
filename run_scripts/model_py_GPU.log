@@ -170,3 +170,65 @@ Current local training loss: 1.84918e-01
 Current local training loss: 1.82272e-01
 Current local training loss: 1.79804e-01
 Current local training loss: 1.77598e-01
+Current local training loss: 1.75555e-01
+Current local training loss: 1.73475e-01
+Current local training loss: 1.71551e-01
+Current local training loss: 1.69826e-01
+Current local training loss: 1.68223e-01
+Current local training loss: 1.66869e-01
+Current local training loss: 1.65177e-01
+Starting epoch: 6
+Current local training loss: 2.79447e-01
+Current local training loss: 2.72623e-01
+Current local training loss: 2.66009e-01
+Current local training loss: 2.60082e-01
+Current local training loss: 2.53714e-01
+Current local training loss: 2.47686e-01
+Current local training loss: 2.42129e-01
+Current local training loss: 2.37809e-01
+Current local training loss: 2.33110e-01
+Current local training loss: 2.28356e-01
+Current local training loss: 2.24061e-01
+Current local training loss: 2.20506e-01
+Current local training loss: 2.16534e-01
+Current local training loss: 2.12897e-01
+Current local training loss: 2.10148e-01
+Current local training loss: 2.05965e-01
+Current local training loss: 2.03486e-01
+Current local training loss: 2.00976e-01
+Current local training loss: 1.97900e-01
+Current local training loss: 1.95704e-01
+Current local training loss: 1.93631e-01
+Current local training loss: 1.91045e-01
+Current local training loss: 1.88809e-01
+Current local training loss: 1.86326e-01
+Current local training loss: 1.84116e-01
+Current local training loss: 1.82143e-01
+Current local training loss: 1.80021e-01
+Current local training loss: 1.77776e-01
+Current local training loss: 1.75960e-01
+Current local training loss: 1.73907e-01
+Current local training loss: 1.72177e-01
+Current local training loss: 1.70417e-01
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 🚶  Training... step 5: train loss 8.2909       val loss 8.2272              │
+╰──────────────────────────────────────────────────────────────────────────────╯wandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:         loss █▅▄▃▃▁▁▁▅▄▃▃▁▁▅▄▄▃▃▃▂▄▃▃▃▂▁▁▅▄▃▂▂▂▁▅▅▄▃▁
+wandb:    step_loss ▁
+wandb: step_time_ms ▁
+wandb:   train_loss ▁▅▃▄▄█
+wandb:     val_loss ▁▄█▃▄▆
+wandb: 
+wandb: Run summary:
+wandb:         loss 0.17042
+wandb:    step_loss 274.44658
+wandb: step_time_ms 68326.51162
+wandb:   train_loss 8.29095
+wandb:     val_loss 8.22719
+wandb: 
+wandb: 🚀 View run fragrant-butterfly-33 at: https://wandb.ai/me322-university-of-heidelberg/MIDI-Transformer/runs/zgrhijx5
+wandb: ⭐️ View project at: https://wandb.ai/me322-university-of-heidelberg/MIDI-Transformer
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20250114_194830-zgrhijx5/logs
