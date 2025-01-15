@@ -60,6 +60,7 @@ for files_paths, subset_name in (
     
      subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
      
+     # :TODO Refactor this into one block
      # Check if the folder exists
      if subset_chunks_dir.exists() and subset_chunks_dir.is_dir():
          # Remove the folder and its contents
@@ -117,7 +118,7 @@ def collator(input, seq_length, PAD=tokenizer.special_tokens_ids[0]):
 
 def process_midi_file(midi_file, seq_length, tokenizer, collator):
     midi_file_tokenized = tokenizer(Path(midi_file))[0].ids
-    print(f"processed {midi_file}")
+    # print(f"processed {midi_file}")
     return collator(midi_file_tokenized, seq_length)
     
 # Create train, val, test token datasets

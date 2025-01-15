@@ -308,7 +308,7 @@ def main():
     total_bass_removed = sum(res["rmv_bass_total"] for res in results)
     track_total = sum(res["tracks_coll"] for res in results)
     note_skipped_total = sum(res["note_skipped"] for res in results)
-    bad_mode_total = sum(Res["bad_mode_total"] for res in results)
+    bad_mode_total = sum(res["bad_mode_total"] for res in results)
             
     print(f"\n{counter - 1} files processed.")
     print(f"Removed {bad_mode_total} midi files due to non-major/minor mode.")
