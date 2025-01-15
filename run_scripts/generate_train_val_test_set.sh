@@ -10,5 +10,5 @@ current_dir=($pwd)
 
 echo "Generating Training, Validation and Test tokenized datasets"
 cd ../CUPY/models/utils/
-python3 generate_t_v_t_NEW.py
+python3 generate_train_val_test.py
 cd $current_dir

@@ -1,14 +1,16 @@
-from random import shuffle
-import os
+from random import shuffle, seed
+import os, shutil
 import numpy as np
 from icecream import ic
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-
+import multiprocessing
 
 from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
 from miditok.utils import split_files_for_training
+
+seed(256)
 
 """
 @Author: Jonas
@@ -36,7 +38,6 @@ seq_length = 128
 # Load the pre-trained tokenizer
 tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
 ic(tokenizer.vocab_size)
-
 # Split the dataset into train/valid/test subsets, with 15% of the data for each of the two latter
 
 total_num_files = len(midi_paths)
@@ -49,35 +50,39 @@ midi_paths_valid = midi_paths[:num_files_valid]
 midi_paths_test = midi_paths[num_files_valid:num_files_valid + num_files_test]
 midi_paths_train = midi_paths[num_files_valid + num_files_test:]
 
-
-# # Chunk MIDIs and perform data augmentation on each subset independently
-# for files_paths, subset_name in (
-#     (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
-# ):
+train_val_test_path = {}
+ # Chunk MIDIs and perform data augmentation on each subset independently
+for files_paths, subset_name in (
+     (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
+ ):
         
-#     # Split the MIDIs into chunks of sizes approximately about 'seq_length' tokens
+     # Split the MIDIs into chunks of sizes approximately about 'seq_length' tokens
     
-#     subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
-#     if not os.path.exists(subset_chunks_dir):
-#         print(f"Creating directory: /dataset_{subset_name}")
-#         os.makedirs(subset_chunks_dir)
-        
+     subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
+     if not os.path.exists(subset_chunks_dir):
+         print(f"Creating directory: /dataset_{subset_name}")
+         os.makedirs(subset_chunks_dir)
+     train_val_test_path[subset_name] = subset_chunks_dir
+    
+    # move the midi files into the corresponding subset folder
+     for midi_file in files_paths:
+        midi_file = Path(midi_file)
+        dst = subset_chunks_dir / midi_file.name  
+        try:
+            #print(f"Moving {midi_file} to {dst}")
+            shutil.move(midi_file, dst)
+        except Exception as e:
+            print(f"Error moving {midi_file} to {dst}: {e}")
+    
 
-#     #split_files_for_training(
-#     #    files_paths=files_paths,
-#     #    tokenizer=tokenizer,
-#     #    save_dir=subset_chunks_dir,
-#     #    max_seq_len=seq_length,
-#     #    num_overlap_bars=2,
-#     #)
+     # Perform data augmentation
+     augment_dataset(
+         subset_chunks_dir,
+         pitch_offsets=[-12, 12],
+         velocity_offsets=[-4, 4],
+         duration_offsets=[-0.5, 0.5],
+     )    
 
-#     # Perform data augmentation
-# #    augment_dataset(
-# #        subset_chunks_dir,
-# #        pitch_offsets=[-12, 12],
-# #        velocity_offsets=[-4, 4],
-# #        duration_offsets=[-0.5, 0.5],
-# #    )    
 
     
 """
@@ -85,17 +90,19 @@ midi_paths_train = midi_paths[num_files_valid + num_files_test:]
 Here I implement the data generating process where we save the integer ids for the tokens 
 as a numpy matrix and then save it as binary in order to feed it to our GoePT model.
 
+collator: PAD (PAD_None): a padding token to use when training a model with batches of sequences of unequal lengths.
+          The padding token id is often set to 0.
 """
 output_path = os.path.join(data_path, "tokenized")
 
-def collator(input, seq_length):
+def collator(input, seq_length, PAD=tokenizer.special_tokens_ids[0]):
     if (len(input) < seq_length):
-        result =  input + [0] * (seq_length - len(input)) 
+        result =  input + [PAD] * (seq_length - len(input)) 
         return np.array(result, dtype=np.uint16)
     # if the input length is greatet than seq_len, truncate!
     return np.array(input[:seq_length], dtype=np.uint16)
         
-    
+
 
 def process_midi_file(midi_file, seq_length, tokenizer, collator):
     midi_file_tokenized = tokenizer(Path(midi_file))[0].ids
@@ -103,26 +110,21 @@ def process_midi_file(midi_file, seq_length, tokenizer, collator):
     return collator(midi_file_tokenized, seq_length)
     
 # Create train, val, test token datasets
-
-midi_path_dict = {
-    "train" : midi_paths_train,
-    "val" : midi_paths_valid,
-    "test" : midi_paths_valid
-}
 size_dict = {}
 
-for subset in midi_path_dict:
-    number_of_subset_files = len(midi_path_dict[subset])
+for subset in train_val_test_path:
+    # Get a list of all midi files (as paths)
+    files_path = list(train_val_test_path[subset].glob("*.mid"))
+    
+    number_of_subset_files = len(files_path)
     size_dict[subset] = number_of_subset_files
     print(f"Generating {subset} binary data with length: {number_of_subset_files}")
 
-    files_path = midi_path_dict[subset]
     dataset_tokenized = np.zeros((number_of_subset_files, seq_length))
     
     # Iterate over all midi files and tokenize them in parallel
-    with ProcessPoolExecutor(max_workers = 128) as executor:
+    with ProcessPoolExecutor(max_workers = multiprocessing.cpu_count()) as executor:
         future_to_idx = {executor.submit(process_midi_file, midi_file, seq_length, tokenizer, collator): i for i, midi_file in enumerate(files_path)}
-
 
         for future in as_completed(future_to_idx):
             i = future_to_idx[future]
