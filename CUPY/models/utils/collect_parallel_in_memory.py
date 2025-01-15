@@ -5,6 +5,7 @@ from pathlib import Path
 # concurrent for parallel execution
 import io
 from concurrent.futures import ProcessPoolExecutor
+import multiprocessing
 
 import os
 
@@ -179,7 +180,7 @@ def greedy_collect(pretty_midi_stream, tempo, output_path_pref):
                     note.velocity = max(0, min(note.velocity, 127))
                 if len(new_instrument.notes) >= 12: #there must be at least 12 notes in file, otherwise the hook is pretty boring
                     midi.instruments.append(new_instrument)
-                    op_new = str(output_path_pref) + f"_track{i}.midi"
+                    op_new = str(output_path_pref) + f"_track{i}.mid"
                     midi.write(str(op_new))
                     print(f"8 bar excerpt saved to: {op_new}")
                     tracks_coll += 1
@@ -254,7 +255,15 @@ def process_file(file, output_folder, counter):
         }
     except Exception as e:
         print(f"Skipping file {file}, due to exception: {e}")
-        return {"counter": counter, "bad_time_sig": 0, "bad_mode_total": 0, "drum_total": 0, "rmv_bass_total": 0}
+        return {
+            "counter": counter,
+            "tracks_coll": 0,
+            "bad_time_sig": 0,
+            "bad_mode_total": 0,
+            "drum_total": 0,
+            "rmv_bass_total": 0,
+            "note_skipped": 0,
+        }
 
         
 """
@@ -282,7 +291,7 @@ def main():
     
     results = []
     
-    with ProcessPoolExecutor(max_workers = 96) as executor:
+    with ProcessPoolExecutor(max_workers = multiprocessing.cpu_count()) as executor:
         futures = [
             executor.submit(process_file, file, output_folder, idx + 1)
             for idx, file in enumerate(midi_files_list)
@@ -292,23 +301,26 @@ def main():
             
     # Aggregate results:
     total_files = len(results)
+    counter = sum(res["counter"] for res in results)
     total_bad_time_sig = sum(res["bad_time_sig"] for res in results)
     total_bad_mode = sum(res["bad_mode_total"] for res in results)
     total_drums_removed = sum(res["drum_total"] for res in results)
     total_bass_removed = sum(res["rmv_bass_total"] for res in results)
     track_total = sum(res["tracks_coll"] for res in results)
     note_skipped_total = sum(res["note_skipped"] for res in results)
+    bad_mode_total = sum(Res["bad_mode_total"] for res in results)
             
     print(f"\n{counter - 1} files processed.")
     print(f"Removed {bad_mode_total} midi files due to non-major/minor mode.")
     print(f"Skipped {bad_time_sig} files in total due to time signature.")
-    print(f"Skipped {bad_mode_total + bad_time_sig} files in total.")
+    print(f"Skipped {bad_mode_total + total_bad_time_sig} files in total.")
 
     print(f"\n{track_total} 8 bar excerpts collected.")
     print(f"Removed {drum_total} drum tracks in total.")
     print(f"Removed {rmv_bass_total} bass tracks in total.")
     print(f"Skipped {note_skipped_total} tracks in total due to note density.")
     print(f"Skipped {drum_total + rmv_bass_count + note_skipped_total} tracks in total.")
-
+    print(f"CPU cores: {multiprocessing.cpu_count()}")
+    
 if __name__ == "__main__":
     main()

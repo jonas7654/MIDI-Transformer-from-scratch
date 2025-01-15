@@ -21,7 +21,7 @@ NOTE: Eventhough we specified vocab_size it does not mean that the final size is
       If the value is to low in order to create a "meaningful" vocabulary or when it is to large the finale choice will differ
       See tokenizer.vocab_size
 """
-vocab_size = 4096
+vocab_size = 8192
 
 
 # Create the Tokenizer
@@ -32,13 +32,17 @@ pitch range: The General MIDI 2 (GM2) specifications indicate the recommended ra
 beat_res: determines the level of timing detail
 
 use_programs: will use Program tokens to specify the instrument/MIDI program of the notes
-
-"""
+special_tokens: -PAD (PAD_None): a padding token to use when training a model with batches of sequences of unequal lengths.
+                -BOS (SOS_None): “Start Of Sequence” token, indicating that a token sequence is beginning.
+                -EOS (EOS_None): “End Of Sequence” tokens, indicating that a token sequence is ending.
+                 Note: you can use the tokenizer.special_tokens property to get the list of the special tokens of a tokenizer,
+                       and tokenizer.special_tokens for their ids.
+""" 
 TOKENIZER_PARAMS = {
     "pitch_range": (21, 109), 
     "beat_res": {(0, 4): 8, (4, 12): 4},
     "num_velocities": 32,
-    "special_tokens": ["PAD", "BOS", "EOS", "MASK"],
+    "special_tokens": ["PAD", "BOS", "EOS"],
     "use_chords": False,
     "use_rests": False,
     "use_tempos": True,
@@ -55,8 +59,10 @@ tokenizer = REMI(config)
 # Train the tokenizer
 tokenizer.train(vocab_size = vocab_size, files_paths = files_path)
 ic(tokenizer.vocab_size)
+ic(tokenizer.special_tokens)
+ic(tokenizer.special_tokens_ids)
 
 # Save the tokenizer
-print(tokenizer_dir)
+print(f"saved to: {tokenizer_dir}")
 tokenizer.save(Path(tokenizer_dir,"tokenizer.json"))
 
