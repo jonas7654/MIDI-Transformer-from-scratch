@@ -105,28 +105,11 @@ for files_paths, subset_name in (
     
 """
 @Author: Jonas
-Here I implement the data generating process where we save the integer ids for the tokens 
-as a numpy matrix and then save it as binary in order to feed it to our GoePT model.
-
-collator: PAD (PAD_None): a padding token to use when training a model with batches of sequences of unequal lengths.
-          The padding token id is often set to 0.
 """
 
 
-def collator(input, seq_length, PAD=tokenizer.special_tokens_ids[0]):
-    if (len(input) < seq_length):
-        result =  input + [PAD] * (seq_length - len(input)) 
-        return np.array(result, dtype=np.uint16)
-    # if the input length is greatet than seq_len, truncate!
-    return np.array(input[:seq_length], dtype=np.uint16)
-        
+output_path = os.path.join(data_path, "tokenized")
 
-
-def process_midi_file(midi_file, seq_length, tokenizer, collator):
-    midi_file_tokenized = tokenizer(Path(midi_file))[0].ids
-    # print(f"processed {midi_file}")
-    return collator(midi_file_tokenized, seq_length)
-    
 # Create train, val, test token datasets
 size_dict = {}
 
@@ -142,15 +125,15 @@ for subset in train_val_test_path:
     
 
     # Convert JSON to Binary
-    save_dir = os.path.join(output_path, f"{subset}.bin")
     
     json_dir = Path(files_path, "json")
     Path(json_dir).mkdir(parents = True, exist_ok = True)
 
     json_to_bin(json_dir=json_dir,
-                bin_dir=save_dir,
+                output_dir=output_path,
                 seq_length=seq_length,
-                tokenizer=tokenizer
+                tokenizer=tokenizer,
+                subset = subset
                 )
     
 
