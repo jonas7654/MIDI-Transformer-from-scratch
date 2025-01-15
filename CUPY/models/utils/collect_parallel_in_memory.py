@@ -301,18 +301,16 @@ def main():
             
     # Aggregate results:
     total_files = len(results)
-    counter = sum(res["counter"] for res in results)
     total_bad_time_sig = sum(res["bad_time_sig"] for res in results)
     total_bad_mode = sum(res["bad_mode_total"] for res in results)
     total_drums_removed = sum(res["drum_total"] for res in results)
     total_bass_removed = sum(res["rmv_bass_total"] for res in results)
     track_total = sum(res["tracks_coll"] for res in results)
     note_skipped_total = sum(res["note_skipped"] for res in results)
-    bad_mode_total = sum(res["bad_mode_total"] for res in results)
             
-    print(f"\n{counter - 1} files processed.")
-    print(f"Removed {bad_mode_total} midi files due to non-major/minor mode.")
-    print(f"Skipped {bad_time_sig} files in total due to time signature.")
+    print(f"\n {total_files} files processed.")
+    print(f"Removed {total_bad_mode} midi files due to non-major/minor mode.")
+    print(f"Skipped {total_bad_time_sig} files in total due to time signature.")
     print(f"Skipped {bad_mode_total + total_bad_time_sig} files in total.")
 
     print(f"\n{track_total} 8 bar excerpts collected.")
