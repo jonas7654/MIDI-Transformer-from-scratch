@@ -59,9 +59,20 @@ for files_paths, subset_name in (
      # Split the MIDIs into chunks of sizes approximately about 'seq_length' tokens
     
      subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
+     
+     # Check if the folder exists
+     if subset_chunks_dir.exists() and subset_chunks_dir.is_dir():
+         # Remove the folder and its contents
+         shutil.rmtree(subset_chunks_dir)
+         print(f"Folder '{subset_chunks_dir}' has been removed.")
+     else:
+         print(f"Folder '{subset_chunks_dir}' does not exist or is not a directory. \n Creating {subset_chunks_dir}")
+         
      if not os.path.exists(subset_chunks_dir):
          print(f"Creating directory: /dataset_{subset_name}")
          os.makedirs(subset_chunks_dir)
+         
+     # Save the subset directory for later    
      train_val_test_path[subset_name] = subset_chunks_dir
     
     # move the midi files into the corresponding subset folder
