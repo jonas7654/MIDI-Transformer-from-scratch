@@ -182,7 +182,7 @@ def greedy_collect(pretty_midi_stream, tempo, output_path_pref):
                     midi.instruments.append(new_instrument)
                     op_new = str(output_path_pref) + f"_track{i}.mid"
                     midi.write(str(op_new))
-                    print(f"8 bar excerpt saved to: {op_new}")
+                    #print(f"8 bar excerpt saved to: {op_new}")
                     tracks_coll += 1
                 else: tracks_skipped += 1
             else: tracks_skipped += 1
