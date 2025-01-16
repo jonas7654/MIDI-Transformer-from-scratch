@@ -267,8 +267,8 @@ def main():
                     best_val_loss = loss_val_mean
                 # Log evaluation metrics to W&B
                 wandb.log({
-                            "train_loss": float(losses_dataset['train'].item()),
-                            "val_loss": float(losses_dataset['val'].item()),
+                            "train_loss": float(loss),
+                            "val_loss": float(loss_val_mean),
                           })
                 
             iter_num += 1
@@ -277,5 +277,7 @@ def main():
             if iter_num > args.epochs:
                 break
 
+ # Finish W&B logging
+wandb.finish()
 if __name__ == '__main__':
     main()
