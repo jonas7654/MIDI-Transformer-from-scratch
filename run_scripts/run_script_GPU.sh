@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task 1
 #SBATCH --time 500:00
 #SBATCH -p exercise-eml
-#SBATCH -o model_py_GPU.log
+#SBATCH -o logs/model_py_GPU.log
 
 
 # load appropriate conda paths, because we are not in a login shell

@@ -21,7 +21,7 @@ NOTE: Eventhough we specified vocab_size it does not mean that the final size is
       If the value is to low in order to create a "meaningful" vocabulary or when it is to large the finale choice will differ
       See tokenizer.vocab_size
 """
-vocab_size = 8192
+vocab_size = 10000
 
 
 # Create the Tokenizer
