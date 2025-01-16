@@ -6,6 +6,8 @@ from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import multiprocessing
 from json_to_bin import json_to_bin
+from tokenize_data_fast import tokenize_dataset_to_bin
+
 
 from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
@@ -105,6 +107,8 @@ for files_paths, subset_name in (
     
 """
 @Author: Jonas
+Monkey Patch tokenizer.tokenize_data_fast
+
 """
 
 
@@ -117,25 +121,28 @@ for subset in train_val_test_path:
     # Get a list of all midi files (as paths)
     files_path = train_val_test_path[subset]
     
-    tokenizer.tokenize_dataset(files_paths = files_path,
-                               out_dir = Path(files_path, "json"),
-                               overwrite_mode = True,
-                               verbose = True)
+    #tokenizer.tokenize_dataset(files_paths = files_path,
+    #                           out_dir = Path(files_path, "json"),
+    #                           overwrite_mode = True,
+    #                           verbose = True)
     
     
 
-    # Convert JSON to Binary
+    tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = files_path,
+                                                       verbose = True)
     
-    json_dir = Path(files_path, "json")
-    Path(json_dir).mkdir(parents = True, exist_ok = True)
+    
+    # Sanity check
+    assert np.all(tokenized_data < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
+    ic(tokenized_data[:100])
+    ic(tokenized_data.shape)
 
-    json_to_bin(json_dir=json_dir,
-                output_dir=output_path,
-                seq_length=seq_length,
-                tokenizer=tokenizer,
-                subset = subset
-                )
+    # SAVE
+    save_dir = os.path.join(output_path, f"{subset}.bin")
+    Path(output_path).mkdir(parents = True, exist_ok = True)
+    tokenized_data.astype(np.uint16).tofile(save_dir)
+    
     
 
-ic(tokenizer.vocab_size)
+
 
