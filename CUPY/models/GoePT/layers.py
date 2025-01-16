@@ -14,6 +14,7 @@ import math
 import copy
 from types import NoneType
 from typing import Union, Callable
+from optimizers import Adam
 
 
 #import numpy as np
@@ -24,6 +25,9 @@ from icecream import ic
 sys.path.append('.')
 
 from utils import compress_numpy_array, decompress_numpy_array
+
+# :NOTE
+learning_rate_decay = 0.99
 
 class Linear():
     def __init__(self,
@@ -64,6 +68,12 @@ class Linear():
         self.grad_bias = cp.zeros(out_features)
 
         self.input = cp.zeros((batch_size, in_features))
+        
+        # ADAM optimizer
+        if self.use_bias:
+            self.optim = Adam([self.weight, self.bias], self.lr, weight_decay_rates=[1e-1, 0.])
+        else:
+            self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
 
     def _multi_dim_matmul(self,
@@ -158,11 +168,16 @@ class Linear():
 
 
     def update(self) -> None:
-        self.weight = self.weight - self.lr*self.grad_weight
         if self.use_bias:
-            self.bias = self.bias - self.lr*self.grad_bias
-
-
+            #self.bias = self.bias - self.lr*self.grad_bias
+            self.weight, self.bias = self.optim.step([self.weight, self.bias], [self.grad_weight, self.grad_bias])
+        else:
+            self.weight = self.weight = self.optim.step([self.weight,], [self.grad_weight])[0]
+            
+        self.lr *= learning_rate_decay
+        
+        return None
+    
     @property
     def weight_transposed(self):
         return self.weight.T
@@ -271,6 +286,7 @@ class LayerNorm():
             self.bias = cp.asanyarray(self.bias_init_func((normalized_shape)))
         else:
             self.bias = cp.zeros((normalized_shape), dtype=cp.float32)
+            self.use_bias = False
 
         self.axis = None
 
@@ -281,6 +297,13 @@ class LayerNorm():
 
         self.x_centered = None
         self.stddev_inv = None
+        
+        
+        # ADAM optimizer
+        if self.use_bias:
+            self.optim = Adam([self.weight, self.bias], self.lr, weight_decay_rates=[1e-1, 0.])
+        else:
+            self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
 
     def forward(self, input: ArrayLike) -> cp.ndarray:
@@ -325,8 +348,13 @@ class LayerNorm():
 
 
     def update(self):
-        self.weight -= self.lr * self.grad_weight
-        self.bias -= self.lr * self.grad_bias
+        if self.use_bias:
+            self.weight, self.bias = self.optim.step([self.weight, self.bias],
+                                                        [self.grad_weight, self.grad_bias])
+        else:
+            self.weight = self.optim.step([self.weight,],
+                                            [self.grad_weight,])[0]
+        self.lr *= learning_rate_decay
         return None
 
 
@@ -590,8 +618,6 @@ class MultiHeadAttention():
     def update(self) -> None:
         #raise NotImplementedError("Implement the MultiHeadAttention update path")
 
-        # Jonas Version
-
         self.c_attn.update()
         self.c_proj.update()
     
@@ -625,6 +651,9 @@ class Embedding():
         self.lr = lr
 
         self.init_func = init_func
+        
+        # ADAM optimizer
+        self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
         # If we get external weights passed, use them
         # instead of allocating ones on our own.
@@ -694,6 +723,8 @@ class Embedding():
 
     def update(self) -> None:
         self.weight -= self.lr *  self.grad_weight
+        self.weight = self.optim.step([self.weight,], [self.grad_weight,])[0]
+        self.lr *= learning_rate_decay
         return None
 
 
