@@ -56,7 +56,6 @@ class GoePT():
         # Change this for cupy compatibility
         self.rng = cp.random
 
-
         def weight_init(size):
             # Using CuPy's random normal distribution generator
             return cp.random.normal(loc=0.0, scale=0.02, size=size).astype(cp.float32)
@@ -424,7 +423,7 @@ def main():
 
                         status.update(status_update_string)
 
-                        checkpoint_path = os.path.join(args.checkpoint_dir, f'goe_pt_iter_{iter_num}.json')
+                        checkpoint_path = os.path.join(args.checkpoint_dir, f'midi_transformer_{iter_num}.json')
 
                         state_dict = model.state_dict()
 

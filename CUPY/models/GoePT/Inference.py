@@ -1,10 +1,18 @@
 from model import GoePT, compute_gradient
+from layers import Softmax
 import json
 from icecream import ic 
 from miditok import REMI
 import cupy as cp
 import numpy as np
 import argparse
+from pathlib import Path
+import sys
+
+
+sys.path.append('/csghome/hpdc04/Transformer_Code/CUPY/models/utils')
+
+from tokenize_data_fast import tokenize_dataset_to_bin
 
 
 def load_model(checkpoint_path, vocab_file):
@@ -12,6 +20,7 @@ def load_model(checkpoint_path, vocab_file):
         state_dict = json.load(weights)
     
     model = GoePT.from_state_dict(state_dict)
+    
     tokenizer = REMI(params=vocab_file) # NOTE: CHANGE THIS IF THE TOKENIZER CHANGES
     print(model)
     
@@ -32,27 +41,44 @@ def main():
     parser.add_argument('--weights', type = str,
                         default = '')
     parser.add_argument('--vocab-file', type = str)   
-    parser.add_argument('--i', type = str,
+    parser.add_argument('--input', type = str,
                         help = "Path to the Input midi file") 
     parser.add_argument('--context-length', type = int)
     
     args = parser.parse_args()
     
+    file_path = Path(args.input)
+    
     model, tokenizer = load_model(args.weights, args.vocab_file)
+    seq_len = model.context_length
 
-    ic(model)
-    ic(tokenizer)
     
     # Tokenize the input
-    tok_input = tokenize_input(args.i, tokenizer)
-    tok_input = cp.array(tok_input, dtype = cp.int16)
-    tok_input = tok_input[:128].reshape(1, 128)
+    tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = file_path,
+                                      verbose = True,
+                                      seq_length = seq_len)
     
-    print(tok_input)
+    # :TODO adjust model.batch_size to fit the passed batch
     # forward the tok_input to the pre-trained model
-    logits, _ = model.forward(tok_input, targets = None)
+    logits, _ = model.forward(tokenized_data, targets = None)
     
-    print(logits)
+    #print(logits)
     
+    # Apply softmax
+    softmax = Softmax(axis = 0) # use rows
+    predictions = softmax.forward(logits)
+    predictions = cp.argmax(predictions, axis = -1) # axis -1 uses the last axis which is the vocabulary
+    
+    # convert back to numpy
+    predictions = predictions.get()
+    
+    print("---------------------")
+    print("\n", predictions) #
+    print(predictions.shape)
+    
+    decoded_predictions = tokenizer.decode(predictions)
+    print(decoded_predictions)
+    
+        
 if __name__ == "__main__":
     main()

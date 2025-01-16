@@ -100,6 +100,8 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--eval-interval', type=int, default=100, metavar='N',
                         help='how many batches to wait before logging training status')
+    parser.add_argument('--n-heads', type=int, default =6, metavar='N',
+                       help = "number of attention heads in Multiheadattention")
 
 
     args = parser.parse_args()
@@ -135,7 +137,8 @@ def main():
                   dropout=0.1,
                   batch_size=args.batch_size,
                   lr=args.lr,
-                  vocab_size = tokenizer.vocab_size)
+                  vocab_size = tokenizer.vocab_size,
+                  n_heads = args.n_heads)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:

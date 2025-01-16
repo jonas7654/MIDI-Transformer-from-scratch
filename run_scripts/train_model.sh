@@ -21,6 +21,7 @@ echo "epochs: $epochs"
 echo "batch size: $batch_size"
 echo "eval_interval: $eval_interval"
 echo "learning rate: $lr"
+echo "number of heads: $n_heads"
 
 
 python ../CUPY/models/GoePT/train.py \
@@ -31,5 +32,6 @@ python ../CUPY/models/GoePT/train.py \
     --epochs "$epochs" \
     --batch-size "$batch_size" \
     --eval-interval "$eval_interval" \
-    --lr "$lr"
+    --lr "$lr" \
+    --n-heads "$n_heads"
                                      
