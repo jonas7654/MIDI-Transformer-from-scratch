@@ -6,10 +6,11 @@ from functools import partial
 from collections import deque
 from types import NoneType
 import json
-import miditok
+from miditok import REMI
+import wandb
 
-import cupy as xp
-np = xp
+import cupy as cp
+import numpy as np
 
 from sklearn.metrics import root_mean_squared_error
 from rich.progress import Progress
@@ -32,21 +33,27 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
     # https://stackoverflow.com/questions/45132940/numpy-memmap-memory-usage-want-to-iterate-once/61472122#61472122
 
     if split == 'train':
-        data = xp.asarray(np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r'))
+        data = np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
     else:
-        data = xp.asarray(np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r'))
-
+        data = np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
+    
     ix = rng.integers(len(data) - context_length, size=(batch_size,))
-
-    x = xp.stack([(data[i:i + context_length].astype(np.int64)) for i in ix])
-    y = xp.stack([(data[i + 1:i + 1 + context_length].astype(np.int64)) for i in ix])
+    
+    
+    x = np.stack([(data[i:i+context_length].astype(np.int64)) for i in ix])
+    y = np.stack([(data[i+1:i+1+context_length].astype(np.int64)) for i in ix])
+    
+    # Load batches directly to GPU memory
+    x = cp.asarray(x)
+    y = cp.asarray(y)
 
     return x, y
 
 
+
 def compute_gradient(target, prediction, one_hot_lookup):
 
-    target = xp.stack([one_hot_lookup[token] for token in target])
+    target = cp.stack([one_hot_lookup[token] for token in target])
 
     return (prediction - target), target
 
@@ -66,16 +73,16 @@ def get_log_output_table(log_output_buffer: deque) -> Table:
 
 
 def main():
-    # Training settings
+        # Training settings
     parser = argparse.ArgumentParser(description='NanoGPT from scratch')
     parser.add_argument('--data-dir', type=str,
-                            default='datasets/tokenized/',
+                            default='/datasets/tokenized',
                             help='Dataset directory')
     parser.add_argument('--checkpoint-dir', type=str,
                                 default='checkpoints/',
                                 help='Checkpoint directory')
     parser.add_argument('--vocab-file', type=str,
-                                default='models/tokenizers/goe_pt/goe_pt_tokenizer.json',
+                                default='tokenizer.json',
                                 help='Vocabulary file')
 
     parser.add_argument('--batch-size', type=int, default=16, metavar='N',
@@ -85,18 +92,50 @@ def main():
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--gradient-accumulation-steps', type=int, default=32, metavar='N')
     parser.add_argument('--eval-iters', type=int, default=200, metavar='N')
-    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
-                        help='learning rate (default: 1e-3)')
-    parser.add_argument('--seed', type=int, default=42, metavar='S',
+    parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
+                        help='learning rate (default: 0.1)')
+    parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
+    parser.add_argument('--log-interval', type=int, default=100, metavar='N',
+                        help='how many batches to wait before logging training status')
     parser.add_argument('--eval-interval', type=int, default=100, metavar='N',
                         help='how many batches to wait before logging training status')
+
 
     args = parser.parse_args()
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
+    
+    # NOTE: CHANGE THIS IF THE TOKENIZER CHANGES
+    tokenizer = REMI(params = args.vocab_file)
 
-    model = GoePT(context_length=args.context_length, n_layer=6, n_embd=384, dropout=0.1, batch_size=args.batch_size, lr=args.lr)
+    # Initialize Weights & Biases (wandb)
+    wandb.init(
+        project="MIDI-Transformer", 
+        config={
+            "data_dir": args.data_dir,
+            "checkpoint_dir": args.checkpoint_dir,
+            "vocab_file": args.vocab_file,
+            "batch_size": args.batch_size,
+            "context_length": args.context_length,
+            "epochs": args.epochs,
+            "gradient_accumulation_steps": args.gradient_accumulation_steps,
+            "eval_iters": args.eval_iters,
+            "lr": args.lr,
+            "seed": args.seed,
+            "log_interval": args.log_interval,
+            "eval_interval": args.eval_interval,
+        }
+    )
+    
+    
+    model = GoePT(context_length=args.context_length,
+                  n_layer=6,
+                  n_embd=384,
+                  dropout=0.1,
+                  batch_size=args.batch_size,
+                  lr=args.lr,
+                  vocab_size = tokenizer.vocab_size)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:
@@ -109,7 +148,8 @@ def main():
 
     # training loop
 
-    rng = xp.random.default_rng(args.seed)
+    rng = np.random.default_rng(args.seed)
+    cp.random.seed(args.seed)
 
     get_batch = partial(read_datasets,
                             data_dir=args.data_dir,
@@ -119,7 +159,7 @@ def main():
 
     # Pre-generate one-hot vectors using the vocab size
     # for gradient computation
-    one_hot_lookup = xp.eye(8192)
+    one_hot_lookup = cp.eye(tokenizer.vocab_size)
 
     iter_num = 0
 
@@ -172,6 +212,8 @@ def main():
                 progress_step.console.clear()
                 progress_step.console.print(table_update_func())
                 progress_step.advance(task_id)
+                
+                wandb.log({"loss": loss.item()})
 
             progress_step.remove_task(task_id)
 
@@ -185,7 +227,7 @@ def main():
 
             if iter_num % args.eval_interval == 0:
 
-                losses_val = xp.zeros(args.eval_iters)
+                losses_val = cp.zeros(args.eval_iters)
 
                 task_id = progress_step.add_task(f'Val loss evaluation')
 
@@ -223,7 +265,12 @@ def main():
                     status.update(f'Saved checkpoint under {checkpoint_path}')
 
                     best_val_loss = loss_val_mean
-
+                # Log evaluation metrics to W&B
+                wandb.log({
+                            "train_loss": float(losses_dataset['train'].item()),
+                            "val_loss": float(losses_dataset['val'].item()),
+                          })
+                
             iter_num += 1
 
             # termination conditions

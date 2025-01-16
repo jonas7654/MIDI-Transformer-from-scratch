@@ -298,7 +298,7 @@ def main():
         ]
         for future in futures:
             results.append(future.result())
-            
+
     # Aggregate results:
     total_files = len(results)
     total_bad_time_sig = sum(res["bad_time_sig"] for res in results)
@@ -311,13 +311,13 @@ def main():
     print(f"\n {total_files} files processed.")
     print(f"Removed {total_bad_mode} midi files due to non-major/minor mode.")
     print(f"Skipped {total_bad_time_sig} files in total due to time signature.")
-    print(f"Skipped {bad_mode_total + total_bad_time_sig} files in total.")
+    print(f"Skipped {total_bad_mode + total_bad_time_sig} files in total.")
 
     print(f"\n{track_total} 8 bar excerpts collected.")
-    print(f"Removed {drum_total} drum tracks in total.")
-    print(f"Removed {rmv_bass_total} bass tracks in total.")
+    print(f"Removed {total_drums_removed} drum tracks in total.")
+    print(f"Removed {total_bass_removed} bass tracks in total.")
     print(f"Skipped {note_skipped_total} tracks in total due to note density.")
-    print(f"Skipped {drum_total + rmv_bass_count + note_skipped_total} tracks in total.")
+    print(f"Skipped {total_drums_removed + total_bass_removed + note_skipped_total} tracks in total.")
     print(f"CPU cores: {multiprocessing.cpu_count()}")
     
 if __name__ == "__main__":

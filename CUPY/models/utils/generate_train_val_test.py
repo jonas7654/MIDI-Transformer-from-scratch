@@ -5,7 +5,8 @@ from icecream import ic
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import multiprocessing
-from tqdm import tqdm
+from tokenize_data_fast import tokenize_dataset_to_bin
+
 
 from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
@@ -34,7 +35,7 @@ name_of_midi_data = "transposed_midi"
 midi_paths = list(Path(data_path, name_of_midi_data).glob("*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
-seq_length = 1024
+seq_length = 128
 
 # Load the pre-trained tokenizer
 tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
@@ -61,18 +62,15 @@ for files_paths, subset_name in (
     
      subset_chunks_dir = Path(f"{data_path}/dataset_{subset_name}")
      
-     # :TODO Refactor this into one block
-     # Check if the folder exists
+     # Check if the folder exists and if it's a directory
      if subset_chunks_dir.exists() and subset_chunks_dir.is_dir():
-         # Remove the folder and its contents
-         shutil.rmtree(subset_chunks_dir)
-         print(f"Folder '{subset_chunks_dir}' has been removed.")
-     else:
-         print(f"Folder '{subset_chunks_dir}' does not exist or is not a directory. \n Creating {subset_chunks_dir}")
-         
-     if not os.path.exists(subset_chunks_dir):
-         print(f"Creating directory: /dataset_{subset_name}")
-         os.makedirs(subset_chunks_dir)
+        # Remove the folder and all its contents
+        shutil.rmtree(subset_chunks_dir)
+        print(f"Folder '{subset_chunks_dir}' and its contents have been removed.")
+    
+    # Recreate the directory after deletion
+        os.makedirs(subset_chunks_dir)
+        print(f"Directory '{subset_chunks_dir}' has been recreated.")
          
      # Save the subset directory for later    
      train_val_test_path[subset_name] = subset_chunks_dir
@@ -86,7 +84,6 @@ for files_paths, subset_name in (
             shutil.copy(midi_file, dst)
         except Exception as e:
             print(f"Error moving {midi_file} to {dst}: {e}")
-        
     
     
     
@@ -95,82 +92,57 @@ for files_paths, subset_name in (
     the velocity offsets should be chosen accordingly to the number of velocities in your tokenizer’s
     vocabulary (num_velocities). (default: None)
          """
-     # Perform data augmentation
      do_augment = False
      if (do_augment):
-         augment_dataset(
+         # Perform data augmentation
+        augment_dataset(
          subset_chunks_dir,
          pitch_offsets=[-12, 12],
-         velocity_offsets=[-4, 5],
-         duration_offsets=[-0.5, 0.5]
-         )    
+         velocity_offsets=[-4, 4],
+         duration_offsets=[-0.5, 0.5],
+        )    
 
 
     
 """
 @Author: Jonas
-Here I implement the data generating process where we save the integer ids for the tokens 
-as a numpy matrix and then save it as binary in order to feed it to our GoePT model.
+Monkey Patch tokenizer.tokenize_data_fast
 
-collator: PAD (PAD_None): a padding token to use when training a model with batches of sequences of unequal lengths.
-          The padding token id is often set to 0.
 """
+
+
 output_path = os.path.join(data_path, "tokenized")
 
-def collator(input, seq_length, PAD=tokenizer.special_tokens_ids[0]):
-    if (len(input) < seq_length):
-        result =  input + [PAD] * (seq_length - len(input)) 
-        return np.array(result, dtype=np.uint16)
-    # if the input length is greatet than seq_len, truncate!
-    return np.array(input[:seq_length], dtype=np.uint16)
-        
-
-
-def process_midi_file(midi_file, seq_length, tokenizer, collator):
-    midi_file_tokenized = tokenizer(Path(midi_file))[0].ids
-    # print(f"processed {midi_file}")
-    return collator(midi_file_tokenized, seq_length)
-    
 # Create train, val, test token datasets
 size_dict = {}
 
 for subset in train_val_test_path:
     # Get a list of all midi files (as paths)
-    files_path = list(train_val_test_path[subset].glob("*.mid"))
+    files_path = train_val_test_path[subset]
     
-    number_of_subset_files = len(files_path)
-    size_dict[subset] = number_of_subset_files
-    print(f"Generating {subset} binary data with length: {number_of_subset_files}")
-
-    dataset_tokenized = np.zeros((number_of_subset_files, seq_length))
+    #tokenizer.tokenize_dataset(files_paths = files_path,
+    #                           out_dir = Path(files_path, "json"),
+    #                           overwrite_mode = True,
+    #                           verbose = True)
     
-    # Initialize the progress bar
-    with tqdm(total=number_of_subset_files, desc=f"Processing {subset}", unit="file") as pbar:
-        # Iterate over all MIDI files and tokenize them in parallel
-        with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
-            future_to_idx = {executor.submit(process_midi_file, midi_file, seq_length, tokenizer, collator): i for i, midi_file in enumerate(files_path)}
+    
 
-            for future in as_completed(future_to_idx):
-                i = future_to_idx[future]
-                try:
-                    dataset_tokenized[i, :] = future.result()
-                except Exception as e:
-                    print(f"Error with file: {files_path[i]}, Error: {e}")
-                finally:
-                    # Update the progress bar
-                    pbar.update(1)
-
+    tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = files_path,
+                                                       verbose = True,
+                                                       seq_length = seq_length)
+    
+    
     # Sanity check
-    assert np.all(dataset_tokenized < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
-    ic(dataset_tokenized[:100])
-    ic(dataset_tokenized.shape)
+    assert np.all(tokenized_data < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
+    ic(tokenized_data[:100])
+    ic(tokenized_data.shape)
 
     # SAVE
     save_dir = os.path.join(output_path, f"{subset}.bin")
     Path(output_path).mkdir(parents = True, exist_ok = True)
-    dataset_tokenized.astype(np.uint16).tofile(save_dir)
+    tokenized_data.astype(np.uint16).tofile(save_dir)
+    
+    
 
-ic(tokenizer.vocab_size)
-for subset in size_dict:
-    print(f"Size of {subset} set: {size_dict[subset]}")
+
 

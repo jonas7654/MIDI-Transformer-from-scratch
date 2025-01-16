@@ -4,7 +4,7 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 import numpy as np
 from tqdm import tqdm
 from symusic import Score
-
+from tqdm import tqdm 
 
 SCORE_LOADING_EXCEPTION = (
     RuntimeError,
@@ -14,11 +14,17 @@ SCORE_LOADING_EXCEPTION = (
     IOError,
     EOFError,
 )
+"""
+Reference: https://github.com/Natooz/MidiTok/blob/515ed5078740ca7dcd643501adc0755b244c97ad/src/miditok/midi_tokenizer.py
+
+"""
+
 
 def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path],
                             validation_fn=None,
                             save_programs=None,
-                            verbose=True):
+                            verbose=True,
+                            seq_length = None):
     """
     @Jonas
     Custom method to tokenize files and return a NumPy array.
@@ -65,10 +71,17 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
         token_ids = tokens[0].ids
         all_ids.append(token_ids)
         max_length = max(max_length, len(token_ids))
+        
+        if seq_length is None:
+            seq_length = max_length
 
     # Convert collected token IDs to a padded NumPy array
     token_array = np.array(
-        [ids + [0] * (max_length - len(ids)) for ids in all_ids], dtype=np.int32
+        [
+            ids[:seq_length] + [self.pad_token_id] * (seq_length - len(ids[:seq_length]))
+            for ids in all_ids
+        ],
+        dtype=np.int32
     )
 
     self._verbose = False
