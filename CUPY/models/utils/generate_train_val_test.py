@@ -35,7 +35,7 @@ name_of_midi_data = "transposed_midi"
 midi_paths = list(Path(data_path, name_of_midi_data).glob("*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
-seq_length = 128
+seq_length = 512
 
 # Load the pre-trained tokenizer
 tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
@@ -107,7 +107,6 @@ for files_paths, subset_name in (
 """
 @Author: Jonas
 Monkey Patch tokenizer.tokenize_data_fast
-
 """
 
 

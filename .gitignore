@@ -4,3 +4,8 @@ checkpoints/
 run_scripts/wandb/
 .conda/
 run_scripts/logs/
+CUPY/models/GoePT/__pycache__/layers.cpython-310.pyc
+run_scripts/train_losses.csv
+run_scripts/wandb/debug-internal.log
+run_scripts/wandb/debug.log
+run_scripts/wandb/latest-run
