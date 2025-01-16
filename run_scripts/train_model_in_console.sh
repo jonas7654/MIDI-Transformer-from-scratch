@@ -16,5 +16,6 @@ srun --mem=5G --cpus-per-task=1 --gres gpu:2 --partition=exercise-eml --pty pyth
     --batch-size "$batch_size" \
     --eval-interval "$eval_interval" \
     --lr "$lr" \
-    --log-interval "$log_interval"
+    --log-interval "$log_interval" \
+    --n-heads "$n_heads"
 

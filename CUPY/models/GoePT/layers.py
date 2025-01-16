@@ -564,6 +564,7 @@ class MultiHeadAttention():
         I don't know why they wrote: self.n_heads*self.depth 
         This is just a non readible way of using C from the beginning
         """
+
         x = cp.ascontiguousarray(x).transpose(0, 2, 1, 3).reshape(self.batch_size, -1, self.n_heads*self.depth)
         x = self.c_proj.forward(x)
         x = self.resid_dropout.forward(x)
@@ -659,15 +660,17 @@ class Embedding():
         #
         # https://paperswithcode.com/method/weight-tying
 
-        if not isinstance(type(weight_external), NoneType):
+        #if not isinstance(type(weight_external), NoneType):
+        if weight_external is None:
             if self.init_func:
                 self.weight = cp.asanyarray(self.init_func((num_embeddings, embedding_dim)))
             else:
                 # use CUPY
-                self.weight = cp.random.standard_normal((num_embeddings, embedding_dim), dtype=cp.float32)                
+                self.weight = cp.random.standard_normal((num_embeddings, embedding_dim), dtype=cp.float32)
         else:
-            self.weight = weight_external
+            self.weight = cp.asarray(weight_external, dtype=cp.float32)
 
+            
         self.gradient_projection_mask = cp.eye(num_embeddings, dtype=cp.uint8)
 
         self.input = None
@@ -677,9 +680,10 @@ class Embedding():
         self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
     def forward(self, input: ArrayLike) -> cp.ndarray:
-        self.input = cp.asanyarray(input) # (Batch size, seq len)
-        # :TODO : Doesnt work in inference
-        return self.weight[self.input.astype(cp.int32), :]
+        self.input = cp.asanyarray(input) # (Batch size, seq len
+        self.input = self.input.astype(cp.int16)
+
+        return self.weight[self.input, :]
 
 
     def backward(self, grad_output: cp.ndarray):
@@ -833,6 +837,5 @@ class Block():
         self.ln_1.bias = decompress_numpy_array(state_dict['ln_1'][1])
         self.ln_2.weight = decompress_numpy_array(state_dict['ln_2'][0])
         self.ln_2.bias = decompress_numpy_array(state_dict['ln_2'][1])
-
         self.mlp.load_params(state_dict['mlp'])
         self.attn.load_params(state_dict['attn'])

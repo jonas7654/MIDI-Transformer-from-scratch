@@ -1,7 +1,7 @@
 from types import NoneType
 from typing import Union
 
-import numpy as np
+import cupy as np # :NOTE : This is CUPY now
 import base64
 import zlib
 
