@@ -87,5 +87,9 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
     self._verbose = False
     return token_array
 
+"""
+@Author: Jonas
+Monkey Patch tokenizer.tokenize_data_fast
 
+"""
 REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin
