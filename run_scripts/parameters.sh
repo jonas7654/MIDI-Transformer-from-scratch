@@ -1,5 +1,5 @@
 export context_length=512
-export epochs=100
+export epochs=300
 export batch_size=9
 export eval_interval=5 # default : 100
 export lr=0.2 # Learning Rate. Not needed since ADAM
