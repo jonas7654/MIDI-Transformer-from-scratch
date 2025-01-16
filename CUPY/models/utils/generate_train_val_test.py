@@ -5,6 +5,7 @@ from icecream import ic
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import multiprocessing
+from tqdm import tqdm
 
 from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
@@ -33,7 +34,7 @@ name_of_midi_data = "transposed_midi"
 midi_paths = list(Path(data_path, name_of_midi_data).glob("*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
-seq_length = 128
+seq_length = 1024
 
 # Load the pre-trained tokenizer
 tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
@@ -85,6 +86,7 @@ for files_paths, subset_name in (
             shutil.copy(midi_file, dst)
         except Exception as e:
             print(f"Error moving {midi_file} to {dst}: {e}")
+        
     
     
     
@@ -142,16 +144,21 @@ for subset in train_val_test_path:
 
     dataset_tokenized = np.zeros((number_of_subset_files, seq_length))
     
-    # Iterate over all midi files and tokenize them in parallel
-    with ProcessPoolExecutor(max_workers = multiprocessing.cpu_count()) as executor:
-        future_to_idx = {executor.submit(process_midi_file, midi_file, seq_length, tokenizer, collator): i for i, midi_file in enumerate(files_path)}
+    # Initialize the progress bar
+    with tqdm(total=number_of_subset_files, desc=f"Processing {subset}", unit="file") as pbar:
+        # Iterate over all MIDI files and tokenize them in parallel
+        with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+            future_to_idx = {executor.submit(process_midi_file, midi_file, seq_length, tokenizer, collator): i for i, midi_file in enumerate(files_path)}
 
-        for future in as_completed(future_to_idx):
-            i = future_to_idx[future]
-            try:
-                dataset_tokenized[i, :] = future.result()
-            except Exception as e:
-                print(f"Error with file: {files_path[i]}, Error: {e}")
+            for future in as_completed(future_to_idx):
+                i = future_to_idx[future]
+                try:
+                    dataset_tokenized[i, :] = future.result()
+                except Exception as e:
+                    print(f"Error with file: {files_path[i]}, Error: {e}")
+                finally:
+                    # Update the progress bar
+                    pbar.update(1)
 
     # Sanity check
     assert np.all(dataset_tokenized < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
