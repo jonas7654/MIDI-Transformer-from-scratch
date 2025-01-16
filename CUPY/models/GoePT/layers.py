@@ -652,8 +652,6 @@ class Embedding():
 
         self.init_func = init_func
         
-        # ADAM optimizer
-        self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
         # If we get external weights passed, use them
         # instead of allocating ones on our own.
@@ -675,6 +673,8 @@ class Embedding():
         self.input = None
         self.grad_weight = None
 
+        # ADAM optimizer
+        self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
     def forward(self, input: ArrayLike) -> cp.ndarray:
         self.input = cp.asanyarray(input) # (Batch size, seq len)
@@ -722,7 +722,6 @@ class Embedding():
 
 
     def update(self) -> None:
-        self.weight -= self.lr *  self.grad_weight
         self.weight = self.optim.step([self.weight,], [self.grad_weight,])[0]
         self.lr *= learning_rate_decay
         return None
