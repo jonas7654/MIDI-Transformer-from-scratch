@@ -3,6 +3,7 @@ from layers import Softmax
 import json
 from icecream import ic 
 from miditok import REMI
+from miditok.utils import merge_scores
 import cupy as cp
 import numpy as np
 import argparse
@@ -59,6 +60,7 @@ def main():
                                       seq_length = seq_len)
     
     # :TODO adjust model.batch_size to fit the passed batch
+    
     # forward the tok_input to the pre-trained model
     logits, _ = model.forward(tokenized_data, targets = None)
     
@@ -77,8 +79,7 @@ def main():
     print(predictions.shape)
     
     decoded_predictions = tokenizer.decode(predictions)
-    print(decoded_predictions)
-    
-        
+   
+
 if __name__ == "__main__":
     main()
