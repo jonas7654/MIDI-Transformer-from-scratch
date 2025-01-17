@@ -26,7 +26,7 @@ ic.disable()
 WANDB_AGENT_DISABLE_FLAPPING=True
 # Define WandB sweep configuration
 sweep_config = {
-    'method': 'bayes',  # Can also be 'grid' or 'random'
+    'method': 'random',  # Can also be 'grid' or 'random'
     'metric': {
         'name': 'val_loss',
         'goal': 'minimize'  
