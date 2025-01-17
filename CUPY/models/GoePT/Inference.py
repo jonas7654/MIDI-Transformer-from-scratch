@@ -63,9 +63,7 @@ def main():
     
     # forward the tok_input to the pre-trained model
     logits, _ = model.forward(tokenized_data, targets = None)
-    
-    #print(logits)
-    
+
     # Apply softmax :TODO : Add Temperature ?
     softmax = Softmax(axis = 0) # use rows
     predictions = softmax.forward(logits)
