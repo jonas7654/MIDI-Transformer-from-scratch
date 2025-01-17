@@ -66,7 +66,7 @@ def main():
     
     #print(logits)
     
-    # Apply softmax
+    # Apply softmax :TODO : Add Temperature ?
     softmax = Softmax(axis = 0) # use rows
     predictions = softmax.forward(logits)
     predictions = cp.argmax(predictions, axis = -1) # axis -1 uses the last axis which is the vocabulary
