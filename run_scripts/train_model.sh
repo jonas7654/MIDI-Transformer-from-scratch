@@ -22,6 +22,7 @@ echo "batch size: $batch_size"
 echo "eval_interval: $eval_interval"
 echo "learning rate: $lr"
 echo "number of heads: $n_heads"
+echo "dropout rate: $dropout"
 
 
 python ../CUPY/models/GoePT/train.py \
@@ -33,5 +34,7 @@ python ../CUPY/models/GoePT/train.py \
     --batch-size "$batch_size" \
     --eval-interval "$eval_interval" \
     --lr "$lr" \
-    --n-heads "$n_heads"
+    --n-heads "$n_heads" \
+    --dropout "$dropout"
+
                                      

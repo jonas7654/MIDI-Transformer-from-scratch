@@ -102,6 +102,8 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--n-heads', type=int, default =6, metavar='N',
                        help = "number of attention heads in Multiheadattention")
+    parser.add_argument('--dropout', type=int,  default=0.2, metavar='N',
+                        help='Specify dropout rate')
 
 
     args = parser.parse_args()
@@ -127,6 +129,7 @@ def main():
             "seed": args.seed,
             "log_interval": args.log_interval,
             "eval_interval": args.eval_interval,
+            "dropout rate": args.dropout
         }
     )
     
@@ -134,7 +137,7 @@ def main():
     model = GoePT(context_length=args.context_length,
                   n_layer=6,
                   n_embd=384,
-                  dropout=0.1,
+                  dropout=args.dropout,
                   batch_size=args.batch_size,
                   lr=args.lr,
                   vocab_size = tokenizer.vocab_size,
