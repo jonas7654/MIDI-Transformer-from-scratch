@@ -102,7 +102,7 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--n-heads', type=int, default =6, metavar='N',
                        help = "number of attention heads in Multiheadattention")
-    parser.add_argument('--dropout', type=int,  default=0.2, metavar='N',
+    parser.add_argument('--dropout', type=float,  default=0.2, metavar='N',
                         help='Specify dropout rate')
     parser.add_argument('--n-layer', type=int, default=6, metavar='N')
     parser.add_argument('--n-embd', type=int, default=384, metavar='N')
@@ -133,7 +133,8 @@ def main():
             "dropout rate": args.dropout,
             "vocab_size": tokenizer.vocab_size,
             "n_layer" : args.n_layer,
-            "n_embd" : args.n_embd
+            "n_embd" : args.n_embd,
+            "n_heads" : args.n_heads
         }
     )
     

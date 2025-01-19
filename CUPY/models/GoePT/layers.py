@@ -345,7 +345,7 @@ class LayerNorm():
         dinput = dx_hat * self.stddev_inv + (dvar * 2.0 * self.x_centered) / self.input.size + dmean / self.input.size
     
         return dinput
-
+    
 
     def update(self):
         if self.use_bias:

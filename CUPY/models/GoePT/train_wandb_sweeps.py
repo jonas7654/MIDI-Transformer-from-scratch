@@ -34,13 +34,13 @@ sweep_config = {
     },
     'parameters': {
         'context_length': {'values': [1024]},
-        'batch_size': {'values': [6]},
+        'batch_size': {'values': [6, 8, 10, 12]},
         'n_layer': {'values': [4, 6, 8, 10, 12]},  # Hyperparameter search for the number of layers
         'n_embd': {'values': [128, 256, 384, 512]},  # Hyperparameter search for embedding size
         'n_heads': {'values': [4, 6, 8, 10, 12]},  # Hyperparameter search for attention heads
-        'dropout': {'values': [0, 0.1, 0.2, 0.3, 0.4, 0.5]},  # Hyperparameter search for dropout
+        'dropout': {'values': [0, 0.1, 0.2, 0.3]},  # Hyperparameter search for dropout
         'lr': {'distribution': 'log_uniform_values', 'min': 0.05, 'max': 0.9},  # Learning rate search
-        'epochs': {'value': 30},  # Fixed value for training duration
+        'epochs': {'value': 14},  # Fixed value for training duration
         'gradient_accumulation_steps': {'value': 32},  # Fixed value
         'eval_iters': {'value': 200},  # Fixed value
         'seed': {'value': 1},  # Fixed random seed
@@ -49,8 +49,8 @@ sweep_config = {
         'checkpoint_dir': {'value': '/csghome/hpdc04/Transformer_Code/checkpoints'},
     },
     'early_terminate': {
-        'type': 'hyperband',
-        'min_iter': 5 # Minimum number of epochs before considering early stopping
+        'type': 'bandit',
+        'min_iter': 15 # Minimum number of epochs before considering early stopping
     }
 }
 
