@@ -34,7 +34,6 @@ python ../CUPY/models/GoePT/train.py \
     --batch-size "$batch_size" \
     --eval-interval "$eval_interval" \
     --lr "$lr" \
-    --n-heads "$n_heads" \
-    --dropout "$dropout"
+    --n-heads "$n_heads" 
 
                                      

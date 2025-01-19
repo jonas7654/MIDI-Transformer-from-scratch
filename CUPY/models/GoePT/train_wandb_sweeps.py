@@ -26,34 +26,33 @@ ic.disable()
 WANDB_AGENT_DISABLE_FLAPPING=True
 # Define WandB sweep configuration
 sweep_config = {
-    'method': 'random',  # Can also be 'grid' or 'random'
+    'method': 'bayes',  # Can also be 'grid' or 'random'
     'metric': {
         'name': 'val_loss',
         'goal': 'minimize'  
     },
     'parameters': {
         'context_length': {'values': [512]},
-        'batch_size': {'values': [9]},
+        'batch_size': {'values': [10, 16, 32]},
         'n_layer': {'values': [4, 6, 8, 10]},  # Hyperparameter search for the number of layers
-        'n_embd': {'values': [384]},  # Hyperparameter search for embedding size
-        'n_heads': {'values': [6]},  # Hyperparameter search for attention heads
-        'dropout': {'values': [0.2]},  # Hyperparameter search for dropout
-        'lr': {'distribution': 'log_uniform_values', 'min': 0.1, 'max': 0.3},  # Learning rate search
-        'epochs': {'value': 50},  # Fixed value for training duration
+        'n_embd': {'values': [256, 384, 512]},  # Hyperparameter search for embedding size
+        'n_heads': {'values': [4, 6, 8]},  # Hyperparameter search for attention heads
+        'dropout': {'values': [0.1, 0.2, 0.3, 0.4]},  # Hyperparameter search for dropout
+        'lr': {'distribution': 'log_uniform_values', 'min': 0.1, 'max': 0.9},  # Learning rate search
+        'epochs': {'value': 14},  # Fixed value for training duration
         'gradient_accumulation_steps': {'value': 32},  # Fixed value
         'eval_iters': {'value': 200},  # Fixed value
         'seed': {'value': 1},  # Fixed random seed
-        'vocab_file': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer.json'},
+        'vocab_file': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_4096.json'},
         'data_dir': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized'},
         'checkpoint_dir': {'value': '/csghome/hpdc04/Transformer_Code/checkpoints'},
     },
-    'early_stopping': {
-    'monitor': 'val_loss',  # Monitoring validation loss
-    'min_delta': 0.25,      # Minimum change in validation loss to qualify as an improvement
-    'patience': 15,          # Number of epochs with no improvement after which training stops
-    'mode': 'max',          # 'min' for minimizing validation loss
-    'threshold':  8      # Validation loss threshold (stop when val_loss < 0.2)
-  }
+    'early_terminate': {
+        'type': 'hyperband',
+        'min_iter': 5,  # Minimum number of epochs before considering early stopping
+        'eta': 2,      # Halve the number of runs at each bracket
+        's': 1         # Number of brackets
+    }
 }
 
 

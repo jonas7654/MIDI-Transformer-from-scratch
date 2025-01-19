@@ -6,6 +6,7 @@ from pathlib import Path
 import io
 from concurrent.futures import ProcessPoolExecutor
 import multiprocessing
+from tqdm import tqdm
 
 import os
 
@@ -243,6 +244,7 @@ def process_file(file, output_folder, counter):
         # Save the transposed file
         output_path = output_folder / f"{file.stem}_transmon{counter}.mid"
         transposed_stream.write(str(output_path))
+        
 
         return {
             "counter": counter,
@@ -291,12 +293,20 @@ def main():
     
     results = []
     
-    with ProcessPoolExecutor(max_workers = multiprocessing.cpu_count()) as executor:
+    #with ProcessPoolExecutor(max_workers = multiprocessing.cpu_count()) as executor:
+    #    futures = [
+    #        executor.submit(process_file, file, output_folder, idx + 1)
+    #        for idx, file in enumerate(midi_files_list)
+    #    ]
+    #    for future in futures:
+    #        results.append(future.result())
+    
+    with ProcessPoolExecutor(max_workers=96) as executor:
         futures = [
             executor.submit(process_file, file, output_folder, idx + 1)
             for idx, file in enumerate(midi_files_list)
         ]
-        for future in futures:
+        for future in tqdm(futures, desc="Processing MIDI files", total=len(futures)):
             results.append(future.result())
 
     # Aggregate results:

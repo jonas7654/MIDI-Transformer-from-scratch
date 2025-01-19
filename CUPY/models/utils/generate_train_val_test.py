@@ -38,7 +38,7 @@ tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 seq_length = 512
 
 # Load the pre-trained tokenizer
-tokenizer = REMI(params = Path(tokenizer_path, "tokenizer.json"))
+tokenizer = REMI(params = Path(tokenizer_path, "tokenizer_4096.json"))
 ic(tokenizer.vocab_size)
 # Split the dataset into train/valid/test subsets, with 15% of the data for each of the two latter
 
@@ -95,7 +95,7 @@ for files_paths, subset_name in (
      do_augment = False
      if (do_augment):
          # Perform data augmentation
-        augment_dataset(
+         augment_dataset(
          subset_chunks_dir,
          pitch_offsets=[-12, 12],
          velocity_offsets=[-4, 4],
