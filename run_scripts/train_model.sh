@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --gres gpu:2
+#SBATCH --gres gpu:1
 #SBATCH --mem 5G
 #SBATCH --cpus-per-task 1
 #SBATCH --time 500:00
@@ -23,11 +23,12 @@ echo "eval_interval: $eval_interval"
 echo "learning rate: $lr"
 echo "number of heads: $n_heads"
 echo "dropout rate: $dropout"
+echo "tokenizer: $tokenizer"
 
 
 python ../CUPY/models/GoePT/train.py \
     --data-dir /csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized \
-    --vocab-file /csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer.json \
+    --vocab-file "$tokenizer" \
     --checkpoint-dir /csghome/hpdc04/Transformer_Code/checkpoints \
     --context-length "$context_length" \
     --epochs "$epochs" \
