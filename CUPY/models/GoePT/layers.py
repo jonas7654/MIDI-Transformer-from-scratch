@@ -169,7 +169,7 @@ class Linear():
 
     def update(self) -> None:
         if self.use_bias:
-            #self.bias = self.bias - self.lr*self.grad_bias
+            #self.bias = self.bias - selfs.lr*elf.grad_bias
             self.weight, self.bias = self.optim.step([self.weight, self.bias], [self.grad_weight, self.grad_bias])
         else:
             self.weight = self.weight = self.optim.step([self.weight,], [self.grad_weight])[0]
