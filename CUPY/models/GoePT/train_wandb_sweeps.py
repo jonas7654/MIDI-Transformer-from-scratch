@@ -32,18 +32,18 @@ sweep_config = {
         'goal': 'minimize'  
     },
     'parameters': {
-        'context_length': {'values': [512]},
-        'batch_size': {'values': [10, 16, 32]},
-        'n_layer': {'values': [4, 6, 8, 10]},  # Hyperparameter search for the number of layers
-        'n_embd': {'values': [256, 384, 512]},  # Hyperparameter search for embedding size
-        'n_heads': {'values': [4, 6, 8]},  # Hyperparameter search for attention heads
-        'dropout': {'values': [0.1, 0.2, 0.3, 0.4]},  # Hyperparameter search for dropout
-        'lr': {'distribution': 'log_uniform_values', 'min': 0.1, 'max': 0.9},  # Learning rate search
-        'epochs': {'value': 14},  # Fixed value for training duration
+        'context_length': {'values': [384]},
+        'batch_size': {'values': [5, 8, 10, 16, 32]},
+        'n_layer': {'values': [4, 6, 8, 10, 12]},  # Hyperparameter search for the number of layers
+        'n_embd': {'values': [128, 256, 384, 512]},  # Hyperparameter search for embedding size
+        'n_heads': {'values': [2, 4, 6, 8, 10, 12]},  # Hyperparameter search for attention heads
+        'dropout': {'values': [0, 0.1, 0.2, 0.3, 0.4]},  # Hyperparameter search for dropout
+        'lr': {'distribution': 'log_uniform_values', 'min': 0.05, 'max': 0.9},  # Learning rate search
+        'epochs': {'value': 30},  # Fixed value for training duration
         'gradient_accumulation_steps': {'value': 32},  # Fixed value
         'eval_iters': {'value': 200},  # Fixed value
         'seed': {'value': 1},  # Fixed random seed
-        'vocab_file': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_4096.json'},
+        'vocab_file': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_8129.json'},
         'data_dir': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized'},
         'checkpoint_dir': {'value': '/csghome/hpdc04/Transformer_Code/checkpoints'},
     },

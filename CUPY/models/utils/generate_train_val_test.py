@@ -35,10 +35,11 @@ name_of_midi_data = "transposed_midi"
 midi_paths = list(Path(data_path, name_of_midi_data).glob("*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
-seq_length = 512
+# :NOTE SET THIS!
+seq_length = 384
 
 # Load the pre-trained tokenizer
-tokenizer = REMI(params = Path(tokenizer_path, "tokenizer_4096.json"))
+tokenizer = REMI(params = Path(tokenizer_path, "tokenizer_8129.json"))
 ic(tokenizer.vocab_size)
 # Split the dataset into train/valid/test subsets, with 15% of the data for each of the two latter
 
