@@ -24,7 +24,8 @@ echo "learning rate: $lr"
 echo "number of heads: $n_heads"
 echo "dropout rate: $dropout"
 echo "tokenizer: $tokenizer"
-
+echo "embd: $n_embd"
+echo "n layer: $n_layer"
 
 python ../CUPY/models/GoePT/train.py \
     --data-dir /csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized \
@@ -35,6 +36,9 @@ python ../CUPY/models/GoePT/train.py \
     --batch-size "$batch_size" \
     --eval-interval "$eval_interval" \
     --lr "$lr" \
-    --n-heads "$n_heads" 
+    --n-heads "$n_heads" \
+    --n-embd "$n_embd" \
+    --n-layer "$n_layer" \
+    --dropout $dropout
 
                                      
