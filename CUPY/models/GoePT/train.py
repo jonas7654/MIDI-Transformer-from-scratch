@@ -104,7 +104,8 @@ def main():
                        help = "number of attention heads in Multiheadattention")
     parser.add_argument('--dropout', type=int,  default=0.2, metavar='N',
                         help='Specify dropout rate')
-
+    parser.add_argument('--n-layer', type=int, default=6, metavar='N')
+    parser.add_argument('--n-embd', type=int, default=384, metavar='N')
 
     args = parser.parse_args()
 
@@ -129,14 +130,17 @@ def main():
             "seed": args.seed,
             "log_interval": args.log_interval,
             "eval_interval": args.eval_interval,
-            "dropout rate": args.dropout
+            "dropout rate": args.dropout,
+            "vocab_size": tokenizer.vocab_size,
+            "n_layer" : args.n_layer,
+            "n_embd" : args.n_embd
         }
     )
     
     
     model = GoePT(context_length=args.context_length,
-                  n_layer=6,
-                  n_embd=384,
+                  n_layer=args.n_layer,
+                  n_embd=args.n_embd,
                   dropout=args.dropout,
                   batch_size=args.batch_size,
                   lr=args.lr,

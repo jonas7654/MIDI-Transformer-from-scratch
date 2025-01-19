@@ -172,6 +172,7 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
 def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id):
     # Analyze sequence lengths before padding
     seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]
+    max_token_id = np.max(token_array)
     
     # Statistics dict
     token_stats = {
@@ -193,7 +194,8 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
         "max_length": max(seq_lengths),
         "min_length": min(seq_lengths),
         "average_length": sum(seq_lengths) / len(seq_lengths),
-        "median_length": np.median(seq_lengths)
+        "median_length": np.median(seq_lengths),
+        "max_token_id" : max_token_id
     }
 
     return {

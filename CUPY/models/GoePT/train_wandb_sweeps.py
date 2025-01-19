@@ -27,14 +27,14 @@ ic.disable()
 WANDB_AGENT_DISABLE_FLAPPING=True
 # Define WandB sweep configuration
 sweep_config = {
-    'method': 'bayes',  # Can also be 'grid' or 'random'
+    'method': 'random',  # Can also be 'grid' or 'random'
     'metric': {
         'name': 'val_loss',
         'goal': 'minimize'  
     },
     'parameters': {
         'context_length': {'values': [1024]},
-        'batch_size': {'values': [5, 8, 10, 16, 32]},
+        'batch_size': {'values': [6]},
         'n_layer': {'values': [4, 6, 8, 10, 12]},  # Hyperparameter search for the number of layers
         'n_embd': {'values': [128, 256, 384, 512]},  # Hyperparameter search for embedding size
         'n_heads': {'values': [4, 6, 8, 10, 12]},  # Hyperparameter search for attention heads
