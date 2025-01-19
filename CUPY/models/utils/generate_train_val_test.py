@@ -36,10 +36,10 @@ midi_paths = list(Path(data_path, name_of_midi_data).glob("*.mid"))
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
 # :NOTE SET THIS!
-seq_length = 384
+seq_length = 1024
 
 # Load the pre-trained tokenizer
-tokenizer = REMI(params = Path(tokenizer_path, "tokenizer_8129.json"))
+tokenizer = REMI(params = Path(tokenizer_path, "tokenizer_512.json"))
 ic(tokenizer.vocab_size)
 # Split the dataset into train/valid/test subsets, with 15% of the data for each of the two latter
 
@@ -93,13 +93,13 @@ for files_paths, subset_name in (
     the velocity offsets should be chosen accordingly to the number of velocities in your tokenizer’s
     vocabulary (num_velocities). (default: None)
          """
-     do_augment = False
+     do_augment = True
      if (do_augment):
          # Perform data augmentation
          augment_dataset(
          subset_chunks_dir,
          pitch_offsets=[-12, 12],
-         velocity_offsets=[-4, 4],
+         velocity_offsets=[0, 0],
          duration_offsets=[-0.5, 0.5],
         )    
 
@@ -117,6 +117,7 @@ output_path = os.path.join(data_path, "tokenized")
 size_dict = {}
 
 for subset in train_val_test_path:
+
     # Get a list of all midi files (as paths)
     files_path = train_val_test_path[subset]
     
@@ -129,7 +130,8 @@ for subset in train_val_test_path:
 
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = files_path,
                                                        verbose = True,
-                                                       seq_length = seq_length)
+                                                       seq_length = seq_length,
+                                                       manually_add_sos_eos = True)
     
     
     # Sanity check

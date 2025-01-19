@@ -5,6 +5,8 @@ from collections import Counter
 import numpy as np
 from tqdm import tqdm
 from symusic import Score
+from icecream import ic
+from tabulate import tabulate
 
 SCORE_LOADING_EXCEPTION = (
     RuntimeError,
@@ -24,13 +26,38 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
                             validation_fn=None,
                             save_programs=None,
                             verbose=True,
-                            seq_length = None):
+                            seq_length = None,
+                            manually_add_sos_eos = False):
     """
     @Jonas
     Custom method to tokenize files and return a NumPy array.
     This only works with a tokenizer object
+
+    PAD (PAD_None): a padding token to use when training a model with batches of sequences of unequal lengths. The padding token id is often set to 0. If you use Hugging Face models, be sure to pad inputs with this tokens, and pad labels with -100.
+
+    BOS (SOS_None): “Start Of Sequence” token, indicating that a token sequence is beginning.
+
+    EOS (EOS_None): “End Of Sequence” tokens, indicating that a token sequence is ending. For autoregressive generation, this token can be used to stop it.
+
+    MASK (MASK_None): a masking token, to use when pre-training a (bidirectional) model with a self-supervised objective like BERT.
+
+    Note: you can use the tokenizer.special_tokens property to get the list of the special tokens of a tokenizer, and tokenizer.special_tokens for their ids.
+    
+    
+    
+    NOTE: SPECIAL TRUNCATE TOKEN: -1 (self defined and not from the tokenizer)
     """
     self._verbose = verbose
+    
+    if (manually_add_sos_eos):
+        print(f"Warning: manually_add_sos_eos is set to True")
+
+    
+    
+    pad_token = self.pad_token_id
+    sos_token = self.special_tokens_ids[1]
+    eos_token = self.special_tokens_ids[2]
+    trunc_token = -1
 
     # Resolve file paths
     if not isinstance(files_paths, Sequence):
@@ -66,35 +93,76 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
 
         # Tokenize the Score
         tokens = self.encode(score)
-        
+            
         # Collect token IDs
         token_ids = tokens[0].ids
+
+        
         all_ids.append(token_ids)
         max_length = max(max_length, len(token_ids))
         
         if seq_length is None:
             seq_length = max_length
 
+
+
+    """
+    If the sequence length is longer than 'seq_len' we add the sos token to the beginning and add a custom truncate token to the end
+    to specify that we have truncated the midi file
+    
+    """
     # Convert collected token IDs to a padded NumPy array
-    token_array = np.array(
+    if (manually_add_sos_eos):
+        token_array = np.empty((len(all_ids), seq_length), dtype = np.int16)
+        
+        for idx, ids in enumerate(all_ids):
+            # Start with a start token
+            token_sequence = [sos_token]
+            
+            if (len(ids) > seq_length - 2): # Truncate if too long
+                token_sequence += ids[:seq_length - 2] + [trunc_token]
+            else:
+                token_sequence += ids
+                token_sequence += [eos_token]
+            
+            # Ensure the sequence is exactly seq_length
+            token_sequence = token_sequence[:seq_length]
+            token_sequence += [pad_token] * (seq_length - len(token_sequence))
+        
+            # Assign to token array
+            token_array[idx, :] = token_sequence
+    else:
+        token_array = np.array(
         [
-            ids[:seq_length] + [self.pad_token_id] * (seq_length - len(ids[:seq_length]))
+            ids[:seq_length] + [pad_token] * (seq_length - len(ids[:seq_length]))
             for ids in all_ids
         ],
-        dtype=np.int32
-    )
+        dtype=np.int16
+                              )
+    
+    
+    
+    
     
     if(verbose):
-        analysis_results = analyze_tokenized_data(token_array, self.pad_token_id, self.sos_token_id, self.eos_token_id)
+        ic(self.special_tokens)
+        analysis_results = analyze_tokenized_data(token_array, pad_token, sos_token, eos_token)
         
+         # Format the results for better readability
+        length_stats_table = [
+            [key, value] for key, value in analysis_results["length_stats"].items()
+        ]
+        token_stats_table = [
+            [key, value if not isinstance(value, list) else f"{len(value)} positions"]
+            for key, value in analysis_results["token_stats"].items()
+        ]
+
         print("\nSequence Length Stats:")
-        for k, v in analysis_results["length_stats"].items():
-            print(f"{k}: {v}")
+        print(tabulate(length_stats_table, headers=["Metric", "Value"], tablefmt="grid"))
 
         print("\nSpecial Token Stats:")
-        for k, v in analysis_results["token_stats"].items():
-            print(f"{k}: {v}")
-        
+        print(tabulate(token_stats_table, headers=["Token Type", "Count/Details"], tablefmt="grid"))
+
 
     self._verbose = False
     return token_array
@@ -110,19 +178,15 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
         "pad_token_count": 0,
         "sos_token_count": 0,
         "eos_token_count": 0,
-        "pad_positions": [],
-        "sos_positions": [],
-        "eos_positions": []
+        "trunc_token_count": 0
     }
 
     for row in token_array:
         token_stats["pad_token_count"] += np.sum(row == pad_token_id)
         token_stats["sos_token_count"] += np.sum(row == sos_token_id)
         token_stats["eos_token_count"] += np.sum(row == eos_token_id)
+        token_stats["trunc_token_count"] += np.sum(row == -1)
         
-        token_stats["pad_positions"].extend(np.where(row == pad_token_id)[0])
-        token_stats["sos_positions"].extend(np.where(row == sos_token_id)[0])
-        token_stats["eos_positions"].extend(np.where(row == eos_token_id)[0])
 
     # Compute statistics on sequence lengths
     length_stats = {
