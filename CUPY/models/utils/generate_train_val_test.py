@@ -7,6 +7,9 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import multiprocessing
 from tokenize_data_fast import tokenize_dataset_to_bin
 
+import sys
+sys.path.insert(0, '/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/')
+import config.py
 
 from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
@@ -131,9 +134,9 @@ for subset in train_val_test_path:
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = files_path,
                                                        verbose = True,
                                                        seq_length = seq_length,
-                                                       manually_add_sos_eos = True)
+                                                       manually_add_sos_eos = manually_set_sos_eos_trunc)
     
-    
+    # :NOTE manually_set_sos_eos_trunc is defined globally at the beginning
     # Sanity check
     assert np.all(tokenized_data < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
     ic(tokenized_data[:100])

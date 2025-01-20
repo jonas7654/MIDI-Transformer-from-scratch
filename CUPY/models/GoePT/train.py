@@ -21,7 +21,7 @@ from rich.table import Table
 from icecream import ic
 
 sys.path.append('.')
-
+import config
 from model import GoePT
 
 ic.configureOutput(includeContext=True)
@@ -134,7 +134,8 @@ def main():
             "vocab_size": tokenizer.vocab_size,
             "n_layer" : args.n_layer,
             "n_embd" : args.n_embd,
-            "n_heads" : args.n_heads
+            "n_heads" : args.n_heads,
+            "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc
         }
     )
     
