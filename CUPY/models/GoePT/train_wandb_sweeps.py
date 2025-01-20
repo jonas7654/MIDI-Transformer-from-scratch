@@ -113,7 +113,7 @@ def sweep_train():
             best_val_loss = val_loss_mean
             wandb.log({"best_val_loss": best_val_loss})
 
-            checkpoint_path = os.path.join(config.checkpoint_dir, f'model_{epoch}.json')
+            checkpoint_path = os.path.join(config.checkpoint_dir, f'{wandb.run.name}_sweep_{epoch}.json')
             with open(checkpoint_path, 'w') as f:
                 json.dump(model.state_dict(), f)
 

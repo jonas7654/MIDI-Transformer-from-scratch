@@ -109,45 +109,45 @@ def main():
 
     args = parser.parse_args()
 
-    os.makedirs(args.checkpoint_dir, exist_ok=True)
+    os.makedirs(config.checkpoint_dir, exist_ok=True)
     
     # NOTE: CHANGE THIS IF THE TOKENIZER CHANGES
-    tokenizer = REMI(params = args.vocab_file)
+    tokenizer = REMI(params = config.vocab_file)
 
     # Initialize Weights & Biases (wandb)
     wandb.init(
         project="MIDI-Transformer", 
         config={
-            "data_dir": args.data_dir,
-            "checkpoint_dir": args.checkpoint_dir,
-            "vocab_file": args.vocab_file,
-            "batch_size": args.batch_size,
-            "context_length": args.context_length,
-            "epochs": args.epochs,
-            "gradient_accumulation_steps": args.gradient_accumulation_steps,
-            "eval_iters": args.eval_iters,
-            "lr": args.lr,
-            "seed": args.seed,
-            "log_interval": args.log_interval,
-            "eval_interval": args.eval_interval,
-            "dropout rate": args.dropout,
+            "data_dir": config.data_dir,
+            "checkpoint_dir": config.checkpoint_dir,
+            "vocab_file": config.vocab_file,
+            "batch_size": config.batch_size,
+            "context_length": config.context_length,
+            "epochs": config.epochs,
+            "gradient_accumulation_steps": config.gradient_accumulation_steps,
+            "eval_iters": config.eval_iters,
+            "lr": config.learning_rate,
+            "seed": config.seed,
+            "log_interval": config.log_interval,
+            "eval_interval": config.eval_interval,
+            "dropout rate": config.dropout_rate,
             "vocab_size": tokenizer.vocab_size,
-            "n_layer" : args.n_layer,
-            "n_embd" : args.n_embd,
-            "n_heads" : args.n_heads,
+            "n_layer" : config.n_layer,
+            "n_embd" : config.n_embd,
+            "n_heads" : config.n_heads,
             "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc
         }
     )
     
     
-    model = GoePT(context_length=args.context_length,
-                  n_layer=args.n_layer,
-                  n_embd=args.n_embd,
-                  dropout=args.dropout,
-                  batch_size=args.batch_size,
-                  lr=args.lr,
+    model = GoePT(context_length=config.context_length,
+                  n_layer=config.n_layer,
+                  n_embd=config.n_embd,
+                  dropout=config.dropout_rate,
+                  batch_size=config.batch_size,
+                  lr=config.learning_rate,
                   vocab_size = tokenizer.vocab_size,
-                  n_heads = args.n_heads)
+                  n_heads = config.n_heads)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:
@@ -160,13 +160,13 @@ def main():
 
     # training loop
 
-    rng = np.random.default_rng(args.seed)
-    cp.random.seed(args.seed)
+    rng = np.random.default_rng(config.seed)
+    cp.random.seed(config.seed)
 
     get_batch = partial(read_datasets,
-                            data_dir=args.data_dir,
-                            context_length=args.context_length,
-                            batch_size=args.batch_size,
+                            data_dir=config.data_dir,
+                            context_length=config.context_length,
+                            batch_size=config.batch_size,
                             rng=rng)
 
     # Pre-generate one-hot vectors using the vocab size
@@ -197,8 +197,8 @@ def main():
 
             task_id = progress_step.add_task('Training')
 
-            for micro_step in progress_step.track(range(args.gradient_accumulation_steps),
-                                                total=args.gradient_accumulation_steps,
+            for micro_step in progress_step.track(range(config.gradient_accumulation_steps),
+                                                total=config.gradient_accumulation_steps,
                                                 task_id=task_id):
 
                 X, Y = get_batch('train')
@@ -206,7 +206,7 @@ def main():
                 logits, loss = model.forward(X, Y)
 
                 # Scale the loss to account for gradient accumulation
-                loss = loss/args.gradient_accumulation_steps
+                loss = loss/config.gradient_accumulation_steps
 
                 with open('train_losses.csv', 'a') as f:
                     f.write(f'{iter_num}\t{loss:.8f}\n')
@@ -219,7 +219,7 @@ def main():
 
                 model.backward(grad)
 
-                log_output_buffer.append((datetime.datetime.now().isoformat(), iter_num + 1, loss.item()*args.gradient_accumulation_steps))
+                log_output_buffer.append((datetime.datetime.now().isoformat(), iter_num + 1, loss.item()*config.gradient_accumulation_steps))
 
                 progress_step.console.clear()
                 progress_step.console.print(table_update_func())
@@ -237,14 +237,14 @@ def main():
 
             # Evaluate the loss on train/val sets and write checkpoints
 
-            if iter_num % args.eval_interval == 0:
+            if iter_num % config.eval_interval == 0:
 
-                losses_val = cp.zeros(args.eval_iters)
+                losses_val = cp.zeros(config.eval_iters)
 
                 task_id = progress_step.add_task(f'Val loss evaluation')
 
-                for k in progress_step.track(range(args.eval_iters),
-                                            total=args.eval_iters,
+                for k in progress_step.track(range(config.eval_iters),
+                                            total=config.eval_iters,
                                             task_id=task_id):
 
                     X, Y = get_batch('val')
@@ -267,7 +267,7 @@ def main():
 
                     status.update(status_update_string)
 
-                    checkpoint_path = os.path.join(args.checkpoint_dir, f'{wandb.run.name}_{iter_num}.json')
+                    checkpoint_path = os.path.join(config.checkpoint_dir, f'{wandb.run.name}_{iter_num}.json')
 
                     state_dict = model.state_dict()
 
@@ -286,7 +286,7 @@ def main():
             iter_num += 1
 
             # termination conditions
-            if iter_num > args.epochs:
+            if iter_num > config.epochs:
                 break
 
  # Finish W&B logging
