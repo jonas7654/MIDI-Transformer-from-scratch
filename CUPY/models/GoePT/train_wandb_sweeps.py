@@ -27,7 +27,7 @@ ic.disable()
 WANDB_AGENT_DISABLE_FLAPPING=True
 # Define WandB sweep configuration
 sweep_config = {
-    'method': 'random',  # Can also be 'grid' or 'random'
+    'method': 'grid',  # Can also be 'grid' or 'random'
     'metric': {
         'name': 'val_loss',
         'goal': 'minimize'  
@@ -40,17 +40,13 @@ sweep_config = {
         'n_heads': {'values': [4, 6]},  # Hyperparameter search for attention heads
         'dropout': {'values': [0, 0.05, 0.1, 0.15, 0.2]},  # Hyperparameter search for dropout
         'lr': {'distribution': 'log_uniform_values', 'min': 0.005, 'max': 0.2},  # Learning rate search
-        'epochs': {'value': 100},  # Fixed value for training duration
+        'epochs': {'value': 14},  # Fixed value for training duration
         'gradient_accumulation_steps': {'value': 32},  # Fixed value
         'eval_iters': {'value': 50},  # Fixed value
         'seed': {'value': 1},  # Fixed random seed
         'vocab_file': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_512.json'},
         'data_dir': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized'},
         'checkpoint_dir': {'value': '/csghome/hpdc04/Transformer_Code/checkpoints'},
-    },
-    'early_terminate': {
-        'type': 'bandit',
-        'min_iter': 15 # Minimum number of epochs before considering early stopping
     }
 }
 

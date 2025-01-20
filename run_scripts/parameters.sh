@@ -1,9 +1,9 @@
 export context_length=1024
 export epochs=100
 export batch_size=6
-export eval_interval=1 # default : 100
-export lr=0.005 # Learning Rate
-export log_interval=1 #default : 100
+export eval_interval=25 # default : 100
+export lr=0.01 # Learning Rate
+export log_interval=100 #default : 100
 export n_heads=4 # Number of heads in MultiHeadAttention
 export dropout=0.05
 export tokenizer="/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_512.json"
