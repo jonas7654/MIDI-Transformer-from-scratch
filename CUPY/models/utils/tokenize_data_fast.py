@@ -173,6 +173,7 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
     # Analyze sequence lengths before padding
     seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]
     max_token_id = np.max(token_array)
+    number_of_min_len = np.sum([s == 2 for s in seq_lengths])
     
     # Statistics dict
     token_stats = {
@@ -195,7 +196,8 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
         "min_length": min(seq_lengths),
         "average_length": sum(seq_lengths) / len(seq_lengths),
         "median_length": np.median(seq_lengths),
-        "max_token_id" : max_token_id
+        "max_token_id" : max_token_id,
+        "number_of_min_length_rows": number_of_min_len
     }
 
     return {
