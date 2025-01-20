@@ -11,34 +11,7 @@
 eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
 conda activate eml
 
-# load model parameters
-source /csghome/hpdc04/Transformer_Code/run_scripts/parameters.sh
-
 echo "Running Training (with CUPY)"
 
-echo "context length: $context_length"
-echo "epochs: $epochs"
-echo "batch size: $batch_size"
-echo "eval_interval: $eval_interval"
-echo "learning rate: $lr"
-echo "number of heads: $n_heads"
-echo "dropout rate: $dropout"
-echo "tokenizer: $tokenizer"
-echo "embd: $n_embd"
-echo "n layer: $n_layer"
-
-python ../CUPY/models/GoePT/train.py \
-    --data-dir /csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized \
-    --vocab-file "$tokenizer" \
-    --checkpoint-dir /csghome/hpdc04/Transformer_Code/checkpoints \
-    --context-length "$context_length" \
-    --epochs "$epochs" \
-    --batch-size "$batch_size" \
-    --eval-interval "$eval_interval" \
-    --lr "$lr" \
-    --n-heads "$n_heads" \
-    --n-embd "$n_embd" \
-    --n-layer "$n_layer" \
-    --dropout $dropout
-
+python ../CUPY/models/GoePT/train.py 
                                      

@@ -14,5 +14,5 @@ conda activate eml
 echo "Running Parameter Search (with wandb sweeps)"
 
 
-python ../CUPY/models/GoePT/train_wandb_sweeps.py
+python ../CUPY/models/GoePT/train_wandb_sweep_NEW.py
                                      
