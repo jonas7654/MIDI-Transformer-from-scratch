@@ -21,6 +21,7 @@ from icecream import ic
 sys.path.append('.')
 
 from model import GoePT
+import config
 
 ic.configureOutput(includeContext=True)
 ic.disable()
@@ -35,18 +36,19 @@ sweep_config = {
     'parameters': {
         'context_length': {'values': [1024]},
         'batch_size': {'values': [6]},
-        'n_layer': {'values': [2, 4, 6, 8]},  # Hyperparameter search for the number of layers
-        'n_embd': {'values': [256, 384]},  # Hyperparameter search for embedding size
-        'n_heads': {'values': [4, 6]},  # Hyperparameter search for attention heads
-        'dropout': {'values': [0, 0.05, 0.1, 0.15, 0.2]},  # Hyperparameter search for dropout
-        'lr': {'distribution': 'log_uniform_values', 'min': 0.005, 'max': 0.2},  # Learning rate search
-        'epochs': {'value': 14},  # Fixed value for training duration
+        'n_layer': {'values': [8]},  # Hyperparameter search for the number of layers
+        'n_embd': {'values': [256]},  # Hyperparameter search for embedding size
+        'n_heads': {'values': [4]},  # Hyperparameter search for attention heads
+        'dropout': {'values': [0.05]},  # Hyperparameter search for dropout
+        'lr': {'values': [0.01]},  # Learning rate search
+        'epochs': {'value': 100},  # Fixed value for training duration
         'gradient_accumulation_steps': {'value': 32},  # Fixed value
-        'eval_iters': {'value': 50},  # Fixed value
+        'eval_iters': {'value': 200},  # Fixed value
         'seed': {'value': 1},  # Fixed random seed
         'vocab_file': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_512.json'},
         'data_dir': {'value': '/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized'},
         'checkpoint_dir': {'value': '/csghome/hpdc04/Transformer_Code/checkpoints'},
+        'manually_set_sos_eos_trunc' : {'value': config.manually_set_sos_eos_trunc}
     }
 }
 
@@ -54,6 +56,8 @@ sweep_config = {
 def sweep_train():
     wandb.init()
     config = wandb.config
+    
+    print(config)
 
     tokenizer = REMI(params=config.vocab_file)
 

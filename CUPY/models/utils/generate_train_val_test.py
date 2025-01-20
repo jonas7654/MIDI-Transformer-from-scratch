@@ -134,7 +134,7 @@ for subset in train_val_test_path:
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = files_path,
                                                        verbose = True,
                                                        seq_length = seq_length,
-                                                       manually_add_sos_eos = manually_set_sos_eos_trunc)
+                                                       manually_add_sos_eos = config.manually_set_sos_eos_trunc)
     
     # :NOTE manually_set_sos_eos_trunc is defined globally at the beginning
     # Sanity check
