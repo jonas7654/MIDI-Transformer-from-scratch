@@ -3,7 +3,7 @@
 ## Repository Contents
 - **Core Model Code**: Python files implementing the Transformer model.
 - **Shell Scripts**:
-  - `train:model.sh`: Script for submitting the job via `sbatch`.
+  - `train_model.sh`: Script for submitting the job via `sbatch`.
   - - Use `parameters.sh` in order to set the model parameters.
   - - After submitting you can use `watch squeue -u $USER` in order to track the running time.
     - Within the file `logs/model_py_GPU.log` are the console outputs
