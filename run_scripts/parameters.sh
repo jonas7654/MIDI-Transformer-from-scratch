@@ -7,5 +7,5 @@ export log_interval=1 #default : 100
 export n_heads=4 # Number of heads in MultiHeadAttention
 export dropout=0.05
 export tokenizer="/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_512.json"
-export n_layer=8
+export n_layer=6
 export n_embd=256

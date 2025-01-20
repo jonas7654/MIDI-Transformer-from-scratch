@@ -461,6 +461,7 @@ class MultiHeadAttention():
         self.n_heads = n_heads
         self.scale = math.sqrt(d_model)
         self.batch_size = batch_size
+
         self.attn_dropout = Dropout(dropout)
         self.resid_dropout = Dropout(dropout)
         self.softmax_attn = Softmax(axis=-1)
@@ -486,11 +487,20 @@ class MultiHeadAttention():
 
         self.mask = cp.tril(cp.ones((context_size, context_size), dtype=cp.float32)).reshape(1, 1, context_size, context_size)
 
+        # Relative Positional Embedding Layer Hardcoded (doesn't fit into previous class)
+        self.rel_pos_emb = cp.random.randn(self.batch_size, self.n_heads, self.context_size, self.depth) * 0.02 # Initialize a relative positional embedding matrix with shape (H, L, D_h)
+        self.grad_rpe = None
+
         self.input = None
         self.v = None
         self.q = None
         self.k = None
         self.attn = None
+
+        self.x1 = None
+        self.x2 = None
+        self.x3 = None
+        self.s_rel = None
 
 
     def forward(self, input: ArrayLike) -> tuple:
@@ -511,6 +521,8 @@ class MultiHeadAttention():
         This is why the c_attn linear object has dimensions (d_model * (3 * d_model))
         """
         q, k, v  = cp.split(self.c_attn.forward(self.input), 3, axis=2)
+
+        e = self.rel_pos_emb 
 
         """
         the output of self.c_attn.forward(self.input) has shape (B, seq_len, 3 * d_model)
@@ -544,10 +556,18 @@ class MultiHeadAttention():
         
         And the resulting shape of attn is (B, n_heads, T, T) [Dot product between tokens]
         """
-        
-        attn = (q @ k.transpose(0, 1, 3, 2))*(1.0/math.sqrt(k.shape[-1]))
 
-        attn = cp.where(self.mask == 0, -1e9, attn)
+        self.x1 = q @ e.transpose(0, 1, 3, 2) #Q * E_T
+
+        self.x2 = cp.pad(self.x1, ((0, 0), (0, 0), (0, 0), (1, 0)), mode='constant', constant_values=0) #padding, adding a column of zeros to the left of the T x T matrix, results in (B, nh, T, T + 1)
+        
+        self.x3 = self.x2.reshape(B, self.n_heads, T + 1, T) #reshape to (B, nh, T + 1, T) matrix
+
+        self.s_rel = self.x3[:, :, 1:, :] #discard first row of 3rd dim, new dim: (B, nh, T, T)
+
+        attn = (q @ k.transpose(0, 1, 3, 2) + self.s_rel)*(1.0/math.sqrt(k.shape[-1])) #relative attention
+
+        attn = cp.where(self.mask == 0, -1e9, attn) 
         attn = self.softmax_attn.forward(attn)
         attn = self.attn_dropout.forward(attn)
 
@@ -560,11 +580,7 @@ class MultiHeadAttention():
         """
         We reshape x to the original Input shape which is (B, T, C) => concat heads
         -1 tells python to calculate the remaining dimension to fit (i.e returning T in this case)
-        
-        I don't know why they wrote: self.n_heads*self.depth 
-        This is just a non readible way of using C from the beginning
         """
-
         x = cp.ascontiguousarray(x).transpose(0, 2, 1, 3).reshape(self.batch_size, -1, self.n_heads*self.depth)
         x = self.c_proj.forward(x)
         x = self.resid_dropout.forward(x)
@@ -579,27 +595,39 @@ class MultiHeadAttention():
         grad = self.resid_dropout.backward(grad)
         grad = self.c_proj.backward(grad)
         
-
-
         # NEW
         grad = cp.ascontiguousarray(grad).reshape(B, self.n_heads, T, -1) # B, n_heads, T, C // n_heads
         
         grad_v = self.attn.transpose(0,1,3,2) @ grad
-        grad = grad @ self.v.transpose(0,1,3,2)
+        grad_attn = grad @ self.v.transpose(0,1,3,2)
         
 
-        grad = self.attn_dropout.backward(grad)
-        grad = self.softmax_attn.backward(grad)
+        grad_dropout = self.attn_dropout.backward(grad_attn)
+        grad_softmax = self.softmax_attn.backward(grad_dropout)
         
         
         # :TODO Here we dont need to set the upper triangular part to -infinity. This is only used before softmax in forward pass!
         # We need to zero out the triangular matrix. 
-        # grad = cp.where(self.mask == 0, -1e9, grad)
-        grad = grad * self.mask
+        # grad = np.where(self.mask == 0, -1e9, grad)
+        grad_mask = grad_softmax * self.mask
         
-        grad_ktrans = ((1.0/math.sqrt(self.k.shape[-1])) * (self.q.transpose(0, 1, 3, 2) @ grad))
-        grad_k = grad_ktrans.transpose(0, 1, 3, 2)
-        grad_q = (1.0/math.sqrt(self.k.shape[-1]))  * (grad @ self.k)
+        grad_ktrans = ((1.0/math.sqrt(self.k.shape[-1])) * (self.q.transpose(0, 1, 3, 2) @ grad_mask))
+        grad_k = grad_ktrans.transpose(0, 1, 3, 2) #No difference here
+        grad_q = (1.0/math.sqrt(self.k.shape[-1]))  * (grad_mask @ self.k) #This must be somehow updated later
+        grad_s_rel = (1.0/math.sqrt(self.k.shape[-1])) * grad_mask
+
+        grad_x3 = cp.pad(grad_s_rel, ((0, 0), (0, 0), (1, 0), (0, 0)), mode='constant', constant_values=0) #pad top row
+        grad_x2 = grad_x3.reshape(B, self.n_heads, T, T + 1) #reverse reshaping
+        grad_x1 = grad_x2[:, :, :, 1:] #discard the left column
+
+        print(grad_x1.shape, self.rel_pos_emb.shape)
+        
+        grad_q2 = grad_x1 * self.rel_pos_emb
+        grad_q += grad_q2 #Here I'm just guessing, I'll enquire about this
+
+        grad_rpe_all_b_trans = self.q.transpose(0, 1, 3, 2) * grad_x1
+        grad_rpe_all_b = grad_rpe_all_b_trans.transpose(0, 1, 3, 2)
+        self.grad_rpe = cp.sum(grad_rpe_all_b, axis=0, keepdims=True) #Sum over all batches to get desired dim: (1, nhs, T, d)
 
         grad_q = grad_q.reshape(self.batch_size, T, self.n_heads * self.depth) 
         grad_v = grad_v.reshape(self.batch_size, T, self.n_heads * self.depth)
@@ -609,11 +637,11 @@ class MultiHeadAttention():
         grad = cp.concatenate([grad_q, grad_k, grad_v], axis=2)
         
         
-        
         grad_downstream = self.c_attn.backward(grad)
         
         
         return grad_downstream
+
 
 
     def update(self) -> None:

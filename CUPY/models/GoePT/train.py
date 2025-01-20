@@ -116,7 +116,7 @@ def main():
 
     # Initialize Weights & Biases (wandb)
     wandb.init(
-        project="MIDI-Transformer", 
+        project="MIDI-Transformer_relative_attention", 
         config={
             "data_dir": args.data_dir,
             "checkpoint_dir": args.checkpoint_dir,
