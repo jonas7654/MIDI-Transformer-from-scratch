@@ -281,6 +281,7 @@ def main():
                 wandb.log({
                             "train_loss": float(loss),
                             "val_loss": float(loss_val_mean),
+                            "iteration_number": iter_num
                           })
                 
             iter_num += 1
