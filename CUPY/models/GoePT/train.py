@@ -267,7 +267,7 @@ def main():
 
                     status.update(status_update_string)
 
-                    checkpoint_path = os.path.join(args.checkpoint_dir, f'midi_transformer_{iter_num}.json')
+                    checkpoint_path = os.path.join(args.checkpoint_dir, f'{wandb.run.name}_{iter_num}.json')
 
                     state_dict = model.state_dict()
 
