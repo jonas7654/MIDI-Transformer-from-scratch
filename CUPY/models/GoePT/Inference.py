@@ -14,7 +14,7 @@ import sys
 sys.path.append('/csghome/hpdc04/Transformer_Code/CUPY/models/utils')
 
 from tokenize_data_fast import tokenize_dataset_to_bin
-
+import config
 
 def load_model(checkpoint_path, vocab_file):
     with open(checkpoint_path, mode = 'r', encoding = 'utf-8') as weights:
@@ -26,6 +26,10 @@ def load_model(checkpoint_path, vocab_file):
     print(model)
     
     return model, tokenizer
+
+def softmax_with_temperature(logits, temperature=1.0, Softmax=None):
+    logits = logits / temperature
+    return Softmax.forward(logits)
 
 def tokenize_input(midi_input, tokenizer):
     # Tokenize and return integer representation
@@ -57,23 +61,28 @@ def main():
     # Tokenize the input
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = file_path,
                                       verbose = True,
-                                      seq_length = seq_len)
+                                      seq_length = seq_len,
+                                      manually_add_sos_eos = config.manually_set_sos_eos_trunc)
     
     # :TODO adjust model.batch_size to fit the passed batch
+
+    tokenized_data_minus_last = np.zeros((len(tokenized_data), seq_len), dtype=tokenized_data.dtype)
+    tokenized_data_minus_last[:, 1:] = tokenized_data[:, :seq_len - 1]
+    print(tokenized_data_minus_last)
     
     # forward the tok_input to the pre-trained model
-    logits, _ = model.forward(tokenized_data, targets = None)
+    logits, _ = model.forward(tokenized_data_minus_last, targets = None)
 
     # Apply softmax :TODO : Add Temperature ?
     softmax = Softmax(axis = 0) # use rows
-    predictions = softmax.forward(logits)
+    predictions = softmax_with_temperature(logits, temperature=0.5, Softmax=softmax)
     predictions = cp.argmax(predictions, axis = -1) # axis -1 uses the last axis which is the vocabulary
     
     # convert back to numpy
     predictions = predictions.get()
     
     print("---------------------")
-    print("\n", predictions) #
+    print("\n", predictions, "\n", tokenized_data[:,(seq_len - 1)]) 
     print(predictions.shape)
     
     decoded_predictions = tokenizer.decode(predictions)

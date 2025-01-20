@@ -207,6 +207,5 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
 """
 @Author: Jonas
 Monkey Patch tokenizer.tokenize_data_fast
-
 """
 REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin
