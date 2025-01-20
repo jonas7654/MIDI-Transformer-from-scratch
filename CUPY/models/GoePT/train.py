@@ -12,7 +12,7 @@ import wandb
 import cupy as cp
 import numpy as np
 
-from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import root_mean_squared_error, accuracy_score
 from rich.progress import Progress
 from rich.console import Console, Group
 from rich.live import Live
@@ -23,9 +23,50 @@ from icecream import ic
 sys.path.append('.')
 import config
 from model import GoePT
+from layers import Softmax
 
 ic.configureOutput(includeContext=True)
 ic.disable()
+
+
+def compute_token_accuracy(logits, targets):
+    softmax = Softmax(axis = 0)
+    
+    pred_tokens = softmax.forward(logits)
+    # axis -1 uses the last axis which is the vocabulary
+    pred_tokens = cp.argmax(pred_tokens, axis = -1)    
+    
+    return accuracy_score(targets.flatten(), pred_tokens.flatten())
+
+def evaluate_test_data(model, data_length, test_batch_size):
+    get_batch = partial(read_datasets,
+                            data_dir=config.data_dir,
+                            context_length=config.context_length,
+                            batch_size=test_batch_size,
+                            rng=np.random.default_rng(config.seed))
+    
+    loop_range = data_length // test_batch_size
+    all_losses = []
+    accuracy = 0
+    
+    for i in range(loop_range):
+        print(f"batch: {i}")
+        X, Y = get_batch('test')
+        
+        logits, loss = model.forward(X, Y)  # Forward pass
+        all_losses.append(loss.item())
+        
+        batch_accuracy = compute_token_accuracy(logits, Y)
+        accuracy += batch_accuracy
+        
+        wandb.log({"batch" : i,
+                   "batch_accuracy": batch_accuracy,
+                   "cumulative_accuracy": accuracy })
+        
+
+    test_loss = np.mean(all_losses)
+    wandb.log({"test_loss": test_loss})
+
 
 
 def read_datasets(split, data_dir, context_length, batch_size, rng):
@@ -34,6 +75,8 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
 
     if split == 'train':
         data = np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
+    elif split == 'test':
+        data = np.memmap(os.path.join(data_dir, 'test.bin'), dtype=np.uint16, mode='r')
     else:
         data = np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
     
@@ -289,7 +332,7 @@ def main():
             # termination conditions
             if iter_num > config.epochs:
                 break
-
+ 
  # Finish W&B logging
 wandb.finish()
 if __name__ == '__main__':

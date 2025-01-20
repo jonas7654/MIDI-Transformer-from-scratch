@@ -108,6 +108,7 @@ class GoePT():
 
 
     def forward(self, idx, targets=None):
+        print(idx.shape)
         b, t = idx.shape
         assert t <= self.context_length, f"Cannot forward sequence of length {t}, block size is only {self.context_length}"
         pos = cp.arange(0, t, dtype=cp.int64) # shape (t)

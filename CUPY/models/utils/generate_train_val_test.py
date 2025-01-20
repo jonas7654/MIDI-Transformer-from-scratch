@@ -9,7 +9,7 @@ from tokenize_data_fast import tokenize_dataset_to_bin
 
 import sys
 sys.path.insert(0, '/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/')
-import config.py
+import config
 
 from miditok import REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
@@ -39,10 +39,10 @@ midi_paths = list(Path(data_path, name_of_midi_data).glob("*.mid"))
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 
 # :NOTE SET THIS!
-seq_length = 1024
+seq_length = config.context_length
 
 # Load the pre-trained tokenizer
-tokenizer = REMI(params = Path(tokenizer_path, "tokenizer_512.json"))
+tokenizer = REMI(params = Path(config.vocab_file))
 ic(tokenizer.vocab_size)
 # Split the dataset into train/valid/test subsets, with 15% of the data for each of the two latter
 
@@ -103,7 +103,7 @@ for files_paths, subset_name in (
          subset_chunks_dir,
          pitch_offsets=[-12, 12],
          velocity_offsets=[0, 0],
-         duration_offsets=[-0.5, 0.5],
+         duration_offsets=[0, 0],
         )    
 
 
@@ -143,7 +143,7 @@ for subset in train_val_test_path:
     ic(tokenized_data.shape)
 
     # SAVE
-    save_dir = os.path.join(output_path, f"{subset}.bin")
+    save_dir = os.path.join(output_path, f"{subset}_seq_len_{config.context_length}.bin")
     Path(output_path).mkdir(parents = True, exist_ok = True)
     tokenized_data.astype(np.uint16).tofile(save_dir)
     
