@@ -11,12 +11,12 @@ manually_set_sos_eos_trunc = True
 # Training parameters
 batch_size = 6  # Default batch size
 context_length = 1024  # Sequence context length
-epochs = 14  # Number of epochs to train
+epochs = 150  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.1  # Initial learning rate
-dropout_rate = 0.2  # Default dropout rate
-n_layer = 6  # Number of layers in the transformer
-n_embd = 256  # Embedding size
+learning_rate = 0.5  # Initial learning rate
+dropout_rate = 0  # Default dropout rate
+n_layer = 8  # Number of layers in the transformer
+n_embd = 384  # Embedding size
 n_heads = 4  # Number of attention heads
 seed = 1  # Random seed
 
