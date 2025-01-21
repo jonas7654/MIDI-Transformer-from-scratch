@@ -7,6 +7,7 @@ from tqdm import tqdm
 from symusic import Score
 from icecream import ic
 from tabulate import tabulate
+import matplotlib.pyplot as plt
 
 SCORE_LOADING_EXCEPTION = (
     RuntimeError,
@@ -146,7 +147,7 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
     
     if(verbose):
         ic(self.special_tokens)
-        analysis_results = analyze_tokenized_data(token_array, pad_token, sos_token, eos_token)
+        analysis_results = analyze_tokenized_data(token_array, pad_token, sos_token, eos_token, trunc_token)
         
          # Format the results for better readability
         length_stats_table = [
@@ -163,13 +164,15 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
         print("\nSpecial Token Stats:")
         print(tabulate(token_stats_table, headers=["Token Type", "Count/Details"], tablefmt="grid"))
 
+        
+        visualize_tokenized_data(token_array, pad_token, sos_token, eos_token, trunc_token) 
 
     self._verbose = False
     return token_array
 
 
 
-def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id):
+def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id):
     # Analyze sequence lengths before padding
     seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]
     max_token_id = np.max(token_array)
@@ -187,7 +190,7 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
         token_stats["pad_token_count"] += np.sum(row == pad_token_id)
         token_stats["sos_token_count"] += np.sum(row == sos_token_id)
         token_stats["eos_token_count"] += np.sum(row == eos_token_id)
-        token_stats["trunc_token_count"] += np.sum(row == -1)
+        token_stats["trunc_token_count"] += np.sum(row == trunc_token_id)
         
 
     # Compute statistics on sequence lengths
@@ -205,6 +208,62 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
         "token_stats": token_stats
     }
 
+
+def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
+                             output_dir="/csghome/hpdc04/Transformer_Code/CUPY/models/utils/token_plots"):
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Analyze sequence lengths
+    seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]
+    
+    # Token frequencies
+    token_flat = token_array.flatten()
+    token_counts = Counter(token_flat)
+    
+    # Special token counts
+    special_token_counts = {
+        "PAD": token_counts[pad_token_id],
+        "SOS": token_counts[sos_token_id],
+        "EOS": token_counts[eos_token_id],
+        "TRUNC": token_counts.get(trunc_token_id, 0)  # Custom truncate token
+    }
+    
+    # Plot sequence length distribution
+    plt.figure(figsize=(12, 6))
+    plt.hist(seq_lengths, bins=50, color="skyblue", edgecolor="black")
+    plt.title("Sequence Length Distribution")
+    plt.xlabel("Sequence Length")
+    plt.ylabel("Frequency")
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    print(f"Saved: {output_path}")
+    
+    # Plot token frequency distribution
+    plt.figure(figsize=(12, 6))
+    plt.bar(range(len(token_counts)), token_counts.values(), color="lightcoral")
+    plt.title("Token Frequency Distribution")
+    plt.xlabel("Token ID")
+    plt.ylabel("Count")
+    plt.xticks(range(0, max(token_counts.keys()), max(1, len(token_counts) // 20)), rotation=45)
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    print(f"Saved: {output_path}")
+    
+    # Plot special token statistics
+    plt.figure(figsize=(8, 6))
+    plt.bar(special_token_counts.keys(), special_token_counts.values(), color="lightgreen")
+    plt.title("Special Token Statistics")
+    plt.xlabel("Special Token")
+    plt.ylabel("Count")
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    print(f"Saved: {output_path}")
+    
+    print("Token Frequency Sample (Top 10):")
+    print(dict(Counter(token_flat).most_common(10)))
 
 """
 @Author: Jonas
