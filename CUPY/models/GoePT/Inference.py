@@ -65,13 +65,9 @@ def main():
                                       manually_add_sos_eos = config.manually_set_sos_eos_trunc)
     
     # :TODO adjust model.batch_size to fit the passed batch
-
-    tokenized_data_minus_last = np.zeros((len(tokenized_data), seq_len), dtype=tokenized_data.dtype)
-    tokenized_data_minus_last[:, 1:] = tokenized_data[:, :seq_len - 1]
-    print(tokenized_data_minus_last)
     
     # forward the tok_input to the pre-trained model
-    logits, _ = model.forward(tokenized_data_minus_last, targets = None)
+    logits, _ = model.forward(tokenized_data, targets = None)
 
     # Apply softmax :TODO : Add Temperature ?
     softmax = Softmax(axis = 0) # use rows
