@@ -14,20 +14,15 @@ import math
 import copy
 from types import NoneType
 from typing import Union, Callable
-from optimizers import Adam
 
 
-#import numpy as np
-import cupy as cp
+import numpy as np
 from numpy.typing import ArrayLike
 from icecream import ic
 
 sys.path.append('.')
 
 from utils import compress_numpy_array, decompress_numpy_array
-
-# :NOTE
-learning_rate_decay = 0.99
 
 class Linear():
     def __init__(self,
@@ -49,39 +44,33 @@ class Linear():
         self.bias_init_func = bias_init_func
 
         if self.weight_init_func:
-            self.weight = cp.asanyarray(self.weight_init_func((in_features, out_features)))
+            self.weight = np.asanyarray(self.weight_init_func((in_features, out_features)))
         else:
-            self.weight = cp.random.normal(size=(in_features, out_features))*cp.sqrt(1./in_features)
+            self.weight = np.random.normal(size=(in_features, out_features))*np.sqrt(1./in_features)
 
         if self.bias_init_func:
-            self.bias = cp.asanyarray(self.bias_init_func((in_features, out_features)))
+            self.bias = np.asanyarray(self.bias_init_func((in_features, out_features)))
         else:
-            self.weight = cp.random.normal(size=(in_features, out_features))*cp.sqrt(1./in_features)
+            self.weight = np.random.normal(size=(in_features, out_features))*np.sqrt(1./in_features)
 
         if self.use_bias:
             if self.bias_init_func:
-                self.bias = cp.asanyarray(self.bias_init_func((out_features,)))
+                self.bias = np.asanyarray(self.bias_init_func((out_features,)))
             else:
-                self.bias = cp.random.normal(size=(out_features,))*cp.sqrt(1./in_features)
+                self.bias = np.random.normal(size=(out_features,))*np.sqrt(1./in_features)
 
-        self.grad_weight = cp.zeros((in_features, out_features))
-        self.grad_bias = cp.zeros(out_features)
+        self.grad_weight = np.zeros((in_features, out_features))
+        self.grad_bias = np.zeros(out_features)
 
-        self.input = cp.zeros((batch_size, in_features))
-        
-        # ADAM optimizer
-        if self.use_bias:
-            self.optim = Adam([self.weight, self.bias], self.lr, weight_decay_rates=[1e-1, 0.])
-        else:
-            self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
+        self.input = np.zeros((batch_size, in_features))
 
 
     def _multi_dim_matmul(self,
-                            mat_a: cp.ndarray,
-                            mat_b: cp.ndarray,
+                            mat_a: np.ndarray,
+                            mat_b: np.ndarray,
                             transpose_a: bool = False,
                             transpose_b: bool = False,
-                            reshape_output: bool = True) -> cp.ndarray:
+                            reshape_output: bool = True) -> np.ndarray:
 
         """
         Replicate torch behavior of flattening all but the
@@ -95,15 +84,12 @@ class Linear():
         if (len(mat_a.shape) > 2) or (len(mat_b.shape) > 2):
             # Dimension handling.
             # We should refactor this if we find the time.
-            
-            # TODO CUPY implementation. We need ap cupy array instead of a tuple for cp.prod
-            # CUPY does not want to work with python containers due to performance issues
-            # We still need to cast this into an integer.
+
             dims_internal_mat_a = mat_a.shape if len(mat_a.shape) <= 2 else\
-                                    (int((cp.prod(cp.array(mat_a.shape[:-1])))), mat_a.shape[-1])
+                                    (np.prod(mat_a.shape[:-1]), mat_a.shape[-1])
 
             dims_internal_mat_b = mat_b.shape if len(mat_b.shape) <= 2 else\
-                                    (int((cp.prod(cp.array(mat_b.shape[:-1])))), mat_b.shape[-1])
+                                    (np.prod(mat_b.shape[:-1]), mat_b.shape[-1])
 
             mat_a_shape = mat_a.shape[::-1] if transpose_a else mat_a.shape
             mat_b_shape = mat_b.shape[::-1] if transpose_b else mat_b.shape
@@ -125,16 +111,16 @@ class Linear():
                 else:
                     return mat_b.reshape(dims_internal_mat_b)
 
-            return cp.matmul(mat_a_transform(),
+            return np.matmul(mat_a_transform(),
                                 mat_b_transform()).reshape(dims_out)
 
         else:
-            return cp.matmul(mat_a, mat_b.T) if transpose_b else cp.matmul(mat_a, mat_b)
+            return np.matmul(mat_a, mat_b.T) if transpose_b else np.matmul(mat_a, mat_b)
 
 
-    def forward(self, input: ArrayLike) -> cp.ndarray:
+    def forward(self, input: ArrayLike) -> np.ndarray:
 
-        self.input = cp.asanyarray(input)
+        self.input = np.asanyarray(input)
 
         output = self._multi_dim_matmul(self.input, self.weight)
         if self.use_bias:
@@ -142,19 +128,16 @@ class Linear():
         return output
 
 
-    def backward(self, grad_output: ArrayLike) -> cp.ndarray:
+    def backward(self, grad_output: ArrayLike) -> np.ndarray:
 
-        grad_output = cp.asanyarray(grad_output)
+        grad_output = np.asanyarray(grad_output)
 
         grad_input = self._multi_dim_matmul(grad_output,
                                                 self.weight,
                                                 transpose_b=True)
-        
-        
-        # CUPY implementation. 
-        # Here we face the same error as before. We need cp.array first
-        flattened_input_shape = (int(cp.prod(cp.array(self.input.shape[:-1]))), self.input.shape[-1])
-        flattened_grad_output_shape = (int(cp.prod(cp.array(grad_output.shape[:-1]))), grad_output.shape[-1])
+
+        flattened_input_shape = (np.prod(self.input.shape[:-1]), self.input.shape[-1])
+        flattened_grad_output_shape = (np.prod(grad_output.shape[:-1]), grad_output.shape[-1])
 
         self.grad_weight = (1. /self.batch_size)*self._multi_dim_matmul(self.input,
                                                                             grad_output,
@@ -168,16 +151,11 @@ class Linear():
 
 
     def update(self) -> None:
+        self.weight = self.weight - self.lr*self.grad_weight
         if self.use_bias:
-            #self.bias = self.bias - selfs.lr*elf.grad_bias
-            self.weight, self.bias = self.optim.step([self.weight, self.bias], [self.grad_weight, self.grad_bias])
-        else:
-            self.weight = self.weight = self.optim.step([self.weight,], [self.grad_weight])[0]
-            
-        self.lr *= learning_rate_decay
-        
-        return None
-    
+            self.bias = self.bias - self.lr*self.grad_bias
+
+
     @property
     def weight_transposed(self):
         return self.weight.T
@@ -191,18 +169,18 @@ class Linear():
 class Sigmoid():
     def __init__(self, in_features: int, batch_size: int):
         super(Sigmoid, self).__init__()
-        self.input = cp.zeros(batch_size)
+        self.input = np.zeros(batch_size)
 
 
     def forward(self, input):
-        input = cp.asanyarray(input)
+        input = np.asanyarray(input)
         self.input = input
-        return 1./(1.+cp.exp(-input))
+        return 1./(1.+np.exp(-input))
 
 
     def backward(self, grad_output):
-        grad_output = cp.asanyarray(grad_output)
-        grad_input = grad_output*cp.exp(-self.input)/cp.power(1. + cp.exp(-self.input), 2)
+        grad_output = np.asanyarray(grad_output)
+        grad_input = grad_output*np.exp(-self.input)/np.power(1. + np.exp(-self.input), 2)
         return grad_input
 
 
@@ -213,15 +191,15 @@ class Softmax():
         self.axis = axis
 
     def forward(self, input: ArrayLike):
-        self.input = cp.asanyarray(input)
-        shifted_inp = input - cp.max(input, axis=self.axis, keepdims=True)
-        exp_res = cp.exp(shifted_inp)
-        output = exp_res/cp.sum(exp_res, axis=self.axis, keepdims=True)
+        self.input = np.asanyarray(input)
+        shifted_inp = input - np.max(input, axis=self.axis, keepdims=True)
+        exp_res = np.exp(shifted_inp)
+        output = exp_res/np.sum(exp_res, axis=self.axis, keepdims=True)
         self.output = output
         return output
 
     def backward(self, grad: ArrayLike):
-        grad = cp.asanyarray(grad)
+        grad = np.asanyarray(grad)
         f_x = self.output
         grad = (grad - (grad * f_x).sum(self.axis, keepdims=True)) * f_x
         return grad
@@ -233,7 +211,7 @@ class Dropout():
         self.p = p
         self.scale = 1/(1 - p)
 
-        self.rng = cp.random.default_rng()
+        self.rng = np.random.default_rng()
 
         self.mask = None
         self.input = None
@@ -241,15 +219,14 @@ class Dropout():
 
     def forward(self,
                     input: ArrayLike,
-                    train: bool = False) -> cp.ndarray:
+                    train: bool = False) -> np.ndarray:
 
-        input = cp.asanyarray(input)
+        input = np.asanyarray(input)
 
         self.input = input
 
         if train:
-            # use CUPY
-            self.mask = cp.random.binomial(1, 1 - self.p, size=input.shape).astype(input.dtype) * self.scale
+            self.mask = self.rng.binomial(1, 1 - self.p, size=input.shape).astype(input.dtype)*self.scale
         else:
             self.mask = 1
 
@@ -260,7 +237,7 @@ class Dropout():
         return grad_out
 
 def one_hot(a, num_classes):
-    return cp.squeeze(cp.eye(num_classes)[a.reshape(-1)])
+    return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
 
 class LayerNorm():
     def __init__(self,
@@ -279,14 +256,13 @@ class LayerNorm():
         self.bias_init_func = bias_init_func
 
         if self.weight_init_func:
-            self.weight = cp.asanyarray(self.weight_init_func((normalized_shape)))
+            self.weight = np.asanyarray(self.weight_init_func((normalized_shape)))
         else:
-            self.weight = cp.ones((normalized_shape), dtype=cp.float32)
+            self.weight = np.ones((normalized_shape), dtype=np.float32)
         if self.bias_init_func:
-            self.bias = cp.asanyarray(self.bias_init_func((normalized_shape)))
+            self.bias = np.asanyarray(self.bias_init_func((normalized_shape)))
         else:
-            self.bias = cp.zeros((normalized_shape), dtype=cp.float32)
-            self.use_bias = False
+            self.bias = np.zeros((normalized_shape), dtype=np.float32)
 
         self.axis = None
 
@@ -297,88 +273,76 @@ class LayerNorm():
 
         self.x_centered = None
         self.stddev_inv = None
-        
-        
-        # ADAM optimizer
-        if self.use_bias:
-            self.optim = Adam([self.weight, self.bias], self.lr, weight_decay_rates=[1e-1, 0.])
-        else:
-            self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
 
-    def forward(self, input: ArrayLike) -> cp.ndarray:
+    def forward(self, input: ArrayLike) -> np.ndarray:
         
-        input = cp.asanyarray(input)
+        input = np.asanyarray(input)
 
         self.input = input
 
         self.axis = tuple(range(-len(self.normalized_shape), 0))
 
-        mean = cp.mean(input, axis=self.axis, keepdims=True)
-        var = cp.var(input, axis=self.axis, keepdims=True)
+        mean = np.mean(input, axis=self.axis, keepdims=True)
+        var = np.var(input, axis=self.axis, keepdims=True)
 
         self.x_centered = input - mean
-        self.stddev_inv = 1/cp.sqrt(var + self.eps)
+        self.stddev_inv = 1/np.sqrt(var + self.eps)
 
         output = self.x_centered*self.stddev_inv
 
         return self.weight*output + self.bias
 
 
-    def backward(self, doutput: ArrayLike) -> cp.ndarray:
+    def backward(self, doutput: ArrayLike) -> np.ndarray:
         """
         Perform backpropagation to compute gradients of input, weight, and bias.
         """
-        doutput = cp.asanyarray(doutput)
+        doutput = np.asanyarray(doutput)
 
         # Calculate gradient of bias and weight
-        self.grad_bias = cp.mean(doutput, axis = (0,1)) 
-        self.grad_weight = cp.mean(doutput * (self.x_centered * self.stddev_inv), axis = (0,1))
+        self.grad_bias = np.mean(doutput, axis = (0,1)) 
+        self.grad_weight = np.mean(doutput * (self.x_centered * self.stddev_inv), axis = (0,1))
         
         
         # Calculate gradient of the normalized output (dhat_x)
         dx_hat = doutput * self.weight  # Backpropagate through the scaling
-        dvar = cp.sum(dx_hat * self.x_centered, axis=self.axis, keepdims=True) * (-0.5) * (self.stddev_inv ** 3)
-        dmean = cp.sum(dx_hat * -self.stddev_inv, axis=self.axis, keepdims=True) + dvar * cp.mean(-2.0 * self.x_centered, axis=self.axis, keepdims=True)
+        dvar = np.sum(dx_hat * self.x_centered, axis=self.axis, keepdims=True) * (-0.5) * (self.stddev_inv ** 3)
+        dmean = np.sum(dx_hat * -self.stddev_inv, axis=self.axis, keepdims=True) + dvar * np.mean(-2.0 * self.x_centered, axis=self.axis, keepdims=True)
 
         # Calculate gradient of input
         dinput = dx_hat * self.stddev_inv + (dvar * 2.0 * self.x_centered) / self.input.size + dmean / self.input.size
     
         return dinput
-    
+
 
     def update(self):
-        if self.use_bias:
-            self.weight, self.bias = self.optim.step([self.weight, self.bias],
-                                                        [self.grad_weight, self.grad_bias])
-        else:
-            self.weight = self.optim.step([self.weight,],
-                                            [self.grad_weight,])[0]
-        self.lr *= learning_rate_decay
+        self.weight -= self.lr * self.grad_weight
+        self.bias -= self.lr * self.grad_bias
         return None
 
 
 class GELU():
     def __init__(self) -> None:
-        self._sqrt_of_2_by_pi = cp.sqrt(2/cp.pi)
+        self._sqrt_of_2_by_pi = np.sqrt(2/np.pi)
         self.input = None
 
 
-    def forward(self, input: ArrayLike) -> cp.ndarray:
-        self.input = cp.asanyarray(input)
-        return (0.5*input*(1 + cp.tanh(self._sqrt_of_2_by_pi*(input + 0.044715*cp.power(input, 3)))))
+    def forward(self, input: ArrayLike) -> np.ndarray:
+        self.input = np.asanyarray(input)
+        return (0.5*input*(1 + np.tanh(self._sqrt_of_2_by_pi*(input + 0.044715*np.power(input, 3)))))
 
     def gelu_grad(self, x):
-        sqrt_2_pi = cp.sqrt(2 / cp.pi)
+        sqrt_2_pi = np.sqrt(2 / np.pi)
         a = sqrt_2_pi * (x + 0.044715 * x**3)
-        tanh_a = cp.tanh(a)
+        tanh_a = np.tanh(a)
         b = sqrt_2_pi * (1 + 3 * 0.044715 * x**2)
     
         grad = 0.5 * (1 + tanh_a + x * (1 - tanh_a**2) * b)
         return grad
 
-    def backward(self, grad_output: ArrayLike) -> cp.ndarray:
-        grad_output = cp.asarray(grad_output)
+    def backward(self, grad_output: ArrayLike) -> np.ndarray:
+        grad_output = np.asarray(grad_output)
         input_grad = self.gelu_grad(self.input)
         
         return grad_output * input_grad
@@ -415,14 +379,14 @@ class MLP():
 
         self.dropout = Dropout(dropout)
 
-    def forward(self, x: cp.ndarray) -> cp.ndarray:
+    def forward(self, x: np.ndarray) -> np.ndarray:
         x = self.c_fc.forward(x)
         x = self.gelu.forward(x)
         x = self.c_proj.forward(x)
         x = self.dropout.forward(x)
         return x
 
-    def backward(self, x: cp.ndarray) -> cp.ndarray:
+    def backward(self, x: np.ndarray) -> np.ndarray:
         x = self.dropout.backward(x)
         x = self.c_proj.backward(x)
         x = self.gelu.backward(x)
@@ -485,16 +449,17 @@ class MultiHeadAttention():
                                 weight_init_func=c_proj_weight_init_func,
                                 bias_init_func=bias_init_func)
 
-        self.mask = cp.tril(cp.ones((context_size, context_size), dtype=cp.float32)).reshape(1, 1, context_size, context_size)
+        self.mask = np.tril(np.ones((context_size, context_size), dtype=np.float32)).reshape(1, 1, context_size, context_size)
 
         # Relative Positional Embedding Layer Hardcoded (doesn't fit into previous class)
-        self.rel_pos_emb = cp.random.randn(self.batch_size, self.n_heads, self.context_size, self.depth) * 0.02 # Initialize a relative positional embedding matrix with shape (H, L, D_h)
+        self.rel_pos_emb = np.random.randn(1, self.n_heads, self.context_size, self.depth) * 0.02 # Initialize a relative positional embedding matrix with shape (H, L, D_h)
         self.grad_rpe = None
 
         self.input = None
         self.v = None
         self.q = None
         self.k = None
+        self.lr = lr
         self.attn = None
 
         self.x1 = None
@@ -505,7 +470,7 @@ class MultiHeadAttention():
 
     def forward(self, input: ArrayLike) -> tuple:
         
-        self.input = cp.asanyarray(input)
+        self.input = np.asanyarray(input)
         # C = d_model : default n_embd: int=384
         # B = batch dim
         # T = seq length
@@ -520,7 +485,7 @@ class MultiHeadAttention():
         Note that q, k, v are calculated in one run.
         This is why the c_attn linear object has dimensions (d_model * (3 * d_model))
         """
-        q, k, v  = cp.split(self.c_attn.forward(self.input), 3, axis=2)
+        q, k, v  = np.split(self.c_attn.forward(self.input), 3, axis=2)
 
         e = self.rel_pos_emb 
 
@@ -559,7 +524,7 @@ class MultiHeadAttention():
 
         self.x1 = q @ e.transpose(0, 1, 3, 2) #Q * E_T
 
-        self.x2 = cp.pad(self.x1, ((0, 0), (0, 0), (0, 0), (1, 0)), mode='constant', constant_values=0) #padding, adding a column of zeros to the left of the T x T matrix, results in (B, nh, T, T + 1)
+        self.x2 = np.pad(self.x1, ((0, 0), (0, 0), (0, 0), (1, 0)), mode='constant', constant_values=0) #padding, adding a column of zeros to the left of the T x T matrix, results in (B, nh, T, T + 1)
         
         self.x3 = self.x2.reshape(B, self.n_heads, T + 1, T) #reshape to (B, nh, T + 1, T) matrix
 
@@ -567,7 +532,7 @@ class MultiHeadAttention():
 
         attn = (q @ k.transpose(0, 1, 3, 2) + self.s_rel)*(1.0/math.sqrt(k.shape[-1])) #relative attention
 
-        attn = cp.where(self.mask == 0, -1e9, attn) 
+        attn = np.where(self.mask == 0, -1e9, attn) 
         attn = self.softmax_attn.forward(attn)
         attn = self.attn_dropout.forward(attn)
 
@@ -581,14 +546,14 @@ class MultiHeadAttention():
         We reshape x to the original Input shape which is (B, T, C) => concat heads
         -1 tells python to calculate the remaining dimension to fit (i.e returning T in this case)
         """
-        x = cp.ascontiguousarray(x).transpose(0, 2, 1, 3).reshape(self.batch_size, -1, self.n_heads*self.depth)
+        x = np.ascontiguousarray(x).transpose(0, 2, 1, 3).reshape(self.batch_size, -1, self.n_heads*self.depth)
         x = self.c_proj.forward(x)
         x = self.resid_dropout.forward(x)
 
         return x, attn
 
-    def backward(self, grad: ArrayLike) -> cp.ndarray:
-        grad = cp.asanyarray(grad)
+    def backward(self, grad: ArrayLike) -> np.ndarray:
+        grad = np.asanyarray(grad)
 
         B, T, C = self.input.shape
 
@@ -596,7 +561,7 @@ class MultiHeadAttention():
         grad = self.c_proj.backward(grad)
         
         # NEW
-        grad = cp.ascontiguousarray(grad).reshape(B, self.n_heads, T, -1) # B, n_heads, T, C // n_heads
+        grad = np.ascontiguousarray(grad).reshape(B, self.n_heads, T, -1) # B, n_heads, T, C // n_heads
         
         grad_v = self.attn.transpose(0,1,3,2) @ grad
         grad_attn = grad @ self.v.transpose(0,1,3,2)
@@ -616,25 +581,24 @@ class MultiHeadAttention():
         grad_q = (1.0/math.sqrt(self.k.shape[-1]))  * (grad_mask @ self.k) #This must be somehow updated later
         grad_s_rel = (1.0/math.sqrt(self.k.shape[-1])) * grad_mask
 
-        grad_x3 = cp.pad(grad_s_rel, ((0, 0), (0, 0), (1, 0), (0, 0)), mode='constant', constant_values=0) #pad top row
+        grad_x3 = np.pad(grad_s_rel, ((0, 0), (0, 0), (1, 0), (0, 0)), mode='constant', constant_values=0) #pad top row
         grad_x2 = grad_x3.reshape(B, self.n_heads, T, T + 1) #reverse reshaping
         grad_x1 = grad_x2[:, :, :, 1:] #discard the left column
 
-        print(grad_x1.shape, self.rel_pos_emb.shape)
-        
-        grad_q2 = grad_x1 * self.rel_pos_emb
+        broadcasted_emb = np.broadcast_to(self.rel_pos_emb, (B, self.n_heads, T, self.depth))
+        grad_q2 = grad_x1 @ broadcasted_emb
         grad_q += grad_q2 #Here I'm just guessing, I'll enquire about this
 
-        grad_rpe_all_b_trans = self.q.transpose(0, 1, 3, 2) * grad_x1
+        grad_rpe_all_b_trans = self.q.transpose(0, 1, 3, 2) @ grad_x1
         grad_rpe_all_b = grad_rpe_all_b_trans.transpose(0, 1, 3, 2)
-        self.grad_rpe = cp.sum(grad_rpe_all_b, axis=0, keepdims=True) #Sum over all batches to get desired dim: (1, nhs, T, d)
+        self.grad_rpe = np.sum(grad_rpe_all_b, axis=0, keepdims=True) #Sum over all batches to get desired dim: (1, nhs, T, d)
 
         grad_q = grad_q.reshape(self.batch_size, T, self.n_heads * self.depth) 
         grad_v = grad_v.reshape(self.batch_size, T, self.n_heads * self.depth)
         grad_k = grad_k.reshape(self.batch_size, T, self.n_heads * self.depth)
         
         # We need to tranpose to the shape (batch_size, seq_len, 3* d_model)
-        grad = cp.concatenate([grad_q, grad_k, grad_v], axis=2)
+        grad = np.concatenate([grad_q, grad_k, grad_v], axis=2)
         
         
         grad_downstream = self.c_attn.backward(grad)
@@ -643,9 +607,10 @@ class MultiHeadAttention():
         return grad_downstream
 
 
-
     def update(self) -> None:
         #raise NotImplementedError("Implement the MultiHeadAttention update path")
+        self.rel_pos_emb -= self.lr * self.grad_rpe
+        # Jonas Version
 
         self.c_attn.update()
         self.c_proj.update()
@@ -671,7 +636,7 @@ class Embedding():
                         init_func: Union[Callable, None] = None,
                         weight_external = None):
 
-        self.rng = cp.random.default_rng()
+        self.rng = np.random.default_rng()
 
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
@@ -680,7 +645,6 @@ class Embedding():
         self.lr = lr
 
         self.init_func = init_func
-        
 
         # If we get external weights passed, use them
         # instead of allocating ones on our own.
@@ -688,38 +652,32 @@ class Embedding():
         #
         # https://paperswithcode.com/method/weight-tying
 
-        #if not isinstance(type(weight_external), NoneType):
-        if weight_external is None:
+        if not isinstance(type(weight_external), NoneType):
             if self.init_func:
-                self.weight = cp.asanyarray(self.init_func((num_embeddings, embedding_dim)))
+                self.weight = np.asanyarray(self.init_func((num_embeddings, embedding_dim)))
             else:
-                # use CUPY
-                self.weight = cp.random.standard_normal((num_embeddings, embedding_dim), dtype=cp.float32)
-        else:
-            self.weight = cp.asarray(weight_external, dtype=cp.float32)
+                self.weight = self.rng.standard_normal((num_embeddings, embedding_dim), dtype=np.float32)
 
-            
-        self.gradient_projection_mask = cp.eye(num_embeddings, dtype=cp.uint8)
+        else:
+            self.weight = weight_external
+
+        self.gradient_projection_mask = np.eye(num_embeddings, dtype=np.uint8)
 
         self.input = None
         self.grad_weight = None
 
-        # ADAM optimizer
-        self.optim = Adam([self.weight,], self.lr, weight_decay_rates=[1e-1,])
 
-    def forward(self, input: ArrayLike) -> cp.ndarray:
-        self.input = cp.asanyarray(input) # (Batch size, seq len
-        self.input = self.input.astype(cp.int16)
-
-        return self.weight[self.input, :]
+    def forward(self, input: ArrayLike) -> np.ndarray:
+        self.input = np.asanyarray(input) # (Batch size, seq len)
+        return self.weight[self.input.astype(np.int32), :]
 
 
-    def backward(self, grad_output: cp.ndarray):
+    def backward(self, grad_output: np.ndarray):
         """
         Backward pass to compute gradients for the embedding weights.
 
         Args:
-        grad_output (cp.ndarray): Gradient of the loss w.r.t. the output embeddings
+        grad_output (np.ndarray): Gradient of the loss w.r.t. the output embeddings
                                   (shape: batch_size x seq_length x embedding_dim).
         """
         # Flatten input indices and corresponding gradients
@@ -728,10 +686,10 @@ class Embedding():
 
         # Initialize grad_weight
         
-        #self.grad_weight = cp.zeros_like(self.weight)
+        #self.grad_weight = np.zeros_like(self.weight)
 
         # Accumulate gradients for the corresponding rows
-        #grad = cp.add.at(self.grad_weight, input_flat, grad_output_flat)A
+        #grad = np.add.at(self.grad_weight, input_flat, grad_output_flat)A
         
         
         # Jonas Version
@@ -745,17 +703,16 @@ class Embedding():
         grad_output_flat = grad_output.reshape(-1, self.embedding_dim)
 
         # Initialize grad_weight to zero (same shape as weight matrix)
-        self.grad_weight = cp.zeros_like(self.weight)
+        self.grad_weight = np.zeros_like(self.weight)
 
         # Accumulate gradients for the corresponding rows
-        cp.add.at(self.grad_weight, input_flat, grad_output_flat)
+        np.add.at(self.grad_weight, input_flat, grad_output_flat)
         # Return None since there's no gradient with respect to the input indices
 
 
 
     def update(self) -> None:
-        self.weight = self.optim.step([self.weight,], [self.grad_weight,])[0]
-        self.lr *= learning_rate_decay
+        self.weight -= self.lr *  self.grad_weight
         return None
 
 
@@ -804,9 +761,9 @@ class Block():
                             bias_init_func=bias_init_func)
 
 
-    def forward(self, input: ArrayLike) -> cp.ndarray:
+    def forward(self, input: ArrayLike) -> np.ndarray:
 
-        input = cp.asanyarray(input)
+        input = np.asanyarray(input)
 
         x = self.ln_1.forward(input)
         x = self.attn.forward(x)[0]
@@ -822,8 +779,8 @@ class Block():
         return x
 
 
-    def backward(self, grad_output: ArrayLike) -> cp.ndarray:
-        grad_output = cp.asanyarray(grad_output)
+    def backward(self, grad_output: ArrayLike) -> np.ndarray:
+        grad_output = np.asanyarray(grad_output)
 
         grad_resid1 = copy.deepcopy(grad_output)
 
@@ -865,5 +822,6 @@ class Block():
         self.ln_1.bias = decompress_numpy_array(state_dict['ln_1'][1])
         self.ln_2.weight = decompress_numpy_array(state_dict['ln_2'][0])
         self.ln_2.bias = decompress_numpy_array(state_dict['ln_2'][1])
+
         self.mlp.load_params(state_dict['mlp'])
         self.attn.load_params(state_dict['attn'])
