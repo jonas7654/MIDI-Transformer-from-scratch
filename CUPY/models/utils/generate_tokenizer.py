@@ -4,10 +4,14 @@ import numpy as np
 from icecream import ic
 import argparse
 
-from miditok import REMI, TokenizerConfig  # here we choose to use REMI
+from miditok import Structured, REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
 from miditok.utils import split_files_for_training
 from pathlib import Path
+
+import sys
+sys.path.insert(0, '/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/')
+import config
 
 
 def train_tokenizer(vocab_size):
@@ -35,10 +39,10 @@ def train_tokenizer(vocab_size):
         "tempo_range": (40, 250),  # (min, max)
     }
     
-    config = TokenizerConfig(**TOKENIZER_PARAMS)
+    tok_config = TokenizerConfig(**TOKENIZER_PARAMS)
     
     # Creates the tokenizer
-    tokenizer = REMI(config)
+    tokenizer = config.tokenizer_name(tok_config)
 
     # Train the tokenizer
     tokenizer.train(vocab_size=vocab_size, files_paths=files_path)
@@ -48,7 +52,7 @@ def train_tokenizer(vocab_size):
     
     # Save the tokenizer
     print(f"saved to: {tokenizer_dir}")
-    tokenizer.save(Path(tokenizer_dir, f"tokenizer_{tokenizer.vocab_size}.json"))
+    tokenizer.save(Path(tokenizer_dir, f"tokenizer_{config.tokenizer_name}_{tokenizer.vocab_size}.json"))
     
     
 if __name__ == "__main__":
@@ -59,5 +63,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for vocab_size in args.vocab_sizes:
-        print(f"Training tokenizer with vocab size: {vocab_size}")
+        print(f"Training tokenizer ({config.tokenizer_name_str}) with vocab size: {vocab_size}")
         train_tokenizer(vocab_size=vocab_size)
