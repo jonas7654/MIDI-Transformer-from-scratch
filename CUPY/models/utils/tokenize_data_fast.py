@@ -1,4 +1,4 @@
-from miditok import REMI
+from miditok import Structured, REMI
 from pathlib import Path
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from collections import Counter
@@ -9,6 +9,13 @@ from icecream import ic
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 import os
+
+import sys
+sys.path.insert(0, '/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/')
+import config
+
+
+
 
 SCORE_LOADING_EXCEPTION = (
     RuntimeError,
@@ -270,4 +277,6 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 @Author: Jonas
 Monkey Patch tokenizer.tokenize_data_fast
 """
-REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin
+config.tokenizer_name.tokenize_dataset_to_bin = tokenize_dataset_to_bin
+#REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin
+#Structured.tokenize_dataset_to_bin = tokenize_dataset_to_bin

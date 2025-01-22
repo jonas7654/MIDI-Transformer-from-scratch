@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, '/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/')
 import config
 
-from miditok import REMI, TokenizerConfig  # here we choose to use REMI
+from miditok import Structured, REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
 from miditok.utils import split_files_for_training
 
@@ -28,7 +28,6 @@ Here we specify the folder structure.
 
 ---------------------------------------------------------------
 
-In our current implementation we use the REMI tokenizer.
 """
 
 current_dir = os.getcwd()
@@ -42,7 +41,7 @@ tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
 seq_length = config.context_length
 
 # Load the pre-trained tokenizer
-tokenizer = REMI(params = Path(config.vocab_file))
+tokenizer = config.tokenizer_name(params = Path(config.vocab_file))
 ic(tokenizer.vocab_size)
 # Split the dataset into train/valid/test subsets, with 15% of the data for each of the two latter
 
@@ -143,7 +142,7 @@ for subset in train_val_test_path:
     ic(tokenized_data.shape)
 
     # SAVE
-    save_dir = os.path.join(output_path, f"{subset}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin")
+    save_dir = os.path.join(output_path, f"{subset}_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin")
     Path(output_path).mkdir(parents = True, exist_ok = True)
     tokenized_data.astype(np.uint16).tofile(save_dir)
     

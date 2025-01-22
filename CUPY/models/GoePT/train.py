@@ -6,7 +6,7 @@ from functools import partial
 from collections import deque
 from types import NoneType
 import json
-from miditok import REMI
+from miditok import REMI, Structured
 import wandb
 
 import cupy as cp
@@ -74,11 +74,11 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
     # https://stackoverflow.com/questions/45132940/numpy-memmap-memory-usage-want-to-iterate-once/61472122#61472122
 
     if split == 'train':
-        data = np.memmap(os.path.join(data_dir, f'train_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'train_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     elif split == 'test':
-        data = np.memmap(os.path.join(data_dir, f'test_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'test_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     else:
-        data = np.memmap(os.path.join(data_dir, f'val_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'val_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     
     ix = rng.integers(len(data) - context_length, size=(batch_size,))
     
@@ -155,7 +155,7 @@ def main():
     os.makedirs(config.checkpoint_dir, exist_ok=True)
     
     # NOTE: CHANGE THIS IF THE TOKENIZER CHANGES
-    tokenizer = REMI(params = config.vocab_file)
+    tokenizer = config.tokenizer_name(params = config.vocab_file)
 
     # Initialize Weights & Biases (wandb)
     wandb.init(
@@ -178,7 +178,8 @@ def main():
             "n_layer" : config.n_layer,
             "n_embd" : config.n_embd,
             "n_heads" : config.n_heads,
-            "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc
+            "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc,
+            "tokenizer": config.tokenizer_name_str
         }
     )
     
