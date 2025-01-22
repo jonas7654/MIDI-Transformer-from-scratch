@@ -4,6 +4,7 @@ import math
 import time
 import argparse
 from functools import partial
+from types import NoneType
 import json
 import wandb
 from miditok import REMI, TokenizerConfig
@@ -193,11 +194,12 @@ class GoePT():
         return state_dict
 
     @classmethod
-    def from_state_dict(cls, state_dict: dict):
+    def from_state_dict(cls, state_dict: dict,
+                                batch_size: int | None = None):
 
         goe_pt = cls(state_dict['vocab_size'],
                             state_dict['context_length'],
-                            state_dict['batch_size'],
+                            state_dict['batch_size'] if isinstance(batch_size, NoneType) else batch_size,
                             state_dict['n_layer'],
                             state_dict['n_embd'],
                             state_dict['n_heads'],
