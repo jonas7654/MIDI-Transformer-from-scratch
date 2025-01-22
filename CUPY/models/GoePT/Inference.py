@@ -16,11 +16,11 @@ sys.path.append('/csghome/hpdc04/Transformer_Code/CUPY/models/utils')
 from tokenize_data_fast import tokenize_dataset_to_bin
 import config
 
-def load_model(checkpoint_path, vocab_file):
+def load_model(checkpoint_path, vocab_file, batch_size):
     with open(checkpoint_path, mode = 'r', encoding = 'utf-8') as weights:
         state_dict = json.load(weights)
     
-    model = GoePT.from_state_dict(state_dict)
+    model = GoePT.from_state_dict(state_dict, batch_size=batch_size)
     
     tokenizer = REMI(params=vocab_file) # NOTE: CHANGE THIS IF THE TOKENIZER CHANGES
     print(model)
@@ -49,12 +49,14 @@ def main():
     parser.add_argument('--input', type = str,
                         help = "Path to the Input midi file") 
     parser.add_argument('--context-length', type = int)
+    parser.add_argument('--b', type = int)
+    parser.add_argument('--bsize', type = int)
     
     args = parser.parse_args()
     
     file_path = Path(args.input)
     
-    model, tokenizer = load_model(args.weights, args.vocab_file)
+    model, tokenizer = load_model(args.weights, args.vocab_file, args.bsize)
     seq_len = model.context_length
 
     
@@ -66,23 +68,35 @@ def main():
     
     # :TODO adjust model.batch_size to fit the passed batch
     
-    # forward the tok_input to the pre-trained model
-    logits, _ = model.forward(tokenized_data, targets = None)
-
-    # Apply softmax :TODO : Add Temperature ?
     softmax = Softmax(axis = 0) # use rows
-    predictions = softmax_with_temperature(logits, temperature=0.5, Softmax=softmax)
-    predictions = cp.argmax(predictions, axis = -1) # axis -1 uses the last axis which is the vocabulary
+    generated_sequence = cp.asanyarray(tokenized_data.copy())
+    
+    for idx in range(args.b):
+        input_context = generated_sequence[:, -seq_len:]
+        logits, _ = model.forward(input_context, targets = None)
+
+        # Apply softmax with temperature
+        predictions = softmax_with_temperature(logits, temperature=1, Softmax=softmax)
+        next_tokens = cp.argmax(predictions, axis=-1)  # axis -1 uses the last axis which is the vocabulary
+        print(f"Iteration {idx}: Next tokens: {next_tokens}")
+        
+        # Append the predicted token to the sequence
+        generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
+    
+    
     
     # convert back to numpy
-    predictions = predictions.get()
+    generated_sequence = generated_sequence.get()
     
     print("---------------------")
-    print("\n", predictions, "\n", tokenized_data[:,(seq_len - 1)]) 
-    print(predictions.shape)
+    print("\n", generated_sequence) 
+    print(generated_sequence.shape)
+    print(type(generated_sequence))
     
-    decoded_predictions = tokenizer.decode(predictions)
-   
-
+    truncated_sequence = generated_sequence[:, seq_len:]
+    print(truncated_sequence)
+    
+    test = tokenizer.decode(truncated_sequence)
+    
 if __name__ == "__main__":
     main()
