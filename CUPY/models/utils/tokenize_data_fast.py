@@ -8,6 +8,7 @@ from symusic import Score
 from icecream import ic
 from tabulate import tabulate
 import matplotlib.pyplot as plt
+import os
 
 SCORE_LOADING_EXCEPTION = (
     RuntimeError,
@@ -210,8 +211,8 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
 
 
 def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
-                             output_dir="/csghome/hpdc04/Transformer_Code/CUPY/models/utils/token_plots"):
-    os.makedirs(output_dir, exist_ok=True)
+                             output_path="/csghome/hpdc04/Transformer_Code/CUPY/models/utils/token_plots"):
+    os.makedirs(output_path, exist_ok=True)
     
     # Analyze sequence lengths
     seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]
