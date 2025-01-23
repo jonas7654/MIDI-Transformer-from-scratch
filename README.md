@@ -1,5 +1,5 @@
 # Transformer Model from Scratch
-
+# THIS IS OUTDATED AND MUST BE RENEWED!
 ## Repository Contents
 - **Core Model Code**: Python files implementing the Transformer model.
 - **Shell Scripts**:
