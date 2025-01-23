@@ -37,6 +37,7 @@ def train_tokenizer(vocab_size):
         "default_note_duration" : 0.5, 
         "num_tempos": 32,  # number of tempo bins
         "tempo_range": (40, 250),  # (min, max)
+        "max_bar_embedding" : "Bar_8"
     }
     
     tok_config = TokenizerConfig(**TOKENIZER_PARAMS)
@@ -52,7 +53,7 @@ def train_tokenizer(vocab_size):
     
     # Save the tokenizer
     print(f"saved to: {tokenizer_dir}")
-    tokenizer.save(Path(tokenizer_dir, f"tokenizer_{config.tokenizer_name}_{tokenizer.vocab_size}.json"))
+    tokenizer.save(Path(tokenizer_dir, f"tokenizer_{config.tokenizer_name_str}_{tokenizer.vocab_size}.json"))
     
     
 if __name__ == "__main__":

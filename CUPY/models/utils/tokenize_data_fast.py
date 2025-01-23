@@ -277,6 +277,5 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 @Author: Jonas
 Monkey Patch tokenizer.tokenize_data_fast
 """
-config.tokenizer_name.tokenize_dataset_to_bin = tokenize_dataset_to_bin
-#REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin
-#Structured.tokenize_dataset_to_bin = tokenize_dataset_to_bin
+REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin
+Structured.tokenize_dataset_to_bin = tokenize_dataset_to_bin

@@ -2,7 +2,7 @@ from model import GoePT, compute_gradient
 from layers import Softmax
 import json
 from icecream import ic 
-from miditok import REMI
+from miditok import REMI, Structured
 from miditok.utils import merge_scores
 import cupy as cp
 import numpy as np
