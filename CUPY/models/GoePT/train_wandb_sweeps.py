@@ -5,7 +5,7 @@ import argparse
 from functools import partial
 from collections import deque
 import json
-from miditok import REMI
+from miditok import REMI, Structured
 import wandb
 import cupy as cp
 import numpy as np
