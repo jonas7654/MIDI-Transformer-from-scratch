@@ -7,7 +7,7 @@ checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save
 
 tokenizer_name = Structured
 tokenizer_name_str = tokenizer_name.__name__
-vo_size = 4096
+vo_size = 2048
 
 """
 The following section is only important after generating a tokenizer
@@ -16,18 +16,18 @@ vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer
 
 
 # Special tokens for the tokenizer
-manually_set_sos_eos_trunc = True
+manually_set_sos_eos_trunc = False
 
 # Training parameters
-batch_size = 8  # Default batch size
+batch_size = 12  # Default batch size
 context_length = 512  # Sequence context length
 epochs = 150  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.001 # Initial learning rate
-dropout_rate = 0 # Default dropout rate
+learning_rate = 0.01 # Initial learning rate
+dropout_rate = 0.3 # Default dropout rate
 n_layer = 10  # Number of layers in the transformer
 n_embd = 384  # Embedding size
-n_heads = 8  # Number of attention heads
+n_heads = 6  # Number of attention heads
 seed = 1  # Random seed
 
 # Logging
