@@ -279,3 +279,4 @@ Monkey Patch tokenizer.tokenize_data_fast
 """
 REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin
 Structured.tokenize_dataset_to_bin = tokenize_dataset_to_bin
+config.tokenizer_name.tokenize_dataset_to_bin = tokenize_dataset_to_bin

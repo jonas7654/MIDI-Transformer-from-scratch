@@ -22,7 +22,8 @@ def load_model(checkpoint_path, vocab_file, batch_size):
     
     model = GoePT.from_state_dict(state_dict, batch_size=batch_size)
     
-    tokenizer = REMI(params=vocab_file) # NOTE: CHANGE THIS IF THE TOKENIZER CHANGES    
+    tokenizer = config.tokenizer_name(params=vocab_file)
+    ic(tokenizer)
     return model, tokenizer
 
 def softmax_with_temperature(logits, temperature=1.0, Softmax=None):
@@ -49,6 +50,8 @@ def main():
     parser.add_argument('--save-dir', type = str)
     parser.add_argument('--context-length', type = int)
     parser.add_argument('--b', type = int)
+    parser.add_argument('--manually-set-sos-eos-trunc', type = bool)
+    
 
     
     args = parser.parse_args()
@@ -64,7 +67,7 @@ def main():
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = file_path,
                                       verbose = True,
                                       seq_length = seq_len,
-                                      manually_add_sos_eos = config.manually_set_sos_eos_trunc)
+                                      manually_add_sos_eos = args.manually_set_sos_eos_trunc)
     
     # :TODO adjust model.batch_size to fit the passed batch
     
@@ -76,7 +79,7 @@ def main():
         logits, _ = model.forward(input_context, targets = None)
 
         # Apply softmax with temperature
-        predictions = softmax_with_temperature(logits, temperature=5, Softmax=softmax)
+        predictions = softmax_with_temperature(logits, temperature=0.00001, Softmax=softmax)
         next_tokens = cp.argmax(predictions, axis=-1)  # axis -1 uses the last axis which is the vocabulary
         #print(f"Iteration {idx}: Next tokens: {next_tokens}")
         
@@ -89,17 +92,14 @@ def main():
     generated_sequence = generated_sequence.get()
     
     print("---------------------")
-    print("\n", generated_sequence) 
-    print(generated_sequence.shape)
-    print(type(generated_sequence))
     
-    truncated_sequence = generated_sequence[:1, seq_len:]
-    print(truncated_sequence)
-    print(truncated_sequence.shape)
+    truncated_sequence = generated_sequence[:, seq_len:]
+
+    print(truncated_sequence[:, 0:args.b])
     
-    test = tokenizer.decode(truncated_sequence)
-    test.dump_midi(path = Path(args.save_dir, "decoded_midi.mid"))
-    print(test)
+    decoded_sequence = tokenizer.decode(truncated_sequence)
+    decoded_sequence.dump_midi(path = Path(args.save_dir, "decoded_midi.mid"))
+    print(decoded_sequence)
     
 if __name__ == "__main__":
     main()

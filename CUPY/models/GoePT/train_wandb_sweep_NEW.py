@@ -23,7 +23,7 @@ sys.path.append('.')
 from model import GoePT
 os.environ["WANDB_AGENT_DISABLE_FLAPPING"] = "true"
 
-def read_datasets(split, data_dir, context_length, batch_size, rng):
+def read_datasets(split, data_dir, context_length, batch_size, rng, config):
     # We recreate np.memmap every batch to avoid a memory leak, as per
     # https://stackoverflow.com/questions/45132940/numpy-memmap-memory-usage-want-to-iterate-once/61472122#61472122
 
@@ -113,7 +113,8 @@ def train(config=None):
         data_dir=config.data_dir,
         context_length=config.context_length,
         batch_size=config.batch_size,
-        rng=rng
+        rng=rng,
+        config=config
     )
 
     one_hot_lookup = cp.eye(tokenizer.vocab_size)
@@ -181,8 +182,8 @@ def train(config=None):
                 if loss_val_mean < best_val_loss:
                     checkpoint_path = os.path.join(config.checkpoint_dir, f'{wandb.run.name}_{iter_num}.json')
                     state_dict = model.state_dict()
-                    #with open(checkpoint_path, mode='w', encoding='utf-8') as out_file:
-                    #    json.dump(state_dict, out_file)
+                    with open(checkpoint_path, mode='w', encoding='utf-8') as out_file:
+                        json.dump(state_dict, out_file)
 
                     best_val_loss = loss_val_mean
 
@@ -207,13 +208,13 @@ if __name__ == '__main__':
             "goal": "minimize"   # Minimize validation loss
         },
         "parameters": {
-            "lr": {"values": [0.001, 0.01, 0.1]},  # Learning rate options
-            "batch_size": {"values": [4, 6, 8, 10, 12]},  # Batch size options
+            "lr": {"values": [0.001, 0.01, 0.1, 0.5]},  # Learning rate options
+            "batch_size": {"values": [4, 6, 8]},  # Batch size options
             "n_layer": {"values": [4, 6, 8, 10, 12]},  # Number of layers
-            "n_heads": {"values": [4, 6, 8, 10, 12, 14]},  # Number of attention heads
+            "n_heads": {"values": [4, 6, 8]},  # Number of attention heads
             "n_embd": {"values": [256, 384, 512]},  # Embedding size
             "dropout_rate": {"values": [0, 0.1, 0.2, 0.3]},  # Dropout
-            "epochs": {"value": 15},  # Fixed number of epochs
+            "epochs": {"value": 40},  # Fixed number of epochs
             "gradient_accumulation_steps": {"value": 32},  # Fixed value
             "context_length": {"values": [512]},  # Fixed value
             "seed": {"value": 1},  # Random seed
@@ -221,14 +222,14 @@ if __name__ == '__main__':
             "checkpoint_dir": {"value": "/csghome/hpdc04/Transformer_Code/checkpoints/"},  # Fixed checkpoint dir
             "vo_size": {"values": [512, 1024, 2048, 4096]},  # Vocabulary size for tokenizer
             "tokenizer_name": {"values": ["Structured", "REMI"]},  # Tokenizer class name
-            "vocab_file": {
-                "value": ""
-            }  ,# Tokenizer vocab file
-            "manually_set_sos_eos_trunc": {"values": [True, False]}
+            "manually_set_sos_eos_trunc": {"values": [True]},
+            "eval_interval": {"value": 5},
+            "eval_iters" : {"value": 200},
+            "log_interval" : {"value" : 5}
         }
     }
     # Initialize the sweep
     sweep_id = wandb.sweep(sweep_config, project="MIDI-Transformer-parameter-search")
 
     # Run the sweep
-    wandb.agent(sweep_id, function=train, count=20)
+    wandb.agent(sweep_id, function=train)
