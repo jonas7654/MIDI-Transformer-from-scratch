@@ -7,12 +7,12 @@ checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save
 
 tokenizer_name = Structured
 tokenizer_name_str = tokenizer_name.__name__
-
+vo_size = 4096
 
 """
 The following section is only important after generating a tokenizer
 """
-vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_{tokenizer_name_str}_4096.json"  # Path to the tokenizer vocabulary file
+vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_{tokenizer_name_str}_{vo_size}.json"  # Path to the tokenizer vocabulary file
 
 
 # Special tokens for the tokenizer
