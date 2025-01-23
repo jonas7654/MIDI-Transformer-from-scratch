@@ -68,23 +68,34 @@ def main():
                                       verbose = True,
                                       seq_length = seq_len,
                                       manually_add_sos_eos = args.manually_set_sos_eos_trunc)
-    
-    # :TODO adjust model.batch_size to fit the passed batch
-    
+        
     softmax = Softmax(axis = 0) # use rows
     generated_sequence = cp.asanyarray(tokenized_data.copy())
-    
+    print(generated_sequence)
+    print(generated_sequence[:, -seq_len:])
     for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
+        print(input_context)
         logits, _ = model.forward(input_context, targets = None)
-
-        # Apply softmax with temperature
-        predictions = softmax_with_temperature(logits, temperature=0.00001, Softmax=softmax)
+        # Apply softmax with temperature 
+        #pad_mask = (input_context == 0)  # Shape: (batch_size, seq_length)
+        # Broadcast the mask to match logits shape (batch_size, seq_length, vocab_size)
+        #pad_mask_expanded = pad_mask[:, :, None]  # Add a new dimension for vocab_size
+            
+        # Mask logits by setting values to -inf where pad_mask_expanded is True
+        #logits = cp.where(pad_mask_expanded, -cp.inf, logits)
+        
+        predictions = softmax_with_temperature(logits, temperature=0.8, Softmax=softmax)
         next_tokens = cp.argmax(predictions, axis=-1)  # axis -1 uses the last axis which is the vocabulary
         #print(f"Iteration {idx}: Next tokens: {next_tokens}")
         
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
+        
+        # End condition
+        eos_token_index = 2
+        if cp.any(next_tokens == eos_token_index):
+            break
     
     
     

@@ -158,7 +158,7 @@ def main():
 
     # Initialize Weights & Biases (wandb)
     wandb.init(
-        project="MIDI-Transformer", 
+        project="MIDI-Transformer-masked-loss", 
         config={
             "data_dir": config.data_dir,
             "checkpoint_dir": config.checkpoint_dir,

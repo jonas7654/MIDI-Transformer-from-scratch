@@ -121,8 +121,15 @@ class GoePT():
         # Position embeddings of shape (t, n_embd)
         pos_emb = self.transformer['wpe'].forward(pos)
 
+        # Create Attention Mask (b, t)
+        attention_mask = (idx != 0)  
+        attention_mask = attention_mask[:, :, None] # only mask B, T dimension
+
+        
         # Main transformer
         x = self.transformer['drop'].forward(tok_emb + pos_emb)
+        x = x * attention_mask  # Apply attention mask
+        
         for block in self.transformer['h']:
             x = block.forward(x)
         x = self.transformer['ln_f'].forward(x)
