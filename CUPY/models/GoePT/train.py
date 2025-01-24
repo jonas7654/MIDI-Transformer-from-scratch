@@ -159,7 +159,7 @@ def main():
 
     # Initialize Weights & Biases (wandb)
     wandb.init(
-        project=f"MIDI-Transformer-Regularization_{config.regularization}", 
+        project=f"MIDI-Transformer", 
         config={
             "data_dir": config.data_dir,
             "checkpoint_dir": config.checkpoint_dir,

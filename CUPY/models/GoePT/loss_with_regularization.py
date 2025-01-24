@@ -8,7 +8,7 @@ def cross_entropy_loss_regularized(y_pred: ArrayLike, y_true: ArrayLike, padding
     """
     Compute cross entropy loss between true 1-hot encoded vector and softmax output of a predictor.
     """
-    
+        
     # Clip predictions to prevent log(0)
     y_pred = cp.clip(y_pred, eps, 1 - eps)
     
