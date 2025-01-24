@@ -73,7 +73,6 @@ def main():
     generated_sequence = cp.asanyarray(tokenized_data.copy())
     
     # Remove the EOS token : TODO : dont duplicate tokens at the end
-    generated_sequence[:, 44:] = 328
     
     print(f"context_size: {seq_len}")
     print(f"Input sequence: \n {generated_sequence}")
