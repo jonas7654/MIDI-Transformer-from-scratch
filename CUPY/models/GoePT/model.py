@@ -137,12 +137,13 @@ class GoePT():
             logits = self.lm_head.forward(x)
 
             ic(logits.shape, targets.shape)
+            print(logits.shape, targets.shape)
             logits_for_loss = logits.reshape(-1, logits.shape[-1])
             
             targets_for_loss = cp.expand_dims(targets.reshape(-1), 1)
             targets_for_loss = scr.one_hot(targets_for_loss, self.vocab_size)
 
-            if (self.regularization):
+            if (self.regularization == True):
                 loss = cross_entropy_loss_regularized(logits_for_loss, targets_for_loss,
                                                          alpha = self.reg_alpha)
             else:

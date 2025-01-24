@@ -109,6 +109,7 @@ def get_log_output_table(log_output_buffer: deque) -> Table:
     table.add_column('Epoch', style='cyan')
     table.add_column('Train loss', style='green')
 
+
     for timestamp, epoch, loss in log_output_buffer:
         table.add_row(f'{timestamp}', f'{epoch}', f'{loss:.5e}')
 
@@ -158,7 +159,7 @@ def main():
 
     # Initialize Weights & Biases (wandb)
     wandb.init(
-        project="MIDI-Transformer", 
+        project=f"MIDI-Transformer-Regularization_{config.regularization}", 
         config={
             "data_dir": config.data_dir,
             "checkpoint_dir": config.checkpoint_dir,
@@ -266,7 +267,8 @@ def main():
 
                 model.backward(grad)
 
-                log_output_buffer.append((datetime.datetime.now().isoformat(), iter_num + 1, loss.item()*config.gradient_accumulation_steps))
+                log_output_buffer.append((datetime.datetime.now().isoformat(), iter_num + 1, loss.item()*config.gradient_accumulation_steps,
+                                          ))
 
                 progress_step.console.clear()
                 progress_step.console.print(table_update_func())
