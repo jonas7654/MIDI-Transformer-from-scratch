@@ -7,7 +7,7 @@ checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save
 
 tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
-vo_size = 4096
+vo_size = 196
 
 """
 The following section is only important after generating a tokenizer
@@ -20,11 +20,11 @@ manually_set_sos_eos_trunc = True
 
 # Training parameters
 batch_size = 12  # Default batch size
-context_length = 256  # Sequence context length
-epochs = 150  # Number of epochs to train
+context_length = 192  # Sequence context length
+epochs = 100  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.05 # Initial learning rate
-dropout_rate = 0 # Default dropout rate
+learning_rate = 0.01 # Initial learning rate
+dropout_rate = 0.1 # Default dropout rate
 n_layer = 10  # Number of layers in the transformer
 n_embd = 384  # Embedding size
 n_heads = 6  # Number of attention heads
