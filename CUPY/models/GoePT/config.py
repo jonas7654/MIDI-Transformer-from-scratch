@@ -22,15 +22,15 @@ manually_set_sos_eos_trunc = True
 
 # REGULARIZATION
 regularization = True
-reg_alpha = 0.1
+reg_alpha = 100000
 #
 
-batch_size = 32  # Default batch size
-context_length = 64  # Sequence context length
+batch_size = 24  # Default batch size
+context_length = 128  # Sequence context length
 epochs = 150  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
 learning_rate = 0.001 # Initial learning rate
-dropout_rate = 0.15 # Default dropout rate
+dropout_rate = 0 # Default dropout rate
 n_layer = 8  # Number of layers in the transformer
 n_embd = 384  # Embedding size
 n_heads = 6  # Number of attention heads

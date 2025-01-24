@@ -36,7 +36,8 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
                             save_programs=None,
                             verbose=True,
                             seq_length = None,
-                            manually_add_sos_eos = False):
+                            manually_add_sos_eos = False,
+                            subset):
     """
     @Jonas
     Custom method to tokenize files and return a NumPy array.
@@ -173,7 +174,7 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
         print(tabulate(token_stats_table, headers=["Token Type", "Count/Details"], tablefmt="grid"))
 
         
-        visualize_tokenized_data(token_array, pad_token, sos_token, eos_token, trunc_token) 
+        visualize_tokenized_data_combined(token_array, pad_token, sos_token, eos_token, trunc_token, subset = subset) 
 
     self._verbose = False
     return token_array
@@ -218,7 +219,8 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
 
 
 def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
-                             output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/"):
+                             output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/",
+                             subset = None):
     os.makedirs(output_path, exist_ok=True)
     
     # Analyze sequence lengths
@@ -283,11 +285,6 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 
 def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
                                       output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/"):
-    import os
-    from pathlib import Path
-    import numpy as np
-    from collections import Counter
-    import matplotlib.pyplot as plt
 
     os.makedirs(output_path, exist_ok=True)
     output_path = Path(output_path, f"combined_visualization_{config.context_length}_{config.vo_size}_{config.tokenizer_name_str}.png")
