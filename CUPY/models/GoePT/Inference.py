@@ -26,9 +26,9 @@ def load_model(checkpoint_path, vocab_file, batch_size):
     ic(tokenizer)
     return model, tokenizer
 
-def softmax_with_temperature(logits, temperature=1.0, Softmax=None):
-    logits = logits / temperature
-    return Softmax.forward(logits)
+def softmax_with_temperature(logits, temperature=1.0, axis = -1):
+    exp_logits = np.exp(logits / temperature)
+    return exp_logits / np.sum(exp_logits, axis = axis)
 
 def tokenize_input(midi_input, tokenizer):
     # Tokenize and return integer representation
@@ -71,23 +71,20 @@ def main():
     
     # :TODO adjust model.batch_size to fit the passed batch
     
+    
     softmax = Softmax(axis = 0) # use rows
     generated_sequence = cp.asanyarray(tokenized_data.copy())
     
+    
+
+    
     for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
-        logits, _ = model.forward(input_context, targets = None)
-
-        # Apply softmax with temperature
-        predictions = softmax_with_temperature(logits, temperature=0.00001, Softmax=softmax)
-        next_tokens = cp.argmax(predictions, axis=-1)  # axis -1 uses the last axis which is the vocabulary
-        #print(f"Iteration {idx}: Next tokens: {next_tokens}")
-        
+        logits, _ = model.forward(input_context, targets = None)# Apply softmax with temperature
+        predictions = softmax_with_temperature(logits, temperature = 1)
+        next_tokens = cp.argmax(predictions, axis = -1)  # axis -1 uses the last axis which is the vocabulary
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
-    
-    
-    
     # convert back to numpy
     generated_sequence = generated_sequence.get()
     

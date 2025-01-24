@@ -178,7 +178,9 @@ def main():
             "n_embd" : config.n_embd,
             "n_heads" : config.n_heads,
             "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc,
-            "tokenizer": config.tokenizer_name_str
+            "tokenizer": config.tokenizer_name_str,
+            "regularization" : config.regularization,
+            "reg_alpha" : config.reg_alpha
         }
     )
     
@@ -190,7 +192,9 @@ def main():
                   batch_size=config.batch_size,
                   lr=config.learning_rate,
                   vocab_size = tokenizer.vocab_size,
-                  n_heads = config.n_heads)
+                  n_heads = config.n_heads,
+                  regularization = config.regularization,
+                  reg_alpha = config.reg_alpha)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:

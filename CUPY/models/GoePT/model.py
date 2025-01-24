@@ -23,6 +23,7 @@ sys.path.append('.')
 
 import layers as scr
 from loss import cross_entropy_loss
+from loss_with_regularization import cross_entropy_loss_regularized
 from utils import compress_numpy_array, decompress_numpy_array
 
 import warnings
@@ -43,6 +44,8 @@ class GoePT():
                     n_embd: int=384, # d_model, 3 * d_model = 1152
                     n_heads: int=6,
                     dropout: float=0.2,
+                    regularization = False,
+                    reg_alpha = 0.1,
                     lr: float=1e-3) -> None:
 
         self.vocab_size = vocab_size
@@ -53,6 +56,8 @@ class GoePT():
         self.dropout = dropout
         self.lr = lr
         self.n_heads = n_heads
+        self.regularization = regularization
+        self.reg_alpha = reg_alpha
         
         # Change this for cupy compatibility
         self.rng = cp.random
@@ -109,7 +114,6 @@ class GoePT():
 
 
     def forward(self, idx, targets=None):
-        print(idx.shape)
         b, t = idx.shape
         assert t <= self.context_length, f"Cannot forward sequence of length {t}, block size is only {self.context_length}"
         pos = cp.arange(0, t, dtype=cp.int64) # shape (t)
@@ -138,7 +142,11 @@ class GoePT():
             targets_for_loss = cp.expand_dims(targets.reshape(-1), 1)
             targets_for_loss = scr.one_hot(targets_for_loss, self.vocab_size)
 
-            loss = cross_entropy_loss(logits_for_loss, targets_for_loss)
+            if (self.regularization):
+                loss = cross_entropy_loss_regularized(logits_for_loss, targets_for_loss,
+                                                         alpha = self.reg_alpha)
+            else:
+                loss = cross_entropy_loss(logits_for_loss, targets_for_loss)
         else:
             # inference-time mini-optimization: only forward the lm_head on the very last position
             logits = self.lm_head.forward(x[:, [-1], :]) # note: using list [-1] to preserve the time dim
