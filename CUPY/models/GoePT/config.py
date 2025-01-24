@@ -5,9 +5,9 @@ from miditok import REMI, Structured
 data_dir = "/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/"  # Path to the dataset directory
 checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save model checkpoints
 
-tokenizer_name = REMI
+tokenizer_name = Structured
 tokenizer_name_str = tokenizer_name.__name__
-vo_size = 196
+vo_size = 256
 
 """
 The following section is only important after generating a tokenizer
@@ -19,11 +19,11 @@ vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer
 manually_set_sos_eos_trunc = True
 
 # Training parameters
-batch_size = 12  # Default batch size
-context_length = 192  # Sequence context length
+batch_size = 18  # Default batch size
+context_length = 64  # Sequence context length
 epochs = 100  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.01 # Initial learning rate
+learning_rate = 0.001 # Initial learning rate
 dropout_rate = 0.1 # Default dropout rate
 n_layer = 10  # Number of layers in the transformer
 n_embd = 384  # Embedding size
