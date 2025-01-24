@@ -343,7 +343,9 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
     plt.savefig(output_path, dpi=300)
     plt.close()
     print(f"Combined visualization saved at: {output_path}")
-
+    
+    print("Token Frequency Sample (Top 10):")
+    print(dict(Counter(token_flat).most_common(10)))
 
 
 
