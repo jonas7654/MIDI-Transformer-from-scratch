@@ -27,7 +27,6 @@ SCORE_LOADING_EXCEPTION = (
 )
 """
 Reference: https://github.com/Natooz/MidiTok/blob/515ed5078740ca7dcd643501adc0755b244c97ad/src/miditok/midi_tokenizer.py
-
 """
 
 
@@ -37,7 +36,7 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
                             verbose=True,
                             seq_length = None,
                             manually_add_sos_eos = False,
-                            subset):
+                            subset = None):
     """
     @Jonas
     Custom method to tokenize files and return a NumPy array.
@@ -173,8 +172,8 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
         print("\nSpecial Token Stats:")
         print(tabulate(token_stats_table, headers=["Token Type", "Count/Details"], tablefmt="grid"))
 
-        
-        visualize_tokenized_data_combined(token_array, pad_token, sos_token, eos_token, trunc_token, subset = subset) 
+        if not (subset == None):
+            visualize_tokenized_data_combined(token_array, pad_token, sos_token, eos_token, trunc_token, subset = subset) 
 
     self._verbose = False
     return token_array
@@ -284,10 +283,11 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 
 
 def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
-                                      output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/"):
+                                      output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/",
+                                      subset = None):
 
     os.makedirs(output_path, exist_ok=True)
-    output_path = Path(output_path, f"combined_visualization_{config.context_length}_{config.vo_size}_{config.tokenizer_name_str}.png")
+    output_path = Path(output_path, f"combined_visualization_{config.context_length}_{config.vo_size}_{config.tokenizer_name_str}_{subset}_manual_tokens_{config.manually_set_sos_eos_trunc}.png")
     
     # Analyze sequence lengths
     seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]

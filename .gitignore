@@ -10,3 +10,4 @@ run_scripts/wandb/debug-internal.log
 run_scripts/wandb/debug.log
 run_scripts/wandb/latest-run
 run_scripts/train_losses.csv
+/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/
