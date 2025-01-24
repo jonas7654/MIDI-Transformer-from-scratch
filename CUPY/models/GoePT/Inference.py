@@ -67,28 +67,27 @@ def main():
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = file_path,
                                       verbose = True,
                                       seq_length = seq_len,
-                                      manually_add_sos_eos = True)
-    
-    # :TODO adjust model.batch_size to fit the passed batch
+                                      manually_add_sos_eos = False) # args.manually_set_sos_eos_trunc
     
     
-    softmax = Softmax(axis = 0) # use rows
     generated_sequence = cp.asanyarray(tokenized_data.copy())
     
-    # Remove the EOS token
-    generated_sequence[:, seq_len - 1] = generated_sequence[:, seq_len - 2]
+    # Remove the EOS token : TODO : dont duplicate tokens at the end
+    generated_sequence[:, 44:] = 328
     
+    print(f"context_size: {seq_len}")
     print(f"Input sequence: \n {generated_sequence}")
     
     
     
     for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
-        logits, _ = model.forward(input_context, targets = None)# Apply softmax with temperature
-        predictions = softmax_with_temperature(logits, temperature = 5)
+        logits, _ = model.forward(input_context, targets = None)
+        predictions = softmax_with_temperature(logits, temperature = 1)
         next_tokens = cp.argmax(predictions, axis = -1)  # axis -1 uses the last axis which is the vocabulary
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
+        
     # convert back to numpy
     generated_sequence = generated_sequence.get()
     
