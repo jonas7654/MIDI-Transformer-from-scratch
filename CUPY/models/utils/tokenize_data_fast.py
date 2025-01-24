@@ -218,7 +218,7 @@ def analyze_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id
 
 
 def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
-                             output_path="/csghome/hpdc04/Transformer_Code/CUPY/models/utils/token_plots"):
+                             output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/"):
     os.makedirs(output_path, exist_ok=True)
     
     # Analyze sequence lengths
@@ -272,6 +272,83 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
     
     print("Token Frequency Sample (Top 10):")
     print(dict(Counter(token_flat).most_common(10)))
+
+
+
+
+
+
+
+
+
+def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
+                                      output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/"):
+    import os
+    from pathlib import Path
+    import numpy as np
+    from collections import Counter
+    import matplotlib.pyplot as plt
+
+    os.makedirs(output_path, exist_ok=True)
+    output_path = Path(output_path, f"combined_visualization_{config.context_length}_{config.vo_size}_{config.tokenizer_name_str}.png")
+    
+    # Analyze sequence lengths
+    seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]
+    
+    # Token frequencies
+    token_flat = token_array.flatten()
+    token_counts = Counter(token_flat)
+    
+    # Special token counts
+    special_token_counts = {
+        "PAD": token_counts.get(pad_token_id, 0),
+        "SOS": token_counts.get(sos_token_id, 0),
+        "EOS": token_counts.get(eos_token_id, 0),
+        "TRUNC": token_counts.get(trunc_token_id, 0)  # Custom truncate token
+    }
+
+    # Create a figure with subplots
+    fig, axs = plt.subplots(2, 2, figsize=(16, 12))
+    
+    # Plot 1: Sequence Length Distribution
+    axs[0, 0].hist(seq_lengths, bins=50, color="skyblue", edgecolor="black")
+    axs[0, 0].set_title("Sequence Length Distribution")
+    axs[0, 0].set_xlabel("Sequence Length")
+    axs[0, 0].set_ylabel("Frequency")
+    axs[0, 0].grid(axis="y", linestyle="--", alpha=0.7)
+
+    # Plot 2: Token Frequency Distribution
+    axs[0, 1].bar(range(len(token_counts)), token_counts.values(), color="lightcoral")
+    axs[0, 1].set_title("Token Frequency Distribution")
+    axs[0, 1].set_xlabel("Token ID")
+    axs[0, 1].set_ylabel("Count")
+    axs[0, 1].set_xticks(range(0, max(token_counts.keys()) + 1, max(1, len(token_counts) // 20)))
+    axs[0, 1].tick_params(axis="x", rotation=45)
+    axs[0, 1].grid(axis="y", linestyle="--", alpha=0.7)
+
+    # Plot 3: Special Token Statistics
+    axs[1, 0].bar(special_token_counts.keys(), special_token_counts.values(), color="lightgreen")
+    axs[1, 0].set_title("Special Token Statistics")
+    axs[1, 0].set_xlabel("Special Token")
+    axs[1, 0].set_ylabel("Count")
+    axs[1, 0].grid(axis="y", linestyle="--", alpha=0.7)
+
+    # Plot 4: Sequence Length Boxplot
+    axs[1, 1].boxplot(seq_lengths, vert=False, patch_artist=True, boxprops=dict(facecolor="lightblue"))
+    axs[1, 1].set_title("Sequence Length Boxplot")
+    axs[1, 1].set_xlabel("Sequence Length")
+    axs[1, 1].grid(axis="x", linestyle="--", alpha=0.7)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save the figure
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    print(f"Combined visualization saved at: {output_path}")
+
+
+
 
 """
 @Author: Jonas

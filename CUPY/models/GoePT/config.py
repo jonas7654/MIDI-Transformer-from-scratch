@@ -5,7 +5,7 @@ from miditok import REMI, Structured
 data_dir = "/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/"  # Path to the dataset directory
 checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save model checkpoints
 
-tokenizer_name = Structured
+tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
 vo_size = 256
 
@@ -19,6 +19,12 @@ vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer
 manually_set_sos_eos_trunc = True
 
 # Training parameters
+
+# REGULARIZATION
+regularization = True
+reg_alpha = 0.1
+#
+
 batch_size = 32  # Default batch size
 context_length = 64  # Sequence context length
 epochs = 150  # Number of epochs to train
