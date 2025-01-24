@@ -67,7 +67,7 @@ def main():
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = file_path,
                                       verbose = True,
                                       seq_length = seq_len,
-                                      manually_add_sos_eos = args.manually_set_sos_eos_trunc)
+                                      manually_add_sos_eos = True)
     
     # :TODO adjust model.batch_size to fit the passed batch
     
@@ -75,13 +75,17 @@ def main():
     softmax = Softmax(axis = 0) # use rows
     generated_sequence = cp.asanyarray(tokenized_data.copy())
     
+    # Remove the EOS token
+    generated_sequence[:, seq_len - 1] = generated_sequence[:, seq_len - 2]
     
-
+    print(f"Input sequence: \n {generated_sequence}")
+    
+    
     
     for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
         logits, _ = model.forward(input_context, targets = None)# Apply softmax with temperature
-        predictions = softmax_with_temperature(logits, temperature = 1)
+        predictions = softmax_with_temperature(logits, temperature = 5)
         next_tokens = cp.argmax(predictions, axis = -1)  # axis -1 uses the last axis which is the vocabulary
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
@@ -90,6 +94,7 @@ def main():
     
     print("---------------------")
     
+    # Just decode the predicted sequence
     truncated_sequence = generated_sequence[:, seq_len:]
 
     print(truncated_sequence[:, 0:args.b])
