@@ -78,16 +78,32 @@ for files_paths, subset_name in (
      # Save the subset directory for later    
      train_val_test_path[subset_name] = subset_chunks_dir
     
+    # move the midi files into the corresponding subset folder
+     for midi_file in files_paths:
+        midi_file = Path(midi_file)
+        dst = subset_chunks_dir / midi_file.name  
+        try:
+            #print(f"Moving {midi_file} to {dst}")
+            shutil.copy(midi_file, dst)
+        except Exception as e:
+            print(f"Error moving {midi_file} to {dst}: {e}")
     
-     # Perform data augmentation
+    
+    
+        """
+    velocity_offsets – list of velocity offsets for augmentation. If you plan to tokenize these files,
+    the velocity offsets should be chosen accordingly to the number of velocities in your tokenizer’s
+    vocabulary (num_velocities). (default: None)
+         """
      do_augment = True
-     if do_augment:
+     if (do_augment):
+         # Perform data augmentation
          augment_dataset(
-             subset_chunks_dir,
-             pitch_offsets=[-12, 12],
-             velocity_offsets=[0, 0],
-             duration_offsets=[0, 0],
-         )
+         subset_chunks_dir,
+         pitch_offsets=[-12, 12],
+         velocity_offsets=[0, 0],
+         duration_offsets=[0, 0],
+        )    
 
 
     

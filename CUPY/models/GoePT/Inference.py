@@ -71,6 +71,7 @@ def main():
     
     
     generated_sequence = cp.asanyarray(tokenized_data.copy())
+    generated_sequence[:, seq_len-1] = 186
     
     # Remove the EOS token : TODO : dont duplicate tokens at the end
     print(f"context_size: {seq_len}")
@@ -96,7 +97,7 @@ def main():
 
     print(truncated_sequence[:, 0:args.b])
     
-    decoded_sequence = tokenizer.decode(truncated_sequence)
+    decoded_sequence = tokenizer.decode(generated_sequence)
     decoded_sequence.dump_midi(path = Path(args.save_dir, "decoded_midi.mid"))
     print(decoded_sequence)
     
