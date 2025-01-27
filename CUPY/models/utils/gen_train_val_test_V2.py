@@ -14,6 +14,8 @@ import config
 from miditok import Structured, REMI, TokenizerConfig  # here we choose to use REMI
 from miditok.data_augmentation import augment_dataset
 from miditok.utils import split_files_for_training
+from miditok.pytorch_data import DatasetMIDI, DataCollator
+from torch.utils.data import DataLoader
 
 seed(256)
 
@@ -32,7 +34,7 @@ Here we specify the folder structure.
 
 current_dir = os.getcwd()
 data_path = os.path.join(os.path.dirname(current_dir) , "datasets")
-name_of_midi_data = "transposed_midi"
+name_of_midi_data = "small_midi"
 
 midi_paths = list(Path(data_path, name_of_midi_data).glob("*.mid")) 
 tokenizer_path = os.path.join(os.path.dirname(current_dir), "tokenizers/")
@@ -78,9 +80,17 @@ for files_paths, subset_name in (
      # Save the subset directory for later    
      train_val_test_path[subset_name] = subset_chunks_dir
     
+        # Split files into chunks for training
+     split_files_for_training(
+         files_paths=files_paths,
+         tokenizer=tokenizer,
+         save_dir=subset_chunks_dir,
+         max_seq_len=seq_length,
+         num_overlap_bars=2,  # Adjust as needed
+     )
     
      # Perform data augmentation
-     do_augment = True
+     do_augment = False
      if do_augment:
          augment_dataset(
              subset_chunks_dir,
@@ -88,6 +98,7 @@ for files_paths, subset_name in (
              velocity_offsets=[0, 0],
              duration_offsets=[0, 0],
          )
+     
 
 
     
@@ -96,42 +107,46 @@ for files_paths, subset_name in (
 Monkey Patch tokenizer.tokenize_data_fast
 """
 
+collator = DataCollator(tokenizer.pad_token_id)
 
-output_path = os.path.join(data_path, "tokenized")
-
-# Create train, val, test token datasets
-size_dict = {}
-
+# Loop through subsets (train/val/test)
 for subset in train_val_test_path:
+    print(f"Processing {subset} subset...")
 
-    # Get a list of all midi files (as paths)
+    # Initialize a list to collect all tokenized sequences for this subset
+    all_tokens = []
+
+    # Get the MIDI files in the directory for this subset
     files_path = train_val_test_path[subset]
-    
-    #tokenizer.tokenize_dataset(files_paths = files_path,
-    #                           out_dir = Path(files_path, "json"),
-    #                           overwrite_mode = True,
-    #                           verbose = True)
-    
-    
+    midi_files = list(Path(files_path).glob("**/*.mid"))  # Find all .mid files recursively
 
-    tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = files_path,
-                                                       verbose = True,
-                                                       seq_length = seq_length,
-                                                       manually_add_sos_eos = config.manually_set_sos_eos_trunc,
-                                                       subset = subset)
-    
-    # :NOTE manually_set_sos_eos_trunc is defined globally at the beginning
-    # Sanity check
-    assert np.all(tokenized_data < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
-    ic(tokenized_data[:100])
-    ic(tokenized_data.shape)
+    # Ensure midi_files is not empty
+    if not midi_files:
+        raise ValueError(f"No MIDI files found in the directory: {files_path}")
 
-    # SAVE
-    save_dir = os.path.join(output_path, f"{config.vo_size}_{subset}_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin")
-    Path(output_path).mkdir(parents = True, exist_ok = True)
-    tokenized_data.astype(np.uint16).tofile(save_dir)
-    
-    
+    # Create the dataset
+    subset_dataset = DatasetMIDI(
+        files_paths=midi_files,  # Pass the list of MIDI files
+        tokenizer=tokenizer,
+        max_seq_len=seq_length,
+        bos_token_id=tokenizer.pad_token_id,
+        eos_token_id=tokenizer["BOS_None"],
+    )
+    subset_loader = DataLoader(dataset=subset_dataset, collate_fn=collator)
 
+    # Iterate through the DataLoader and save tokens
+    for batch in subset_loader:
+        input_ids = batch["input_ids"]  # Extract input_ids
+        all_tokens.extend(input_ids.tolist())  # Convert tensor to list and collect sequences
 
+    # Convert to NumPy array and save as a binary file
+    tokenized_data = np.array(all_tokens, dtype=np.uint16)
+    save_dir = os.path.join(
+        output_path,
+        f"{subset}_tokenized_seq_len_{seq_length}.bin"
+    )
+    tokenized_data.tofile(save_dir)  # Save as binary file
 
+    # Update size_dict with the size of this subset
+    size_dict[subset] = tokenized_data.shape[0]
+    print(f"Saved {subset} subset to {save_dir}, size: {size_dict[subset]} sequences.")

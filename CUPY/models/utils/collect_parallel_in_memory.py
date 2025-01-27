@@ -301,7 +301,7 @@ def main():
     #    for future in futures:
     #        results.append(future.result())
     
-    with ProcessPoolExecutor(max_workers=96) as executor:
+    with ProcessPoolExecutor(max_workers=48) as executor:
         futures = [
             executor.submit(process_file, file, output_folder, idx + 1)
             for idx, file in enumerate(midi_files_list)

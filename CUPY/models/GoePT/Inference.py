@@ -67,13 +67,12 @@ def main():
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = file_path,
                                       verbose = True,
                                       seq_length = seq_len,
-                                      manually_add_sos_eos = False) # args.manually_set_sos_eos_trunc
+                                      manually_add_sos_eos = args.manually_set_sos_eos_trunc) # args.manually_set_sos_eos_trunc
     
     
     generated_sequence = cp.asanyarray(tokenized_data.copy())
     
     # Remove the EOS token : TODO : dont duplicate tokens at the end
-    
     print(f"context_size: {seq_len}")
     print(f"Input sequence: \n {generated_sequence}")
     

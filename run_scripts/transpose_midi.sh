@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#SBATCH --gres gpu:0
+#SBATCH --mem 15G
+#SBATCH --cpus-per-task 1
+#SBATCH --time 500:00
+#SBATCH -p exercise-eml
+#SBATCH -o logs/tranpose.log
 
 
 # load appropriate conda paths, because we are not in a login shell
