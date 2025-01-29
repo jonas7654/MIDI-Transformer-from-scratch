@@ -70,16 +70,17 @@ def main():
                                       manually_add_sos_eos = args.manually_set_sos_eos_trunc) # args.manually_set_sos_eos_trunc
     
     
-    generated_sequence = cp.asanyarray(tokenized_data.copy())
+    
 
     
     # Remove the EOS token : TODO : dont duplicate tokens at the end
+    generated_sequence = cp.asanyarray(tokenized_data.copy())
     print(f"context_size: {seq_len}")
     print(f"Input sequence: \n {generated_sequence}")
     
     
     
-    for idx in range(args.b):
+    for idx in range(seq_len):
         input_context = generated_sequence[:, -seq_len:]
         logits, _ = model.forward(input_context, targets = None)
         predictions = softmax_with_temperature(logits, temperature = 1)
@@ -97,7 +98,7 @@ def main():
 
     print(truncated_sequence[:, 0:args.b])
     
-    decoded_sequence = tokenizer.decode(generated_sequence)
+    decoded_sequence = tokenizer.decode(truncated_sequence)
     decoded_sequence.dump_midi(path = Path(args.save_dir, "decoded_midi.mid"))
     print(decoded_sequence)
     
