@@ -775,14 +775,17 @@ class Block():
                             c_proj_init_func=c_proj_init_func,
                             bias_init_func=bias_init_func)
 
+        self.attention_weights = None
 
     def forward(self, input: ArrayLike) -> cp.ndarray:
 
         input = cp.asanyarray(input)
 
         x = self.ln_1.forward(input)
-        x = self.attn.forward(x)[0]
-
+        x, attn = self.attn.forward(x)
+        
+        self.attention_weights = attn
+        
         x = input + x
 
         residual = copy.deepcopy(x)
@@ -793,7 +796,9 @@ class Block():
 
         return x
 
-
+    def get_attention_weights(self):
+        return self.attention_weights
+    
     def backward(self, grad_output: ArrayLike) -> cp.ndarray:
         grad_output = cp.asanyarray(grad_output)
 

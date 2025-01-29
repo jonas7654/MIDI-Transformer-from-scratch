@@ -118,6 +118,9 @@ class GoePT():
         assert t <= self.context_length, f"Cannot forward sequence of length {t}, block size is only {self.context_length}"
         pos = cp.arange(0, t, dtype=cp.int64) # shape (t)
 
+        # Forward pass while collecting attention weights
+        attention_maps = []
+        
         # Forward the GPT model itself
         # Token embeddings of shape (b, t, n_embd)
         tok_emb = self.transformer['wte'].forward(idx)
@@ -127,8 +130,11 @@ class GoePT():
 
         # Main transformer
         x = self.transformer['drop'].forward(tok_emb + pos_emb)
+        
         for block in self.transformer['h']:
             x = block.forward(x)
+            attention_maps.append(block.get_attention_weights())
+            
         x = self.transformer['ln_f'].forward(x)
         
         # Compute loss and return
@@ -153,7 +159,7 @@ class GoePT():
             logits = self.lm_head.forward(x[:, [-1], :]) # note: using list [-1] to preserve the time dim
             loss = None
 
-        return logits, loss
+        return logits, loss, attention_maps
 
 
     def backward(self, x):

@@ -93,22 +93,23 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
     return x, y
 
 
-def compute_gradient(target, prediction, one_hot_lookup):
-
+def compute_gradient(target, prediction, one_hot_lookup, alpha, padding_token_idx = 0):
+    target = cp.stack([one_hot_lookup[token] for token in target])
+    
     if (config.regularization):
             # Compute gradient for cross-entropy loss
-        cross_entropy_grad = prediction - target_one_hot
+        cross_entropy_grad = prediction - target
 
         # Compute gradient for padding penalty regularization
         batch_size = prediction.shape[0]
         padding_grad = cp.zeros_like(prediction)
-        padding_grad[:, padding_token_idx] = alpha / batch_size
+        padding_grad[:, padding_token_idx] =  alpha / batch_size
 
         # Combine gradients
         total_grad = cross_entropy_grad + padding_grad
         return total_grad, target
     
-    target = cp.stack([one_hot_lookup[token] for token in target])
+    
 
     return (prediction - target), target
 
@@ -272,7 +273,7 @@ def main():
                     f.write(f'{iter_num}\t{loss:.8f}\n')
 
                 # Get raw gradient
-                raw_grad, target = compute_gradient(Y, logits, one_hot_lookup)
+                raw_grad, target = compute_gradient(Y, logits, one_hot_lookup, model.reg_alpha)
 
                 # Continue backward
                 grad = loss*raw_grad
@@ -310,8 +311,18 @@ def main():
 
                     X, Y = get_batch('val')
 
-                    logits, loss = model.forward(X, Y)
-
+                    logits, loss, attn_weights = model.forward(X, Y)
+                    
+                    plot_attention_head(attention_maps[0], layer=0, head=0, example=0)
+                    plot_attention_grid(attention_maps, example=0)
+                    # Log to wandb
+                    for layer_idx, attn in enumerate(attention_maps):
+                        for head_idx in range(attn.shape[1]):
+                            fig = plot_attention_head(attn, layer=layer_idx, head=head_idx, example=0)
+                            wandb.log({f"attention/layer_{layer_idx}_head_{head_idx}": wandb.Image(fig)})
+                            plt.close(fig)
+                    
+                    
                     losses_val[k] = loss.item()
 
                     progress_step.advance(task_id)
