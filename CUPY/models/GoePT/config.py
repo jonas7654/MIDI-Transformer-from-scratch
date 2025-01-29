@@ -7,7 +7,7 @@ checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save
 
 tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
-vo_size = 1024
+vo_size = 512
 
 """
 The following section is only important after generating a tokenizer
@@ -16,17 +16,17 @@ vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer
 
 
 # Special tokens for the tokenizer
-manually_set_sos_eos_trunc = True
+manually_set_sos_eos_trunc = True #:NOTE At the moment we do not have a TRUNC token!
 
 # Training parameters
 
 # REGULARIZATION
-regularization = True
+regularization = False
 reg_alpha = 1.5
 #
 
 batch_size = 16  # Default batch size
-context_length = 32 # Sequence context length
+context_length = 50# Sequence context length
 epochs = 100  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
 learning_rate = 0.001 # Initial learning rate

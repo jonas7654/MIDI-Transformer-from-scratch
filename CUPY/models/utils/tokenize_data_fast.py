@@ -129,7 +129,7 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
             token_sequence = [sos_token]
             
             if (len(ids) > seq_length - 2): # Truncate if too long
-                token_sequence += ids[:seq_length - 2] + [trunc_token]
+                token_sequence += ids[:seq_length - 2] + [eos_token] 
             else:
                 token_sequence += ids
                 token_sequence += [eos_token]

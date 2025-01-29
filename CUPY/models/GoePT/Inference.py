@@ -71,7 +71,7 @@ def main():
     
     
     generated_sequence = cp.asanyarray(tokenized_data.copy())
-    generated_sequence[:, seq_len-1] = 186
+
     
     # Remove the EOS token : TODO : dont duplicate tokens at the end
     print(f"context_size: {seq_len}")
