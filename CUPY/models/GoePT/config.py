@@ -26,7 +26,7 @@ reg_alpha = 1.5
 #
 
 batch_size = 16  # Default batch size
-context_length = 50# Sequence context length
+context_length = 50 # Sequence context length
 epochs = 100  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
 learning_rate = 0.001 # Initial learning rate

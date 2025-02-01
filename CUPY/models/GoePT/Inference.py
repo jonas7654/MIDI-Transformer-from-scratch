@@ -80,10 +80,10 @@ def main():
     
     
     
-    for idx in range(seq_len):
+    for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
         logits, _ = model.forward(input_context, targets = None)
-        predictions = softmax_with_temperature(logits, temperature = 1)
+        predictions = softmax_with_temperature(logits, temperature = 0.5)
         next_tokens = cp.argmax(predictions, axis = -1)  # axis -1 uses the last axis which is the vocabulary
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
@@ -96,6 +96,7 @@ def main():
     # Just decode the predicted sequence
     truncated_sequence = generated_sequence[:, seq_len:]
 
+    print("Predicted sequence: \n")
     print(truncated_sequence[:, 0:args.b])
     
     decoded_sequence = tokenizer.decode(truncated_sequence)
