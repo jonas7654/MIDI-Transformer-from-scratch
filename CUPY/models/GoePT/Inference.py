@@ -30,7 +30,7 @@ def softmax_with_temperature(logits, temperature=1.5, axis = -1):
     exp_logits = cp.exp(logits / temperature)
     return exp_logits / cp.sum(exp_logits, axis = axis)
 
-def top_p_sampling(prob_matrix, p=0.4):
+def top_p_sampling(prob_matrix, p=0.5):
     
     batch_x, batch_y, vocab_size = prob_matrix.shape
     sampled_indices = cp.zeros((batch_x, batch_y), dtype=int)
