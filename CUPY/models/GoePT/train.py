@@ -193,7 +193,8 @@ def main():
             "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc,
             "tokenizer": config.tokenizer_name_str,
             "regularization" : config.regularization,
-            "reg_alpha" : config.reg_alpha
+            "reg_alpha" : config.reg_alpha,
+            "relative_attention": config.relative_attention
         }
     )
     
@@ -207,7 +208,8 @@ def main():
                   vocab_size = tokenizer.vocab_size,
                   n_heads = config.n_heads,
                   regularization = config.regularization,
-                  reg_alpha = config.reg_alpha)
+                  reg_alpha = config.reg_alpha,
+                  relative_attention = config.relative_attention)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:

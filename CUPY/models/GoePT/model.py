@@ -46,6 +46,7 @@ class GoePT():
                     dropout: float=0.2,
                     regularization = False,
                     reg_alpha = 0.1,
+                    relative_attention = False,
                     lr: float=1e-3) -> None:
 
         self.vocab_size = vocab_size
@@ -58,6 +59,7 @@ class GoePT():
         self.n_heads = n_heads
         self.regularization = regularization
         self.reg_alpha = reg_alpha
+        self.relative_attention = relative_attention
         
         # Change this for cupy compatibility
         self.rng = cp.random
@@ -98,7 +100,8 @@ class GoePT():
                 dropout = self.dropout,
                 weight_init_func = weight_init,
                 c_proj_init_func = c_proj_weight_init,
-                bias_init_func = bias_init) for _ in range(self.n_layer)],
+                bias_init_func = bias_init,
+                relative_attention = self.relative_attention) for _ in range(self.n_layer)],
             "ln_f": scr.LayerNorm(self.n_embd, weight_init_func=weight_init),
             }
 

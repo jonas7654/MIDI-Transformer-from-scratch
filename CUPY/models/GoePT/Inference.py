@@ -76,7 +76,7 @@ def main():
     # Remove the EOS token : TODO : dont duplicate tokens at the end
     generated_sequence = cp.asanyarray(tokenized_data.copy())
     print(f"context_size: {seq_len}")
-    print(f"Input sequence: \n {generated_sequence}")
+    print(f"Input sequence shape: \n {generated_sequence.shape}")
     
     
     
@@ -94,14 +94,14 @@ def main():
     print("---------------------")
     
     # Just decode the predicted sequence
-    truncated_sequence = generated_sequence[:, seq_len:]
+    for idx, midifile in enumerate(list(file_path.glob("*mid"))):
+        fileName = midifile.name
+        predicted_sequence = generated_sequence[idx:idx+1, seq_len:] # Here we preserve the 2D shape
 
-    print("Predicted sequence: \n")
-    print(truncated_sequence[:, 0:args.b])
+        decoded_sequence = tokenizer.decode(predicted_sequence)
+        decoded_sequence.dump_midi(path = Path(args.save_dir, fileName))
+        print(f"{fileName}: {predicted_sequence} \n \n")
     
-    decoded_sequence = tokenizer.decode(truncated_sequence)
-    decoded_sequence.dump_midi(path = Path(args.save_dir, "decoded_midi.mid"))
-    print(decoded_sequence)
     
 if __name__ == "__main__":
     main()

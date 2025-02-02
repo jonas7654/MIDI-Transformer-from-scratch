@@ -635,6 +635,224 @@ class MultiHeadAttention():
         self.c_proj.weight = decompress_numpy_array(state_dict['c_proj'][0])
         self.c_proj.bias = decompress_numpy_array(state_dict['c_proj'][1])
 
+class RelativeMultiHeadAttention():
+    def __init__(self, d_model: int,
+                        context_size: int,
+                        n_heads: int,
+                        batch_size: int,
+                        lr: float=0.1,
+                        dropout: float=0.1,
+                        c_attn_weight_init_func: Union[Callable, None] = None,
+                        c_proj_weight_init_func: Union[Callable, None] = None,
+                        bias_init_func: Union[Callable, None] = None) -> None:
+
+        self.d_model = d_model
+        self.context_size = context_size
+        self.n_heads = n_heads
+        self.scale = math.sqrt(d_model)
+        self.batch_size = batch_size
+
+        self.attn_dropout = Dropout(dropout)
+        self.resid_dropout = Dropout(dropout)
+        self.softmax_attn = Softmax(axis=-1)
+
+        if d_model % n_heads != 0:
+            raise ValueError("d_model must be divisible by n_heads")
+
+        self.depth = d_model//n_heads
+
+        self.c_attn = Linear(d_model,
+                                3*d_model,
+                                batch_size,
+                                lr,
+                                weight_init_func=c_attn_weight_init_func,
+                                bias_init_func=bias_init_func)
+
+        self.c_proj = Linear(d_model,
+                                d_model,
+                                batch_size,
+                                lr,
+                                weight_init_func=c_proj_weight_init_func,
+                                bias_init_func=bias_init_func)
+
+        self.mask = cp.tril(cp.ones((context_size, context_size), dtype=cp.float32)).reshape(1, 1, context_size, context_size)
+
+        # Relative Positional Embedding Layer Hardcoded (doesn't fit into previous class)
+        self.rel_pos_emb = cp.random.randn(1, self.n_heads, self.context_size, self.depth) * 0.02 # Initialize a relative positional embedding matrix with shape (H, L, D_h)
+        self.grad_rpe = None
+
+        self.input = None
+        self.v = None
+        self.q = None
+        self.k = None
+        self.lr = lr
+        self.attn = None
+
+        self.x1 = None
+        self.x2 = None
+        self.x3 = None
+        self.s_rel = None
+
+
+    def forward(self, input: ArrayLike) -> tuple:
+        
+        self.input = cp.asanyarray(input)
+        # C = d_model : default n_embd: int=384
+        # B = batch dim
+        # T = seq length
+        B, T, C = self.input.shape
+
+        """
+        c_attn has shape d_model * (3 * d_model)
+        when splitting at axis = 2 (the seq length axis) we split it into three equal parts with the correct d_model dimension
+        for each q, k, v
+        
+        
+        Note that q, k, v are calculated in one run.
+        This is why the c_attn linear object has dimensions (d_model * (3 * d_model))
+        """
+        q, k, v  = cp.split(self.c_attn.forward(self.input), 3, axis=2)
+
+        e = self.rel_pos_emb 
+
+        """
+        the output of self.c_attn.forward(self.input) has shape (B, seq_len, 3 * d_model)
+        
+        
+        C = d_model
+        B = batch dim
+        T = seq length
+        
+        The original shape of k (before transpose) is (B, T, n_heads, C // n_heads)
+        
+        After transposing, the shape becomes (B, n_heads, T, C // n_heads)
+        
+        """
+        
+        k = k.reshape((B, T, self.n_heads, C//self.n_heads)).transpose(0, 2, 1, 3) # (B, nh, T, hs)
+        q = q.reshape((B, T, self.n_heads, C//self.n_heads)).transpose(0, 2, 1, 3) # (B, nh, T, hs)
+        v = v.reshape((B, T, self.n_heads, C//self.n_heads)).transpose(0, 2, 1, 3) # (B, nh, T, hs)
+
+        self.k = k
+        self.q = q
+        self.v = v
+
+        """
+        q dim = (B, n_heads, T, C // n_heads)
+        k.tranpose dim = (B, n_heads, C // n_heads, T)
+        
+        we want to multiply along the sequence axis (T) and (C // n_heads) axis
+        
+        Note that k.shape[-1] = C // n_heads
+        
+        And the resulting shape of attn is (B, n_heads, T, T) [Dot product between tokens]
+        """
+
+        self.x1 = q @ e.transpose(0, 1, 3, 2) #Q * E_T
+
+        self.x2 = cp.pad(self.x1, ((0, 0), (0, 0), (0, 0), (1, 0)), mode='constant', constant_values=0) #padding, adding a column of zeros to the left of the T x T matrix, results in (B, nh, T, T + 1)
+        
+        self.x3 = self.x2.reshape(B, self.n_heads, T + 1, T) #reshape to (B, nh, T + 1, T) matrix
+
+        self.s_rel = self.x3[:, :, 1:, :] #discard first row of 3rd dim, new dim: (B, nh, T, T)
+
+        attn = (q @ k.transpose(0, 1, 3, 2) + self.s_rel)*(1.0/math.sqrt(k.shape[-1])) #relative attention
+
+        attn = cp.where(self.mask == 0, -1e9, attn) 
+        attn = self.softmax_attn.forward(attn)
+        attn = self.attn_dropout.forward(attn)
+
+        self.attn = attn
+        """
+        Now x has shape (B, n_heads, T, C // n_heads)
+        """
+        x = attn @ v
+        
+        """
+        We reshape x to the original Input shape which is (B, T, C) => concat heads
+        -1 tells python to calculate the remaining dimension to fit (i.e returning T in this case)
+        """
+        x = cp.ascontiguousarray(x).transpose(0, 2, 1, 3).reshape(self.batch_size, -1, self.n_heads*self.depth)
+        x = self.c_proj.forward(x)
+        x = self.resid_dropout.forward(x)
+
+        return x, attn
+
+    def backward(self, grad: ArrayLike) -> cp.ndarray:
+        grad = cp.asanyarray(grad)
+
+        B, T, C = self.input.shape
+
+        grad = self.resid_dropout.backward(grad)
+        grad = self.c_proj.backward(grad)
+        
+        # NEW
+        grad = cp.ascontiguousarray(grad).reshape(B, self.n_heads, T, -1) # B, n_heads, T, C // n_heads
+        
+        grad_v = self.attn.transpose(0,1,3,2) @ grad
+        grad_attn = grad @ self.v.transpose(0,1,3,2)
+        
+
+        grad_dropout = self.attn_dropout.backward(grad_attn)
+        grad_softmax = self.softmax_attn.backward(grad_dropout)
+        
+        
+        # :TODO Here we dont need to set the upper triangular part to -infinity. This is only used before softmax in forward pass!
+        # We need to zero out the triangular matrix. 
+        # grad = np.where(self.mask == 0, -1e9, grad)
+        grad_mask = grad_softmax * self.mask
+        
+        grad_ktrans = ((1.0/math.sqrt(self.k.shape[-1])) * (self.q.transpose(0, 1, 3, 2) @ grad_mask))
+        grad_k = grad_ktrans.transpose(0, 1, 3, 2) #No difference here
+        grad_q = (1.0/math.sqrt(self.k.shape[-1]))  * (grad_mask @ self.k) #This must be somehow updated later
+        grad_s_rel = (1.0/math.sqrt(self.k.shape[-1])) * grad_mask
+
+        grad_x3 = cp.pad(grad_s_rel, ((0, 0), (0, 0), (1, 0), (0, 0)), mode='constant', constant_values=0) #pad top row
+        grad_x2 = grad_x3.reshape(B, self.n_heads, T, T + 1) #reverse reshaping
+        grad_x1 = grad_x2[:, :, :, 1:] #discard the left column
+
+        broadcasted_emb = cp.broadcast_to(self.rel_pos_emb, (B, self.n_heads, T, self.depth))
+        grad_q2 = grad_x1 @ broadcasted_emb
+        grad_q += grad_q2 #Here I'm just guessing, I'll enquire about this
+
+        grad_rpe_all_b_trans = self.q.transpose(0, 1, 3, 2) @ grad_x1
+        grad_rpe_all_b = grad_rpe_all_b_trans.transpose(0, 1, 3, 2)
+        self.grad_rpe = cp.sum(grad_rpe_all_b, axis=0, keepdims=True) #Sum over all batches to get desired dim: (1, nhs, T, d)
+
+        grad_q = grad_q.reshape(self.batch_size, T, self.n_heads * self.depth) 
+        grad_v = grad_v.reshape(self.batch_size, T, self.n_heads * self.depth)
+        grad_k = grad_k.reshape(self.batch_size, T, self.n_heads * self.depth)
+        
+        # We need to tranpose to the shape (batch_size, seq_len, 3* d_model)
+        grad = cp.concatenate([grad_q, grad_k, grad_v], axis=2)
+        
+        
+        grad_downstream = self.c_attn.backward(grad)
+        
+        
+        return grad_downstream
+
+
+    def update(self) -> None:
+        #raise NotImplementedError("Implement the MultiHeadAttention update path")
+        self.rel_pos_emb -= self.lr * self.grad_rpe
+        # Jonas Version
+
+        self.c_attn.update()
+        self.c_proj.update()
+    
+    def get_params(self) -> dict:
+        return {'c_attn': [compress_numpy_array(self.c_attn.weight), compress_numpy_array(self.c_attn.bias)],
+                'c_proj': [compress_numpy_array(self.c_proj.weight), compress_numpy_array(self.c_proj.bias)]}
+
+
+    def load_params(self, state_dict: dict) -> None:
+        self.c_attn.weight = decompress_numpy_array(state_dict['c_attn'][0])
+        self.c_attn.bias = decompress_numpy_array(state_dict['c_attn'][1])
+        self.c_proj.weight = decompress_numpy_array(state_dict['c_proj'][0])
+        self.c_proj.bias = decompress_numpy_array(state_dict['c_proj'][1])
+
+
 class Embedding():
     def __init__(self, num_embeddings: int,
                         embedding_dim: int,
@@ -742,7 +960,8 @@ class Block():
                     dropout: float,
                     weight_init_func: Union[Callable, None],
                     c_proj_init_func: Union[Callable, None],
-                    bias_init_func: Union[Callable, None]) -> None:
+                    bias_init_func: Union[Callable, None],
+                    relative_attention: bool) -> None:
 
         self.d_model = d_model
         self.context_size = context_size
@@ -750,11 +969,23 @@ class Block():
         self.batch_size = batch_size
         self.lr = lr
         self.dropout = dropout
+        
+        self.relative_attention = relative_attention
 
         self.ln_1 = LayerNorm(d_model,
                                 weight_init_func=weight_init_func)
 
         self.attn = MultiHeadAttention(d_model,
+                                            context_size,
+                                            n_heads,
+                                            batch_size,
+                                            lr,
+                                            dropout,
+                                            c_attn_weight_init_func=weight_init_func,
+                                            c_proj_weight_init_func=c_proj_init_func,
+                                            bias_init_func=bias_init_func)
+        
+        self.rel_attn = RelativeMultiHeadAttention(d_model,
                                             context_size,
                                             n_heads,
                                             batch_size,
@@ -781,7 +1012,13 @@ class Block():
         input = cp.asanyarray(input)
 
         x = self.ln_1.forward(input)
-        x = self.attn.forward(x)[0]
+        
+        # Choose between rel attn or normal attn
+        if (self.relative_attention):
+            x = self.rel_attn.forward(x)[0]
+        else:
+            x = self.attn.forward(x)[0] 
+        
 
         x = input + x
 
@@ -806,7 +1043,10 @@ class Block():
 
         grad_resid2 = copy.deepcopy(grad)
 
-        grad = self.attn.backward(grad)[0]
+        if(self.relative_attention):
+            grad = self.rel_attn.backward(grad)[0]
+        else:
+            grad = self.attn.backward(grad)[0]
         grad = self.ln_1.backward(grad)
 
         grad = grad + grad_resid2
@@ -821,15 +1061,23 @@ class Block():
         # Jonas Version
         self.mlp.update()
         self.ln_2.update()
-        self.attn.update()
+        if (self.relative_attention):
+            self.rel_attn.update()
+        else:
+            self.attn.update()
         self.ln_1.update()
 
 
     def state_dict(self) -> dict:
-        return {'ln_1': [compress_numpy_array(self.ln_1.weight), compress_numpy_array(self.ln_1.bias)],
-                            'ln_2': [compress_numpy_array(self.ln_2.weight), compress_numpy_array(self.ln_2.bias)],
-                            'mlp': self.mlp.get_params(),
-                            'attn': self.attn.get_params()}
+        state_dict = {'ln_1': [compress_numpy_array(self.ln_1.weight), compress_numpy_array(self.ln_1.bias)],
+                      'ln_2': [compress_numpy_array(self.ln_2.weight), compress_numpy_array(self.ln_2.bias)],
+                      'mlp': self.mlp.get_params()}
+        
+        if self.relative_attention:
+            state_dict['attn'] = self.rel_attn.get_params()
+        else:
+            state_dict['attn'] = self.attn.get_params()
+
 
 
     def load_params(self, state_dict: dict) -> None:
@@ -838,4 +1086,8 @@ class Block():
         self.ln_2.weight = decompress_numpy_array(state_dict['ln_2'][0])
         self.ln_2.bias = decompress_numpy_array(state_dict['ln_2'][1])
         self.mlp.load_params(state_dict['mlp'])
-        self.attn.load_params(state_dict['attn'])
+        if (self.relative_attention):
+            self.rel_attn.load_params(state_dict['attn'])
+        else:
+            self.attn.load_params(state_dict['attn']) 
+        
