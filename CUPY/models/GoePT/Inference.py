@@ -37,7 +37,7 @@ def top_p_sampling(prob_matrix, p=0.5):
 
     for i in range(batch_x):
         for j in range(batch_y):
-            probs = prob_matrix[i, j]
+            probs = prob_matrix[i, j].copy()
 
             # Sort probabilities and get sorted indices
             sorted_indices = cp.argsort(probs)[::-1]  # Descending order
@@ -115,7 +115,7 @@ def main():
         logits, _ = model.forward(input_context, targets = None)
         predictions = softmax_with_temperature(logits, temperature = 1)
         print(f"Predictions shape: {predictions.shape}")
-        next_tokens = top_p_sampling(predictions)  # axis -1 uses the last axis which is the vocabulary
+        next_tokens = top_p_sampling(predictions) 
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
         
