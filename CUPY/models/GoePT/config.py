@@ -21,8 +21,8 @@ manually_set_sos_eos_trunc = True #:NOTE At the moment we do not have a TRUNC to
 # Training parameters
 
 # REGULARIZATION
-regularization = False
-reg_alpha = 0.5
+regularization = True
+reg_alpha = 0.3
 #
 
 # Relative Attention
@@ -30,11 +30,11 @@ relative_attention = True
 #####
 
 batch_size = 16  # Default batch size
-context_length = 32 # Sequence context length
-epochs = 300  # Number of epochs to train
+context_length = 40 # Sequence context length
+epochs = 120  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.0005 # Initial learning rate
-dropout_rate = 0.2 # Default dropout rate
+learning_rate = 0.0001 # Initial learning rate
+dropout_rate = 0 # Default dropout rate
 n_layer = 8  # Number of layers in the transformer
 n_embd = 512  # Embedding size
 n_heads = 8  # Number of attention heads

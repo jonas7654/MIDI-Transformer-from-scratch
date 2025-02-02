@@ -1,5 +1,5 @@
 srun --mem=12G --cpus-per-task=1 --gres gpu:1 --partition=exercise-eml --pty python ../CUPY/models/GoePT/Inference.py \
-    --weights "/csghome/hpdc04/Transformer_Code/checkpoints/youthful-valley-227_90.json" \
+    --weights "/csghome/hpdc04/Transformer_Code/checkpoints/cosmic-dream-244_160.json" \
     --vocab-file "/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_REMI_1024.json" \
     --input "/csghome/hpdc04/Transformer_Code/test_folder" \
     --b 40 \

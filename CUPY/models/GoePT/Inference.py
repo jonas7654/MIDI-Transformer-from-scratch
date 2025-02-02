@@ -26,40 +26,39 @@ def load_model(checkpoint_path, vocab_file, batch_size):
     ic(tokenizer)
     return model, tokenizer
 
-def softmax_with_temperature(logits, temperature=1.0, axis = -1):
-    exp_logits = np.exp(logits / temperature)
-    return exp_logits / np.sum(exp_logits, axis = axis)
+def softmax_with_temperature(logits, temperature=1.5, axis = -1):
+    exp_logits = cp.exp(logits / temperature)
+    return exp_logits / cp.sum(exp_logits, axis = axis)
 
-def top_p_sampling(prob_matrix, p=0.7):
+def top_p_sampling(prob_matrix, p=0.4):
     
-    batch_size, vocab_size = prob_matrix.shape
-    sampled_indices = np.zeros(batch_size, dtype=int)
+    batch_x, batch_y, vocab_size = prob_matrix.shape
+    sampled_indices = cp.zeros((batch_x, batch_y), dtype=int)
 
-    for i in range(batch_size):
-        probs = prob_matrix[i]
+    for i in range(batch_x):
+        for j in range(batch_y):
+            probs = prob_matrix[i, j]
 
-        # Sort probabilities and get sorted indices
-        sorted_indices = np.argsort(probs)[::-1]  # Descending order
-        sorted_probs = probs[sorted_indices]
+            # Sort probabilities and get sorted indices
+            sorted_indices = cp.argsort(probs)[::-1]  # Descending order
+            sorted_probs = probs[sorted_indices]
 
-        # Compute cumulative probabilities
-        cumulative_probs = np.cumsum(sorted_probs)
+            # Compute cumulative probabilities
+            cumulative_probs = cp.cumsum(sorted_probs)
 
-        # Find the cutoff where cumulative probability exceeds p
-        cutoff = np.argmax(cumulative_probs > p) + 1  # Keep at least one token
+            # Find the cutoff where cumulative probability exceeds p
+            cutoff = cp.argmax(cumulative_probs > p) + 1  # Keep at least one token
 
-        # Get the subset of valid token indices and their probabilities
-        top_indices = sorted_indices[:cutoff]
-        top_probs = sorted_probs[:cutoff]
-        print(top_indices)
-        print(top_probs)
-        # Normalize probabilities
-        top_probs /= np.sum(top_probs)
+            # Get the subset of valid token indices and their probabilities
+            top_indices = sorted_indices[:cutoff]
+            top_probs = sorted_probs[:cutoff]
+            # Normalize probabilities
+            top_probs /= cp.sum(top_probs)
 
-        # Sample from the filtered distribution
-        sampled_indices[i] = np.random.choice(top_indices, p=top_probs)
+            # Sample from the filtered distribution
+            sampled_indices[i, j] = cp.random.choice(top_indices, size=1, p=top_probs)[0]
 
-    return sampled_indices
+        return cp.asarray(sampled_indices)
 
 def tokenize_input(midi_input, tokenizer):
     # Tokenize and return integer representation
@@ -114,7 +113,8 @@ def main():
     for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
         logits, _ = model.forward(input_context, targets = None)
-        predictions = softmax_with_temperature(logits, temperature = 0.5)
+        predictions = softmax_with_temperature(logits, temperature = 1)
+        print(f"Predictions shape: {predictions.shape}")
         next_tokens = top_p_sampling(predictions)  # axis -1 uses the last axis which is the vocabulary
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
