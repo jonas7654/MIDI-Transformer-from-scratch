@@ -1077,6 +1077,8 @@ class Block():
             state_dict['attn'] = self.rel_attn.get_params()
         else:
             state_dict['attn'] = self.attn.get_params()
+            
+        return state_dict
 
 
 

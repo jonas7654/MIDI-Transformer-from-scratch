@@ -93,11 +93,12 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
     return x, y
 
 
-def compute_gradient(target, prediction, one_hot_lookup):
-
+def compute_gradient(target, prediction, one_hot_lookup, alpha = config.reg_alpha, batch_size = config.batch_size, padding_token_idx = 0):
+    target = cp.stack([one_hot_lookup[token] for token in target])
+    cross_entropy_grad = prediction - target
     if (config.regularization):
-            # Compute gradient for cross-entropy loss
-        cross_entropy_grad = prediction - target_one_hot
+        # Compute gradient for cross-entropy loss
+        
 
         # Compute gradient for padding penalty regularization
         batch_size = prediction.shape[0]
@@ -108,9 +109,8 @@ def compute_gradient(target, prediction, one_hot_lookup):
         total_grad = cross_entropy_grad + padding_grad
         return total_grad, target
     
-    target = cp.stack([one_hot_lookup[token] for token in target])
 
-    return (prediction - target), target
+    return cross_entropy_grad, target
 
 
 def get_log_output_table(log_output_buffer: deque) -> Table:

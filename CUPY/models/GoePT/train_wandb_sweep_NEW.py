@@ -49,10 +49,24 @@ def read_datasets(split, data_dir, context_length, batch_size, rng, config):
 
 
 
-def compute_gradient(target, prediction, one_hot_lookup):
+def compute_gradient(target, prediction, one_hot_lookup, reg = False, alpha = 0, batch_size = None, padding_token_idx = 0):
     target = cp.stack([one_hot_lookup[token] for token in target])
-    return (prediction - target), target
+    cross_entropy_grad = prediction - target
+    if (reg):
+        # Compute gradient for cross-entropy loss
+        
 
+        # Compute gradient for padding penalty regularization
+        batch_size = prediction.shape[0]
+        padding_grad = cp.zeros_like(prediction)
+        padding_grad[:, padding_token_idx] = alpha / batch_size
+
+        # Combine gradients
+        total_grad = cross_entropy_grad + padding_grad
+        return total_grad, target
+    
+
+    return cross_entropy_grad, target
 
 def get_log_output_table(log_output_buffer: deque) -> Table:
     table = Table()
@@ -94,16 +108,17 @@ def train(config=None):
     
     tokenizer = tokenizer_class(params = vocab_file)
 
-    model = GoePT(
-        context_length=config.context_length,
-        n_layer=config.n_layer,
-        n_embd=config.n_embd,
-        dropout=config.dropout_rate,
-        batch_size=config.batch_size,
-        lr=config.lr,
-        vocab_size=tokenizer.vocab_size,
-        n_heads=config.n_heads
-    )
+    model = GoePT(context_length=config.context_length,
+                  n_layer=config.n_layer,
+                  n_embd=config.n_embd,
+                  dropout=config.dropout_rate,
+                  batch_size=config.batch_size,
+                  lr=config.lr,
+                  vocab_size = tokenizer.vocab_size,
+                  n_heads = config.n_heads,
+                  regularization = config.regularization,
+                  reg_alpha = config.reg_alpha,
+                  relative_attention = config.relative_attention)
 
     rng = np.random.default_rng(config.seed)
     cp.random.seed(config.seed)
@@ -148,7 +163,10 @@ def train(config=None):
                 #with open('train_losses.csv', 'a') as f:
                 #    f.write(f'{iter_num}\t{loss:.8f}\n')
 
-                raw_grad, target = compute_gradient(Y, logits, one_hot_lookup)
+                raw_grad, target = compute_gradient(Y, logits, one_hot_lookup, reg = config.regularization,
+                                                    alpha = config.reg_alpha,
+                                                    batch_size = model.batch_size,
+                                                    padding_token_idx=0)
                 grad = loss * raw_grad
                 model.backward(grad)
 
@@ -208,24 +226,27 @@ if __name__ == '__main__':
             "goal": "minimize"   # Minimize validation loss
         },
         "parameters": {
-            "lr": {"values": [0.001, 0.01, 0.1, 0.5]},  # Learning rate options
-            "batch_size": {"values": [4, 6, 8]},  # Batch size options
+            "lr": {"values": [0.0001, 0.0005, 0.00001]},  # Learning rate options
+            "batch_size": {"values": [12]},  # Batch size options
             "n_layer": {"values": [4, 6, 8, 10, 12]},  # Number of layers
-            "n_heads": {"values": [4, 6, 8]},  # Number of attention heads
-            "n_embd": {"values": [256, 384, 512]},  # Embedding size
+            "n_heads": {"values": [4, 8]},  # Number of attention heads
+            "n_embd": {"values": [256, 512]},  # Embedding size
             "dropout_rate": {"values": [0, 0.1, 0.2, 0.3]},  # Dropout
             "epochs": {"value": 40},  # Fixed number of epochs
             "gradient_accumulation_steps": {"value": 32},  # Fixed value
-            "context_length": {"values": [512]},  # Fixed value
+            "context_length": {"values": [16, 32, 40, 50]},  # Fixed value
             "seed": {"value": 1},  # Random seed
             "data_dir": {"value":  "/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/"},  # Fixed data dir
             "checkpoint_dir": {"value": "/csghome/hpdc04/Transformer_Code/checkpoints/"},  # Fixed checkpoint dir
-            "vo_size": {"values": [512, 1024, 2048, 4096]},  # Vocabulary size for tokenizer
-            "tokenizer_name": {"values": ["Structured", "REMI"]},  # Tokenizer class name
+            "vo_size": {"values": [1024]},  # Vocabulary size for tokenizer
+            "tokenizer_name": {"values": ["REMI"]},  # Tokenizer class name
             "manually_set_sos_eos_trunc": {"values": [True]},
             "eval_interval": {"value": 5},
             "eval_iters" : {"value": 200},
-            "log_interval" : {"value" : 5}
+            "log_interval" : {"value" : 5},
+            "regularization" : {"values": [True, False]},
+            "reg_alpha": {"values": [0, 0.05, 0.1, 0.2, 0.3, 1, 2, 3 ,4]},
+            "relative_attention": {"values": [True, False]}
         }
     }
     # Initialize the sweep

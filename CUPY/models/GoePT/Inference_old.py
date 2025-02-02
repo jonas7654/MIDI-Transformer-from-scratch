@@ -30,37 +30,6 @@ def softmax_with_temperature(logits, temperature=1.0, axis = -1):
     exp_logits = np.exp(logits / temperature)
     return exp_logits / np.sum(exp_logits, axis = axis)
 
-def top_p_sampling(prob_matrix, p=0.7):
-    
-    batch_size, vocab_size = prob_matrix.shape
-    sampled_indices = np.zeros(batch_size, dtype=int)
-
-    for i in range(batch_size):
-        probs = prob_matrix[i]
-
-        # Sort probabilities and get sorted indices
-        sorted_indices = np.argsort(probs)[::-1]  # Descending order
-        sorted_probs = probs[sorted_indices]
-
-        # Compute cumulative probabilities
-        cumulative_probs = np.cumsum(sorted_probs)
-
-        # Find the cutoff where cumulative probability exceeds p
-        cutoff = np.argmax(cumulative_probs > p) + 1  # Keep at least one token
-
-        # Get the subset of valid token indices and their probabilities
-        top_indices = sorted_indices[:cutoff]
-        top_probs = sorted_probs[:cutoff]
-        print(top_indices)
-        print(top_probs)
-        # Normalize probabilities
-        top_probs /= np.sum(top_probs)
-
-        # Sample from the filtered distribution
-        sampled_indices[i] = np.random.choice(top_indices, p=top_probs)
-
-    return sampled_indices
-
 def tokenize_input(midi_input, tokenizer):
     # Tokenize and return integer representation
     tokenized_input = tokenizer(midi_input)[0].ids
@@ -115,7 +84,7 @@ def main():
         input_context = generated_sequence[:, -seq_len:]
         logits, _ = model.forward(input_context, targets = None)
         predictions = softmax_with_temperature(logits, temperature = 0.5)
-        next_tokens = top_p_sampling(predictions)  # axis -1 uses the last axis which is the vocabulary
+        next_tokens = cp.argmax(predictions, axis = -1)  # axis -1 uses the last axis which is the vocabulary
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
         
