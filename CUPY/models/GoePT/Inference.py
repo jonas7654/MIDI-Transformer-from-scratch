@@ -28,15 +28,15 @@ def load_model(checkpoint_path, vocab_file, batch_size):
 
 def softmax_with_temperature(logits, temperature=1.5, axis = -1):
     exp_logits = cp.exp(logits / temperature)
-    return exp_logits / cp.sum(exp_logits, axis = axis)
+    return exp_logits / cp.sum(exp_logits, axis = axis, keepdims=True)
 
 def top_p_sampling(prob_matrix, p=0.5):
     
-    batch_x, batch_y, vocab_size = prob_matrix.shape
-    sampled_indices = cp.zeros((batch_x, batch_y), dtype=int)
+    batch_x, y, vocab_size = prob_matrix.shape
+    sampled_indices = cp.zeros((batch_x, y), dtype=int)
 
     for i in range(batch_x):
-        for j in range(batch_y):
+        for j in range(y):
             probs = prob_matrix[i, j].copy()
 
             # Sort probabilities and get sorted indices
@@ -113,6 +113,7 @@ def main():
     for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
         logits, _ = model.forward(input_context, targets = None)
+        print(logits.shape)
         predictions = softmax_with_temperature(logits, temperature = 1)
         print(f"Predictions shape: {predictions.shape}")
         next_tokens = top_p_sampling(predictions) 
