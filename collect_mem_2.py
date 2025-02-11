@@ -180,7 +180,7 @@ def greedy_collect(pretty_midi_stream, tempo, output_path_pref):
 
             bars_with_notes = sum(1 for bar in bars if len(bar) > 0)
 
-            if bars_with_notes >= 6: #something must be played in first and second half
+            if bars_with_notes >= 6: #something must be played in at least 6 out of 8 bars
                 for note in new_instrument.notes:
                     note.start = max(0, note.start - first_note_time)
                     note.end = max(0, min(note.end - first_note_time, cutoff_time - first_note_time))
