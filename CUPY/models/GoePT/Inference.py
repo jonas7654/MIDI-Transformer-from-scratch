@@ -26,7 +26,7 @@ def load_model(checkpoint_path, vocab_file, batch_size):
     ic(tokenizer)
     return model, tokenizer
 
-def softmax_with_temperature(logits, temperature=1.5, axis = -1):
+def softmax_with_temperature(logits, temperature=1, axis = -1):
     exp_logits = cp.exp(logits / temperature)
     return exp_logits / cp.sum(exp_logits, axis = axis, keepdims=True)
 
@@ -34,6 +34,8 @@ def top_p_sampling(prob_matrix, p=0.5):
     
     batch_x, y, vocab_size = prob_matrix.shape
     sampled_indices = cp.zeros((batch_x, y), dtype=int)
+    
+    print(prob_matrix.shape)
 
     for i in range(batch_x):
         for j in range(y):
@@ -59,6 +61,38 @@ def top_p_sampling(prob_matrix, p=0.5):
             sampled_indices[i, j] = cp.random.choice(top_indices, size=1, p=top_probs)[0]
 
         return cp.asarray(sampled_indices)
+
+def top_p_sampling_NEW(prob_matrix, p=0.2):
+    batch_size, vocab_size = prob_matrix.shape
+    sampled_indices = cp.zeros((batch_size,1), dtype=int)
+    
+    for i in range(batch_size):
+        probs = prob_matrix[i].copy()  # Copy to avoid modifying original data
+        
+        # Sort probabilities in descending order and get indices
+        sorted_indices = cp.argsort(probs)[::-1]
+        sorted_probs = probs[sorted_indices]
+        
+        # Compute cumulative probabilities
+        cumulative_probs = cp.cumsum(sorted_probs)
+        
+        # Find the cutoff where cumulative probability exceeds p
+        # Use argmax to find the first index where condition is True; add 1 to include that index
+        # If none exceed p, argmax returns 0 (False for all), cutoff becomes 1 (keep the first)
+        cutoff = cp.argmax(cumulative_probs > p) + 1
+        
+        # Slice the top indices and probabilities up to the cutoff
+        top_indices = sorted_indices[:cutoff]
+        top_probs = sorted_probs[:cutoff]
+        
+        # Normalize the probabilities
+        top_probs /= cp.sum(top_probs)
+        
+        # Sample from the top distribution
+        sampled_index = cp.random.choice(top_indices, size=1, p=top_probs)
+        sampled_indices[i] = sampled_index[0]
+    
+    return sampled_indices
 
 def tokenize_input(midi_input, tokenizer):
     # Tokenize and return integer representation
@@ -113,10 +147,12 @@ def main():
     for idx in range(args.b):
         input_context = generated_sequence[:, -seq_len:]
         logits, _ = model.forward(input_context, targets = None)
-        print(logits.shape)
+        logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
+        
         predictions = softmax_with_temperature(logits, temperature = 1)
         print(f"Predictions shape: {predictions.shape}")
-        next_tokens = top_p_sampling(predictions) 
+        next_tokens = top_p_sampling_NEW(predictions) 
+        print(next_tokens.shape)
         # Append the predicted token to the sequence
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
         
