@@ -158,7 +158,7 @@ def greedy_collect(pretty_midi_stream, tempo, output_path_pref):
     tracks_skipped = 0
     for i, instr in enumerate(pretty_midi_stream.instruments):
         if instr.notes: #this might be this case with removed bass tracks f.e.
-            midi = pretty_midi.PrettyMIDI() #create a new midi file for writing
+            midi = pretty_midi.PrettyMIDI(initial_tempo=120) #create a new midi file for writing
             seconds_per_beat = 60.0 / tempo
             seconds_per_bar = 4 * seconds_per_beat #4 beats in one bar (4/4, we treat 2/4 just like 4/4 here)
             bar_duration = seconds_per_bar * 8  # Duration of 8 bars in seconds
@@ -180,13 +180,12 @@ def greedy_collect(pretty_midi_stream, tempo, output_path_pref):
 
             bars_with_notes = sum(1 for bar in bars if len(bar) > 0)
 
-            if bars_with_notes >= 6: #something must be played in at least 6 out of 8 bars
+            if bars_with_notes >= 5: #something must be played in at least 5 out of 8 bars
                 for note in new_instrument.notes:
                     note.start = max(0, note.start - first_note_time)
                     note.end = max(0, min(note.end - first_note_time, cutoff_time - first_note_time))
-                    # Clamp pitch and velocity to valid ranges
-                    note.pitch = max(0, min(note.pitch, 127))
-                    note.velocity = max(0, min(note.velocity, 127))
+                    note.start *= tempo/120 #Stretch to 120 bpm from original tempo
+                    note.end *= tempo/120
                 if len(new_instrument.notes) >= 12: #there must be at least 12 notes in file, otherwise the hook is pretty boring
                     midi.instruments.append(new_instrument)
                     op_new = str(output_path_pref) + f"_track{i}.mid"
@@ -245,7 +244,7 @@ def process_file(file, output_folder, counter):
         make_monophonic(transposed_stream)
         rmv_bass_count = remove_bass_tracks(transposed_stream)
         
-        curr_tempo = get_tempo(transposed_stream)[0]
+        curr_tempo = get_tempo(pretty_midi_stream)[0]
         output_path_prefix = output_folder / f"{file.stem}"
         tracks_coll, tracks_skipped = greedy_collect(transposed_stream, curr_tempo, output_path_prefix)
 
