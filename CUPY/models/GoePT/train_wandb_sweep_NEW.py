@@ -28,11 +28,11 @@ def read_datasets(split, data_dir, context_length, batch_size, rng, config):
     # https://stackoverflow.com/questions/45132940/numpy-memmap-memory-usage-want-to-iterate-once/61472122#61472122
 
     if split == 'train':
-        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_train_{config.tokenizer_name}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_train_{config.tokenizer_name}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     elif split == 'test':
-        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_test_{config.tokenizer_name}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_test_{config.tokenizer_name}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     else:
-        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_val_{config.tokenizer_name}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_val_{config.tokenizer_name}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     
     ix = rng.integers(len(data) - context_length, size=(batch_size,))
     
@@ -227,14 +227,14 @@ if __name__ == '__main__':
         },
         "parameters": {
             "lr": {"values": [0.1, 0.01, 0.0001, 0.0005, 0.00001]},  # Learning rate options
-            "batch_size": {"values": [32]},  # Batch size options
-            "n_layer": {"values": [4, 6, 8, 10, 12]},  # Number of layers
+            "batch_size": {"values": [8]},  # Batch size options
+            "n_layer": {"values": [4, 6, 8, 10]},  # Number of layers
             "n_heads": {"values": [4, 8, 16]},  # Number of attention heads
             "n_embd": {"values": [256, 512, 1024]},  # Embedding size
             "dropout_rate": {"values": [0, 0.1, 0.2, 0.3, 0.4]},  # Dropout
-            "epochs": {"value": 150},  # Fixed number of epochs
+            "epochs": {"value": 500},  # Fixed number of epochs
             "gradient_accumulation_steps": {"value": 32},  # Fixed value
-            "context_length": {"values": [32, 42]},  # Fixed value
+            "context_length": {"values": [128, 256, 512, 1024]},  # Fixed value
             "seed": {"value": 1},  # Random seed
             "data_dir": {"value":  "/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/"},  # Fixed data dir
             "checkpoint_dir": {"value": "/csghome/hpdc04/Transformer_Code/checkpoints/"},  # Fixed checkpoint dir
@@ -244,7 +244,7 @@ if __name__ == '__main__':
             "eval_interval": {"value": 5},
             "eval_iters" : {"value": 200},
             "log_interval" : {"value" : 5},
-            "regularization" : {"values": [True, False]},
+            "regularization" : {"values": [False]},
             "reg_alpha": {"values": [0, 0.05, 0.1, 0.2, 0.3, 1, 2, 3 ,4]},
             "relative_attention": {"values": [True, False]}
         }

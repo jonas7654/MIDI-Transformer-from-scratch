@@ -9,5 +9,5 @@ conda activate eml
 current_dir=($pwd)
 
 cd ../CUPY/models/utils/
-python3 token_to_midi.py --token "$1"
+python3 token_to_midi.py 
 cd $current_dir

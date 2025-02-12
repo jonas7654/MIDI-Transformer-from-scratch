@@ -109,23 +109,22 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
         all_ids.append(token_ids)
 
     
-    total_number_of_tokens = 0
-    for ids in all_ids:
-        total_number_of_tokens += len(ids)
+    total_number_of_tokens = sum(len(ids) + 2 for ids in all_ids)
+    
     print(f"Total Number of Tokens: {total_number_of_tokens}")
     """
     Create a flat array
     """
     if (manually_add_sos_eos):
-        token_sequence = np.empty(total_number_of_tokens, dtype=np.int16)
+        token_array= np.empty(total_number_of_tokens, dtype=np.int16)
         current_position = 0
         
         for ids in all_ids:
             seq_len = len(ids)
             
-            token_sequence[current_position] = sos_token
-            token_sequence[current_position + 1:current_position + 1 + seq_len] = ids 
-            token_sequence[current_position + 1 + seq_len] = eos_token
+            token_array[current_position] = sos_token
+            token_array[current_position + 1:current_position + 1 + seq_len] = ids 
+            token_array[current_position + 1 + seq_len] = eos_token
             
             current_position += seq_len + 2
     # Convert to numpy 

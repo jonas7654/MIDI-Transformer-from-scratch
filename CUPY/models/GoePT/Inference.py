@@ -123,49 +123,75 @@ def main():
     file_path = Path(args.input)
     number_of_files = len(list(file_path.glob("*.mid")))
     
-    model, tokenizer = load_model(args.weights, args.vocab_file, number_of_files)
+    model, tokenizer = load_model(args.weights, args.vocab_file, batch_size = 1)
     seq_len = model.context_length
-
+    pad_token = tokenizer.pad_token_id
+    sos_token = tokenizer.special_tokens_ids[1]
+    eos_token = tokenizer.special_tokens_ids[2]
     
-    # Tokenize the input
-    tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = file_path,
-                                      verbose = True,
-                                      seq_length = seq_len,
-                                      manually_add_sos_eos = args.manually_set_sos_eos_trunc) # args.manually_set_sos_eos_trunc
+    tokenized_input_sequences = []
+    for midifile in list(file_path.glob("*mid")):
+        t = tokenizer(midifile)[0].ids
+        sequence = [sos_token] + t + [eos_token]
+        
+        tokenized_input_sequences.append(sequence)
+        
     
-    
-    
-
-    
-    # Remove the EOS token : TODO : dont duplicate tokens at the end
-    generated_sequence = cp.asanyarray(tokenized_data.copy())
     print(f"context_size: {seq_len}")
-    print(f"Input sequence shape: \n {generated_sequence.shape}")
+
     
     
-    
-    for idx in range(args.b):
-        input_context = generated_sequence[:, -seq_len:]
-        logits, _ = model.forward(input_context, targets = None)
-        logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
+    generated_sequences = []
+    for input_sequence in tokenized_input_sequences:
+        length_input = len(input_sequence)
+        # :TODO
+        if length_input > seq_len:
+            print("Truncated")
+            input_sequence = input_sequence[0:seq_len]
+            input_sequence = cp.asanyarray(input_sequence)
+            input_sequence.shape = (1, seq_len)
+            
+        elif length_input < seq_len:
+            diff = seq_len - length_input
+            input_sequence = diff * [pad_token] + input_sequence
+            
+            if seq_len == len(input_sequence):
+                print("OK")
+                input_sequence = cp.asanyarray(input_sequence)
+                input_sequence.shape = (1, seq_len)
+            print(input_sequence.shape)
+            
+        generated_sequence = cp.asanyarray(input_sequence)
+        cp.expand_dims(generated_sequence, axis=0)
         
-        predictions = softmax_with_temperature(logits, temperature = 1)
-        print(f"Predictions shape: {predictions.shape}")
-        next_tokens = top_p_sampling_NEW(predictions) 
-        print(next_tokens.shape)
-        # Append the predicted token to the sequence
-        generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
+        prediction_start_idx = seq_len
+        print("\n --------------------------------------------------------------- \n")
+        for idx in range(args.b):
+            logits, _ = model.forward(input_sequence, targets = None)
+            logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
+            predictions = softmax_with_temperature(logits, temperature = 0.9)
+            next_tokens = top_p_sampling_NEW(predictions, p = 0.01) 
+            if next_tokens == 2:
+                print("Encountered a EOS token, stopping prediction")
+                break
+            # Append the predicted token to the sequence
+            generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
+            print(generated_sequence)
         
-    # convert back to numpy
-    generated_sequence = generated_sequence.get()
+        # convert back to numpy
+        generated_sequence = generated_sequence.get()
+        generated_sequences.append((generated_sequence, prediction_start_idx))
+    
     
     print("---------------------")
     
     # Just decode the predicted sequence
     for idx, midifile in enumerate(list(file_path.glob("*mid"))):
         fileName = midifile.name
-        predicted_sequence = generated_sequence[idx:idx+1, seq_len:] # Here we preserve the 2D shape
-
+        generated_sequence, prediction_start_idx = generated_sequences[idx] # Here we preserve the 2D shape and only take predicted tokens
+        print(generated_sequence[:, prediction_start_idx:])
+        predicted_sequence = generated_sequence[:, prediction_start_idx:]
+        
         decoded_sequence = tokenizer.decode(predicted_sequence)
         decoded_sequence.dump_midi(path = Path(args.save_dir, fileName))
         print(f"{fileName}: {predicted_sequence} \n \n")
