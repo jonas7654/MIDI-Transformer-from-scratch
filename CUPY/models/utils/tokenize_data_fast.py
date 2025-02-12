@@ -117,17 +117,19 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
     Create a flat array
     """
     if (manually_add_sos_eos):
-        token_sequence = []
+        token_sequence = np.empty(total_number_of_tokens, dtype=np.int16)
+        current_position = 0
         
         for ids in all_ids:
-            # Start with a start token
-            token_sequence.extend([sos_token] + ids + [eos_token])
+            seq_len = len(ids)
+            
+            token_sequence[current_position] = sos_token
+            token_sequence[current_position + 1:current_position + 1 + seq_len] = ids 
+            token_sequence[current_position + 1 + seq_len] = eos_token
+            
+            current_position += seq_len + 2
     # Convert to numpy 
-    print(len(token_sequence))
-    token_array = np.array(token_sequence, dtype = np.int16)
-    
-    
-    
+    print(f"Final array length: {len(token_array)}")
     
     
     if(verbose):
@@ -261,66 +263,79 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 
 def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
                                       output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/",
-                                      subset = None):
-
+                                      subset=None):
+    
     os.makedirs(output_path, exist_ok=True)
     output_path = Path(output_path, f"combined_visualization_{config.context_length}_{config.vo_size}_{config.tokenizer_name_str}_{subset}_manual_tokens_{config.manually_set_sos_eos_trunc}.png")
     
     # Analyze sequence lengths
-    seq_lengths = [np.count_nonzero(row != pad_token_id) for row in token_array]
+    seq_lengths = [len(token_array)] if token_array.ndim == 1 else [np.count_nonzero(row != pad_token_id) for row in token_array]
     
     # Token frequencies
     token_flat = token_array.flatten()
     token_counts = Counter(token_flat)
     
-    # Special token counts
-    special_token_counts = {
-        "PAD": token_counts.get(pad_token_id, 0),
-        "SOS": token_counts.get(sos_token_id, 0),
-        "EOS": token_counts.get(eos_token_id, 0),
-        "TRUNC": token_counts.get(trunc_token_id, 0)  # Custom truncate token
+    # Special token counts with labels including IDs
+    special_labels = {
+        "PAD": pad_token_id,
+        "SOS": sos_token_id,
+        "EOS": eos_token_id,
+        "TRUNC": trunc_token_id
     }
+    special_token_counts = {f"{k} ({v})": token_counts.get(v, 0) for k, v in special_labels.items()}
 
-    # Create a figure with subplots
-    fig, axs = plt.subplots(2, 2, figsize=(16, 12))
-    
-    # Plot 1: Sequence Length Distribution
-    axs[0, 0].hist(seq_lengths, bins=50, color="skyblue", edgecolor="black")
-    axs[0, 0].set_title("Sequence Length Distribution")
-    axs[0, 0].set_xlabel("Sequence Length")
-    axs[0, 0].set_ylabel("Frequency")
-    axs[0, 0].grid(axis="y", linestyle="--", alpha=0.7)
+    # Create figure with subplots
+    plt.figure(figsize=(18, 12))
+    plt.suptitle(f"Tokenization Analysis - {subset.capitalize()} Set", y=1.02, fontsize=14)
 
-    # Plot 2: Token Frequency Distribution
-    axs[0, 1].bar(range(len(token_counts)), token_counts.values(), color="lightcoral")
-    axs[0, 1].set_title("Token Frequency Distribution")
-    axs[0, 1].set_xlabel("Token ID")
-    axs[0, 1].set_ylabel("Count")
-    axs[0, 1].set_xticks(range(0, max(token_counts.keys()) + 1, max(1, len(token_counts) // 20)))
-    axs[0, 1].tick_params(axis="x", rotation=45)
-    axs[0, 1].grid(axis="y", linestyle="--", alpha=0.7)
+    # Plot 1: Sequence Length Distribution (Log Scale)
+    plt.subplot(2, 2, 1)
+    plt.hist(seq_lengths, bins=50, color="skyblue", edgecolor="black", log=True)
+    plt.title("Sequence Length Distribution (Log Scale)")
+    plt.xlabel("Sequence Length (tokens)")
+    plt.ylabel("Log Frequency")
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    # Plot 2: Top 20 Frequent Tokens
+    plt.subplot(2, 2, 2)
+    top_tokens = token_counts.most_common(20)
+    plt.barh([str(t[0]) for t in top_tokens], [t[1] for t in top_tokens], color="salmon")
+    plt.title("Top 20 Frequent Tokens")
+    plt.xlabel("Count")
+    plt.gca().invert_yaxis()  # Highest count at top
+    plt.grid(axis="x", linestyle="--", alpha=0.7)
 
     # Plot 3: Special Token Statistics
-    axs[1, 0].bar(special_token_counts.keys(), special_token_counts.values(), color="lightgreen")
-    axs[1, 0].set_title("Special Token Statistics")
-    axs[1, 0].set_xlabel("Special Token")
-    axs[1, 0].set_ylabel("Count")
-    axs[1, 0].grid(axis="y", linestyle="--", alpha=0.7)
+    plt.subplot(2, 2, 3)
+    bars = plt.bar(special_token_counts.keys(), special_token_counts.values(), color="lightgreen")
+    plt.title("Special Token Counts")
+    plt.ylabel("Count")
+    plt.xticks(rotation=45, ha="right")
+    # Add value labels
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                 f'{height:,}',
+                 ha='center', va='bottom')
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
 
-    # Plot 4: Sequence Length Boxplot
-    axs[1, 1].boxplot(seq_lengths, vert=False, patch_artist=True, boxprops=dict(facecolor="lightblue"))
-    axs[1, 1].set_title("Sequence Length Boxplot")
-    axs[1, 1].set_xlabel("Sequence Length")
-    axs[1, 1].grid(axis="x", linestyle="--", alpha=0.7)
-    
+    # Plot 4: Boxplot of Sequence Lengths
+    plt.subplot(2, 2, 4)
+    plt.boxplot(seq_lengths, vert=True, patch_artist=True, 
+               boxprops=dict(facecolor="lightblue"), showfliers=False)
+    plt.title("Sequence Length Distribution")
+    plt.ylabel("Tokens")
+    plt.xticks([1], ["All Sequences"])
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
     # Adjust layout
     plt.tight_layout()
     
     # Save the figure
-    plt.savefig(output_path, dpi=300)
+    plt.savefig(output_path, bbox_inches="tight", dpi=300)
     plt.close()
     print(f"Combined visualization saved at: {output_path}")
-    
+
     print("Token Frequency Sample (Top 10):")
     print(dict(Counter(token_flat).most_common(10)))
 

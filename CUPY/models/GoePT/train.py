@@ -74,11 +74,11 @@ def read_datasets(split, data_dir, context_length, batch_size, rng):
     # https://stackoverflow.com/questions/45132940/numpy-memmap-memory-usage-want-to-iterate-once/61472122#61472122
 
     if split == 'train':
-        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_train_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_train_{config.tokenizer_name_str}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     elif split == 'test':
-        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_test_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_test_{config.tokenizer_name_str}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     else:
-        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_val_{config.tokenizer_name_str}_seq_len_{config.context_length}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
+        data = np.memmap(os.path.join(data_dir, f'{config.vo_size}_val_{config.tokenizer_name_str}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin'), dtype=np.uint16, mode='r')
     
     ix = rng.integers(len(data) - context_length, size=(batch_size,))
     
