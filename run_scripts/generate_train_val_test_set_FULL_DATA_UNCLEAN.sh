@@ -8,7 +8,7 @@ conda activate eml
 
 current_dir=($pwd)
 
-echo "Generating Tokenizer with BPE"
+echo "Generating Training, Validation and Test tokenized datasets"
 cd ../CUPY/models/utils/
-python3 generate_tokenizer.py --vocab_sizes 2048
+python3 generate_train_val_test_FULL_DATA_UNCLEAN.py
 cd $current_dir

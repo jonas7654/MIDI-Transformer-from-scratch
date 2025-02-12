@@ -278,11 +278,11 @@ I locally count within the process_file() function and then aggregate these at t
 def main():
     
     current_dir = os.getcwd()
-    name_of_raw_midi_folder = "clean_midi/"
+    name_of_raw_midi_folder = "full_dataset_unclean/"
     folder_path = Path(
         os.path.dirname(current_dir), "datasets", name_of_raw_midi_folder
     )
-    output_folder = Path(os.path.dirname(current_dir), "datasets/transposed_midi")
+    output_folder = Path(os.path.dirname(current_dir), "datasets/transposed_midi_unclean")
     output_folder.mkdir(parents=True, exist_ok=True)
 
     print(f"Input Folder: {folder_path}")
@@ -301,7 +301,7 @@ def main():
     #    for future in futures:
     #        results.append(future.result())
     
-    max_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
+    max_workers = multiprocessing.cpu_count()
     print(f"Using {max_workers} workers")
     
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
