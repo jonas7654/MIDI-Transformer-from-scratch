@@ -226,19 +226,19 @@ if __name__ == '__main__':
             "goal": "minimize"   # Minimize validation loss
         },
         "parameters": {
-            "lr": {"values": [0.0001, 0.0005, 0.00001]},  # Learning rate options
-            "batch_size": {"values": [12]},  # Batch size options
+            "lr": {"values": [0.1, 0.01, 0.0001, 0.0005, 0.00001]},  # Learning rate options
+            "batch_size": {"values": [32]},  # Batch size options
             "n_layer": {"values": [4, 6, 8, 10, 12]},  # Number of layers
-            "n_heads": {"values": [4, 8]},  # Number of attention heads
-            "n_embd": {"values": [256, 512]},  # Embedding size
-            "dropout_rate": {"values": [0, 0.1, 0.2, 0.3]},  # Dropout
-            "epochs": {"value": 40},  # Fixed number of epochs
+            "n_heads": {"values": [4, 8, 16]},  # Number of attention heads
+            "n_embd": {"values": [256, 512, 1024]},  # Embedding size
+            "dropout_rate": {"values": [0, 0.1, 0.2, 0.3, 0.4]},  # Dropout
+            "epochs": {"value": 150},  # Fixed number of epochs
             "gradient_accumulation_steps": {"value": 32},  # Fixed value
-            "context_length": {"values": [16, 32, 40, 50]},  # Fixed value
+            "context_length": {"values": [32, 42]},  # Fixed value
             "seed": {"value": 1},  # Random seed
             "data_dir": {"value":  "/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/"},  # Fixed data dir
             "checkpoint_dir": {"value": "/csghome/hpdc04/Transformer_Code/checkpoints/"},  # Fixed checkpoint dir
-            "vo_size": {"values": [1024]},  # Vocabulary size for tokenizer
+            "vo_size": {"values": [2048]},  # Vocabulary size for tokenizer
             "tokenizer_name": {"values": ["REMI"]},  # Tokenizer class name
             "manually_set_sos_eos_trunc": {"values": [True]},
             "eval_interval": {"value": 5},
