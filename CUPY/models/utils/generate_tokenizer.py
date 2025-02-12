@@ -23,7 +23,7 @@ def train_tokenizer(vocab_size):
     
     # Create the Tokenizer
     TOKENIZER_PARAMS = {
-        "pitch_range": (40, 109),
+        "pitch_range": (21, 109),
         "beat_res": {(0, 32): 8},
         "num_velocities": 1,
         "special_tokens": ["PAD", "BOS", "EOS"],
@@ -43,8 +43,7 @@ def train_tokenizer(vocab_size):
         "ac_note_duration_track": True,
         "ac_note_density_track": True,
         "ac_repetition_track": True,
-        "ac_repetition_track_num_bins": 8,
-        "ac_pitch_class_bar": True
+        "ac_repetition_track_num_bins": 8
         #"max_bar_embedding" : 8
     }
     
