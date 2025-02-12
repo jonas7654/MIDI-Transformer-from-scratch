@@ -102,52 +102,29 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
 
         # Tokenize the Score
         tokens = self.encode(score)
-            
+
         # Collect token IDs
         token_ids = tokens[0].ids
-
         
         all_ids.append(token_ids)
-        max_length = max(max_length, len(token_ids))
-        
-        if seq_length is None:
-            seq_length = max_length
 
-
-
-    """
-    If the sequence length is longer than 'seq_len' we add the sos token to the beginning and add a custom truncate token to the end
-    to specify that we have truncated the midi file
     
+    total_number_of_tokens = 0
+    for ids in all_ids:
+        total_number_of_tokens += len(ids)
+    print(f"Total Number of Tokens: {total_number_of_tokens}")
     """
-    # Convert collected token IDs to a padded NumPy array
+    Create a flat array
+    """
     if (manually_add_sos_eos):
-        token_array = np.empty((len(all_ids), seq_length), dtype = np.int16)
+        token_sequence = []
         
-        for idx, ids in enumerate(all_ids):
+        for ids in all_ids:
             # Start with a start token
-            token_sequence = [sos_token]
-            
-            if (len(ids) > seq_length - 1): # Truncate if too long
-                token_sequence += ids[:seq_length - 1] 
-            else:
-                token_sequence += ids
-                token_sequence += [eos_token]
-            
-            # Ensure the sequence is exactly seq_length
-            token_sequence = token_sequence[:seq_length]
-            token_sequence += [pad_token] * (seq_length - len(token_sequence))
-        
-            # Assign to token array
-            token_array[idx, :] = token_sequence
-    else:
-        token_array = np.array(
-        [
-            ids[:seq_length] + [pad_token] * (seq_length - len(ids[:seq_length]))
-            for ids in all_ids
-        ],
-        dtype=np.int16
-                              )
+            token_sequence.extend([sos_token] + ids + [eos_token])
+    # Convert to numpy 
+    print(len(token_sequence))
+    token_array = np.array(token_sequence, dtype = np.int16)
     
     
     

@@ -58,7 +58,7 @@ midi_paths_train = midi_paths[num_files_valid + num_files_test:]
 train_val_test_path = {}
  # Chunk MIDIs and perform data augmentation on each subset independently
 for files_paths, subset_name in (
-     (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
+    (midi_paths_train, "train"),  (midi_paths_valid, "val"), (midi_paths_test, "test")
  ):
         
      # Split the MIDIs into chunks of sizes approximately about 'seq_length' tokens
