@@ -29,18 +29,18 @@ reg_alpha = 2.5
 relative_attention = True
 #####
 
-batch_size = 24  # Default batch size
+batch_size = 64  # Default batch size
 context_length = 32 # Sequence context length
 epochs = 120  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.0005 # Initial learning rate
-dropout_rate = 0.3 # Default dropout rate
-n_layer = 6  # Number of layers in the transformer
+learning_rate = 0.001 # Initial learning rate
+dropout_rate = 0.2 # Default dropout rate
+n_layer = 12  # Number of layers in the transformer
 n_embd = 1024  # Embedding size
-n_heads = 4  # Number of attention heads
+n_heads = 16  # Number of attention heads
 seed = 1  # Random seed
 
 # Logging
 log_interval = 5  # Number of steps between log updates
 eval_interval = 5  # Number of steps between evaluations
-eval_iters = 50 
+eval_iters = 200 

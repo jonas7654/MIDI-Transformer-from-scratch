@@ -1,9 +1,8 @@
 #!/bin/bash
-
+#SBATCH --cpus-per-task=16
 #SBATCH --gres gpu:0
-#SBATCH --mem 15G
-#SBATCH --cpus-per-task 1
-#SBATCH --time 500:00
+#SBATCH --mem 32G
+#SBATCH --time 1000:00
 #SBATCH -p exercise-eml
 #SBATCH -o logs/tranpose.log
 
@@ -16,5 +15,5 @@ current_dir=($pwd)
 
 echo "Pre-processing raw midi files"
 cd ../CUPY/models/utils/
-python3 collect_parallel_in_memory.py
+python3 collect_mem_2.py
 cd $current_dir

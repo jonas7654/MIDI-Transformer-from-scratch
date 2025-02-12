@@ -301,7 +301,7 @@ def main():
     #    for future in futures:
     #        results.append(future.result())
     
-    max_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
+    max_workers = multiprocessing.cpu_count()
     print(f"Using {max_workers} workers")
     
     with ProcessPoolExecutor(max_workers=max_workers) as executor:

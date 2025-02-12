@@ -1,15 +1,15 @@
 {
     "config": {
         "pitch_range": [
-            40,
+            21,
             109
         ],
         "beat_res": {
-            "0_16": 8
+            "0_32": 8
         },
         "num_velocities": 1,
         "remove_duplicated_notes": false,
-        "encode_ids_split": "bar",
+        "encode_ids_split": "no",
         "special_tokens": [
             "PAD_None",
             "BOS_None",
@@ -291,7 +291,7 @@
         "one_token_stream_for_programs": false,
         "program_changes": false,
         "beat_res_rest": {
-            "0_16": 8
+            "0_32": 8
         },
         "chord_maps": {
             "min": [
@@ -379,23 +379,13 @@
         "chord_unknown": null,
         "num_tempos": 32,
         "tempo_range": [
-            40,
-            250
+            120,
+            120
         ],
         "log_tempos": false,
         "delete_equal_successive_tempo_changes": false,
         "time_signature_range": {
-            "8": [
-                3,
-                12,
-                6
-            ],
             "4": [
-                5,
-                6,
-                3,
-                2,
-                1,
                 4
             ]
         },
@@ -417,15 +407,15 @@
         "ac_polyphony_min": 1,
         "ac_polyphony_max": 6,
         "ac_pitch_class_bar": false,
-        "ac_note_density_track": false,
+        "ac_note_density_track": true,
         "ac_note_density_track_min": 0,
         "ac_note_density_track_max": 18,
         "ac_note_density_bar": false,
         "ac_note_density_bar_max": 18,
         "ac_note_duration_bar": false,
-        "ac_note_duration_track": false,
-        "ac_repetition_track": false,
-        "ac_repetition_track_num_bins": 10,
+        "ac_note_duration_track": true,
+        "ac_repetition_track": true,
+        "ac_repetition_track_num_bins": 8,
         "ac_repetition_track_num_consec_bars": 4,
         "additional_params": {
             "max_bar_embedding": null,
