@@ -21,8 +21,8 @@ def train_tokenizer(vocab_size):
     tokenizer_dir = os.path.join(os.path.dirname(current_dir), "tokenizers/")
     clean_path = list(Path(data_dir, "transposed_midi/").glob("*.mid"))
     unclean_path = list(Path(data_dir, "transposed_midi_unclean/").glob("*.mid"))
-    files_path = clean_path.extend(unclean_path)
-    print(len(clean_path))
+    files_path = clean_path + unclean_path
+    print(len(files_path))
     
     # Create the Tokenizer
     TOKENIZER_PARAMS = {

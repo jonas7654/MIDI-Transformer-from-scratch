@@ -341,7 +341,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
 
 
 """
-@Author: Jonas
+@Author: Jonas  
 Monkey Patch tokenizer.tokenize_data_fast
 """
 REMI.tokenize_dataset_to_bin = tokenize_dataset_to_bin

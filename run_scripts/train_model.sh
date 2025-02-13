@@ -2,7 +2,7 @@
 #SBATCH --gres gpu:1
 #SBATCH --mem 16G
 #SBATCH --cpus-per-task 1
-#SBATCH --time 1500:00
+#SBATCH --time 2880:00
 #SBATCH -p exercise-eml
 #SBATCH -o logs/model_py_GPU.log
 
