@@ -95,7 +95,7 @@ for files_paths, subset_name in (
     the velocity offsets should be chosen accordingly to the number of velocities in your tokenizer’s
     vocabulary (num_velocities). (default: None)
          """
-     do_augment = True
+     do_augment = False
      if (do_augment):
          # Perform data augmentation
          augment_dataset(

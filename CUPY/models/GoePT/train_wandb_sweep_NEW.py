@@ -40,10 +40,9 @@ def read_datasets(split, data_dir, context_length, batch_size, rng, config):
     x = np.stack([(data[i:i+context_length].astype(np.int64)) for i in ix])
     y = np.stack([(data[i+1:i+1+context_length].astype(np.int64)) for i in ix])
     
-    # Load batches directly to GPU memory
+    
     x = cp.asarray(x)
     y = cp.asarray(y)
-
     return x, y
 
 
@@ -79,8 +78,7 @@ def get_log_output_table(log_output_buffer: deque) -> Table:
 
 
 def generate_vocab_file_path(tokenizer_name_str, vo_size, base_dir="/path/to/vocab/files"):
-
-    return os.path.join(base_dir, f"tokenizer_{tokenizer_name_str}_{vo_size}.json")
+    return os.path.join(base_dir, f"tokenizer_{tokenizer_name_str}_{vo_size}_FULL_False.json")
 
 
 def train(config=None):
@@ -157,6 +155,8 @@ def train(config=None):
                 task_id=task_id
             ):
                 X, Y = get_batch('train')
+
+                
                 logits, loss = model.forward(X, Y)
                 loss = loss / config.gradient_accumulation_steps
 
@@ -191,6 +191,7 @@ def train(config=None):
 
                 for k in progress_step.track(range(config.eval_iters), total=config.eval_iters, task_id=task_id):
                     X, Y = get_batch('val')
+                    
                     logits, loss = model.forward(X, Y)
                     losses_val[k] = loss.item()
 
@@ -227,26 +228,26 @@ if __name__ == '__main__':
         },
         "parameters": {
             "lr": {"values": [0.1, 0.01, 0.0001, 0.0005, 0.00001]},  # Learning rate options
-            "batch_size": {"values": [8]},  # Batch size options
-            "n_layer": {"values": [4, 6, 8, 10]},  # Number of layers
-            "n_heads": {"values": [4, 8, 16]},  # Number of attention heads
+            "batch_size": {"values": [4,6]},  # Batch size options
+            "n_layer": {"values": [4, 6, 8]},  # Number of layers
+            "n_heads": {"values": [4, 8]},  # Number of attention heads
             "n_embd": {"values": [256, 512, 1024]},  # Embedding size
             "dropout_rate": {"values": [0, 0.1, 0.2, 0.3, 0.4]},  # Dropout
-            "epochs": {"value": 500},  # Fixed number of epochs
+            "epochs": {"value": 450},  # Fixed number of epochs
             "gradient_accumulation_steps": {"value": 32},  # Fixed value
             "context_length": {"values": [128, 256, 512, 1024]},  # Fixed value
             "seed": {"value": 1},  # Random seed
             "data_dir": {"value":  "/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/"},  # Fixed data dir
             "checkpoint_dir": {"value": "/csghome/hpdc04/Transformer_Code/checkpoints/"},  # Fixed checkpoint dir
-            "vo_size": {"values": [8192, 4096]},  # Vocabulary size for tokenizer
+            "vo_size": {"values": [4096, 8192]},  # Vocabulary size for tokenizer
             "tokenizer_name": {"values": ["REMI"]},  # Tokenizer class name
             "manually_set_sos_eos_trunc": {"values": [True]},
-            "eval_interval": {"value": 5},
+            "eval_interval": {"value": 100},
             "eval_iters" : {"value": 200},
-            "log_interval" : {"value" : 5},
+            "log_interval" : {"value" : 100},
             "regularization" : {"values": [False]},
-            "reg_alpha": {"values": [0, 0.05, 0.1, 0.2, 0.3, 1, 2, 3 ,4]},
-            "relative_attention": {"values": [True, False]}
+            "reg_alpha": {"values": [0]},
+            "relative_attention": {"values": [True]}
         }
     }
     # Initialize the sweep
