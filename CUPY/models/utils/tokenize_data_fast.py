@@ -115,18 +115,10 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
     """
     Create a flat array
     """
-    if (manually_add_sos_eos):
-        token_array= np.empty(total_number_of_tokens, dtype=np.int16)
-        current_position = 0
+    if (manually_add_sos_eos):                    
+        sequences = [np.concatenate(([sos_token], ids, [eos_token])) for ids in all_ids]
+        token_array = np.concatenate(sequences)    
         
-        for ids in all_ids:
-            seq_len = len(ids)
-            
-            token_array[current_position] = sos_token
-            token_array[current_position + 1:current_position + 1 + seq_len] = ids 
-            token_array[current_position + 1 + seq_len] = eos_token
-            
-            current_position += seq_len + 2
     # Convert to numpy 
     print(f"Final array length: {len(token_array)}")
     

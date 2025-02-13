@@ -10,5 +10,5 @@ current_dir=($pwd)
 
 echo "Generating Tokenizer with BPE"
 cd ../CUPY/models/utils/
-python3 generate_tokenizer.py --vocab_sizes 4096 8192
+python3 generate_tokenizer.py --vocab_sizes 16384
 cd $current_dir

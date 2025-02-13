@@ -58,7 +58,7 @@ midi_paths_train = midi_paths[num_files_valid + num_files_test:]
 train_val_test_path = {}
  # Chunk MIDIs and perform data augmentation on each subset independently
 for files_paths, subset_name in (
-      (midi_paths_valid, "val"), (midi_paths_test, "test")
+    (midi_paths_train, "train"), (midi_paths_valid, "val"), (midi_paths_test, "test")
  ):
         
      # Split the MIDIs into chunks of sizes approximately about 'seq_length' tokens
@@ -132,14 +132,14 @@ for subset in train_val_test_path:
 
     tokenized_data = tokenizer.tokenize_dataset_to_bin(files_paths = files_path,
                                                        verbose = True,
-                                                       seq_length = seq_length,
+                                                       seq_length = seq_length, #:NOTE We don't use this anymore
                                                        manually_add_sos_eos = config.manually_set_sos_eos_trunc,
                                                        subset = subset)
     
     # :NOTE manually_set_sos_eos_trunc is defined globally at the beginning
     # Sanity check
     assert np.all(tokenized_data < tokenizer.vocab_size), "Found out-of-vocabulary tokens in dataset"
-    ic(tokenized_data[:100])
+    ic(tokenized_data[:500])
     ic(tokenized_data.shape)
 
     # SAVE

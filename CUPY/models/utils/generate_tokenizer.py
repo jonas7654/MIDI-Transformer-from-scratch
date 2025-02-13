@@ -60,7 +60,7 @@ def train_tokenizer(vocab_size):
     
     # Save the tokenizer
     print(f"saved to: {tokenizer_dir}")
-    tokenizer.save(Path(tokenizer_dir, f"tokenizer_{config.tokenizer_name_str}_{tokenizer.vocab_size}.json"))
+    tokenizer.save(Path(tokenizer_dir, f"tokenizer_{config.tokenizer_name_str}_{tokenizer.vocab_size}_FULL_{config.FULL}.json"))
     
     
 if __name__ == "__main__":
