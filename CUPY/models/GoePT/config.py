@@ -8,11 +8,8 @@ checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save
 tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
 vo_size = 4096
-FULL = False
+FULL = True
 
-"""
-The following section is only important after generating a tokenizer
-"""
 vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_{tokenizer_name_str}_{vo_size}_FULL_{FULL}.json"  # Path to the tokenizer vocabulary file
 
 
@@ -31,14 +28,14 @@ relative_attention = True
 #####
 
 batch_size = 12  # Default batch size
-context_length = 384 # Sequence context length
+context_length = 128 # Sequence context length
 epochs = 1000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
 learning_rate = 0.0005 # Initial learning rate
-dropout_rate = 0.2 # Default dropout rate
+dropout_rate = 0.25 # Default dropout rate
 n_layer = 8  # Number of layers in the transformer
-n_embd = 384  # Embedding size
-n_heads = 6  # Number of attention heads
+n_embd = 512  # Embedding size
+n_heads = 8 # Number of attention heads
 seed = 1  # Random seed
 
 # Logging

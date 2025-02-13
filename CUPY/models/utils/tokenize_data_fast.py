@@ -112,11 +112,13 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
     total_number_of_tokens = sum(len(ids) + 2 for ids in all_ids)
     
     print(f"Total Number of Tokens: {total_number_of_tokens}")
+    individual_sequence_lengths = [len(ids) + 2 for ids in all_ids] # +2 since we add sos and eos
+    
     """
     Create a flat array
     """
     if (manually_add_sos_eos):                    
-        sequences = [np.concatenate(([sos_token], ids, [eos_token])) for ids in all_ids]
+        sequences = [np.concatenate(([sos_token], ids, [eos_token])).astype(np.int16) for ids in all_ids]
         token_array = np.concatenate(sequences)    
         
     # Convert to numpy 
@@ -143,7 +145,7 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
         print(tabulate(token_stats_table, headers=["Token Type", "Count/Details"], tablefmt="grid"))
 
         if not (subset == None):
-            visualize_tokenized_data_combined(token_array, pad_token, sos_token, eos_token, trunc_token, subset = subset) 
+            visualize_tokenized_data_combined(token_array, pad_token, sos_token, eos_token, trunc_token, subset = subset, lengths = individual_sequence_lengths) 
 
     self._verbose = False
     return token_array
@@ -254,14 +256,12 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 
 def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
                                       output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/",
-                                      subset=None):
+                                      subset=None,
+                                      lengths=None):
     
     os.makedirs(output_path, exist_ok=True)
-    output_path = Path(output_path, f"combined_visualization_{config.context_length}_{config.vo_size}_{config.tokenizer_name_str}_{subset}_manual_tokens_{config.manually_set_sos_eos_trunc}.png")
-    
-    # Analyze sequence lengths
-    seq_lengths = [len(token_array)] if token_array.ndim == 1 else [np.count_nonzero(row != pad_token_id) for row in token_array]
-    
+    output_path = Path(output_path, f"combined_visualization_{config.vo_size}_{config.tokenizer_name_str}_{subset}_manual_tokens_{config.manually_set_sos_eos_trunc}.png")
+        
     # Token frequencies
     token_flat = token_array.flatten()
     token_counts = Counter(token_flat)
@@ -281,7 +281,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
 
     # Plot 1: Sequence Length Distribution (Log Scale)
     plt.subplot(2, 2, 1)
-    plt.hist(seq_lengths, bins=50, color="skyblue", edgecolor="black", log=True)
+    plt.hist(lengths, bins=50, color="skyblue", edgecolor="black", log=True)
     plt.title("Sequence Length Distribution (Log Scale)")
     plt.xlabel("Sequence Length (tokens)")
     plt.ylabel("Log Frequency")
@@ -312,7 +312,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
 
     # Plot 4: Boxplot of Sequence Lengths
     plt.subplot(2, 2, 4)
-    plt.boxplot(seq_lengths, vert=True, patch_artist=True, 
+    plt.boxplot(lengths, vert=True, patch_artist=True, 
                boxprops=dict(facecolor="lightblue"), showfliers=False)
     plt.title("Sequence Length Distribution")
     plt.ylabel("Tokens")

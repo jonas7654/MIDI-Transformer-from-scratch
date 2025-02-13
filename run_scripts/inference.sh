@@ -1,7 +1,7 @@
 srun --mem=12G --cpus-per-task=1 --gres gpu:1 --partition=exercise-eml --pty python ../CUPY/models/GoePT/Inference.py \
-    --weights "/csghome/hpdc04/Transformer_Code/checkpoints/logical-sweep-1_340.json" \
-    --vocab-file "/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_REMI_2048.json" \
+    --weights "/csghome/hpdc04/Transformer_Code/checkpoints/lyric-blaze-283_335.json" \
+    --vocab-file "/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_REMI_2048_FULL_False.json" \
     --input "/csghome/hpdc04/Transformer_Code/Inference/input_files/" \
     --b 128\
-    --save-dir "/csghome/hpdc04/Transformer_Code/Inference/output_files/ \
+    --save-dir "/csghome/hpdc04/Transformer_Code/Inference/output_files/" \
     --manually-set-sos-eos-trunc true

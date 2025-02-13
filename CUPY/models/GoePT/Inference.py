@@ -170,7 +170,7 @@ def main():
             logits, _ = model.forward(input_sequence, targets = None)
             logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
             predictions = softmax_with_temperature(logits, temperature = 0.9)
-            next_tokens = top_p_sampling_NEW(predictions, p = 0.01) 
+            next_tokens = top_p_sampling_NEW(predictions, p = 0.1) 
             if next_tokens == 2:
                 print("Encountered a EOS token, stopping prediction")
                 break
