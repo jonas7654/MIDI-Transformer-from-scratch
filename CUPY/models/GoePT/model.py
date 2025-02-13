@@ -44,10 +44,10 @@ class GoePT():
                     n_embd: int=384, # d_model, 3 * d_model = 1152
                     n_heads: int=6,
                     dropout: float=0.2,
+                    lr: float=1e-3,
+                    relative_attention = True,
                     regularization = False,
-                    reg_alpha = 0.1,
-                    relative_attention = False,
-                    lr: float=1e-3) -> None:
+                    reg_alpha = 0.1) -> None:
 
         self.vocab_size = vocab_size
         self.context_length = context_length
@@ -201,8 +201,11 @@ class GoePT():
             'n_heads': self.n_heads,
             'dropout': self.dropout,
             'lr': self.lr,
+            'relative_attention' : self.relative_attention,
+            'regularization' : self.regularization,
+            'reg_alpha' : self.reg_alpha,
             'params': params_all}
-
+        
         return state_dict
 
     @classmethod
@@ -216,7 +219,10 @@ class GoePT():
                             state_dict['n_embd'],
                             state_dict['n_heads'],
                             state_dict['dropout'],
-                            state_dict['lr'])
+                            state_dict['lr'],
+                            state_dict['relative_attention'],
+                            state_dict['regularization'],
+                            state_dict['reg_alpha'])
 
         goe_pt.lm_head.weight = decompress_numpy_array(state_dict['params']['lm_head'][0])
         goe_pt.lm_head.bias = decompress_numpy_array(state_dict['params']['lm_head'][1])
