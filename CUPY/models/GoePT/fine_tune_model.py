@@ -270,6 +270,7 @@ def main():
     learning_rate = config.learning_rate
     decay_rate = config.decay_rate  # Example exponential decay
     decay_interval = config.decay_interval  # Decay every epoch
+    min_lr = 0.00001
     
     # with status_console.screen():
     with Live(header_panel):
@@ -319,11 +320,12 @@ def main():
             
             # Apply learning rate decay
             if config.use_decay:
-                if iter_num % decay_interval == 0:
-                    new_lr = learning_rate * (decay_rate ** (iter_num / decay_interval))
-                    model.setLR(new_lr)
-                    wandb.log({"learning_rate": model.lr})
-                    learning_rate = new_lr
+                current_step = iter_num % decay_interval  # For cyclic restarts
+                progress = cp.array(current_step / decay_interval, dtype=cp.float32)  # Convert to CuPy array
+                new_lr = min_lr + 0.5 * (learning_rate - min_lr) * (1 + cp.cos(cp.pi * progress))
+                new_lr = float(new_lr)  # Convert back to Python float for setLR and logging
+                model.setLR(new_lr)
+                wandb.log({"learning_rate": new_lr})
         
             progress_step.remove_task(task_id)
 

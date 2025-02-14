@@ -145,7 +145,14 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
         print(tabulate(token_stats_table, headers=["Token Type", "Count/Details"], tablefmt="grid"))
 
         if not (subset == None):
-            visualize_tokenized_data_combined(token_array, pad_token, sos_token, eos_token, trunc_token, subset = subset, lengths = individual_sequence_lengths) 
+            visualize_tokenized_data_combined(token_array,
+                                              pad_token,
+                                              sos_token,
+                                              eos_token,
+                                              trunc_token,
+                                              subset = subset,
+                                              lengths = individual_sequence_lengths,
+                                              sequences = all_ids) 
 
     self._verbose = False
     return token_array
@@ -257,7 +264,8 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token=None,
                                       output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/",
                                       subset=None,
-                                      lengths=None):
+                                      lengths=None,
+                                      sequences=None):
     output_path = Path(output_path)
     os.makedirs(str(output_path), exist_ok=True)
     output_path = output_path / f"combined_visualization_{config.vo_size}_{config.tokenizer_name_str}_{str(subset)}_manual_tokens_{config.manually_set_sos_eos_trunc}.png"
@@ -345,7 +353,9 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
     plt.subplot(3, 3, 8)
     max_length = max(lengths)
     position_counts = np.zeros(max_length)
-    for seq in token_array:
+    for seq in sequences:
+        if isinstance(seq, (int, np.integer)):  # If seq is a single integer, make it a list
+            seq = [seq]
         for i, token in enumerate(seq):
             if i < max_length:
                 position_counts[i] += 1
@@ -357,7 +367,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
 
     # Plot 9: Token Diversity Analysis
     plt.subplot(3, 3, 9)
-    unique_tokens_per_seq = [len(set(seq)) for seq in token_array]
+    unique_tokens_per_seq = [len(set(seq)) for seq in sequences]  # Use 'sequences' instead of 'token_array'
     plt.hist(unique_tokens_per_seq, bins=50, color="teal", edgecolor="black")
     plt.title("Unique Tokens per Sequence")
     plt.xlabel("Number of Unique Tokens")

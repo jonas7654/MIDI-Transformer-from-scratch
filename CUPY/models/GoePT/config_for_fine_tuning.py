@@ -3,7 +3,7 @@ from miditok import REMI, Structured
 
 # Paths
 data_dir = "/csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/"  # Path to the dataset directory
-checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save model checkpoints
+checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints_fine_tuning"  # Path to save model checkpoints
 
 tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
@@ -29,15 +29,15 @@ relative_attention = True
 ### learning rate decay ###
 use_decay = True
 decay_rate =  0.95
-decay_interval = 25
+decay_interval = 15
 ####
 
 
 batch_size = 32  # Default batch size
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.001 # Initial learning rate
-dropout_rate = 0.25 # Default dropout rate
+learning_rate = 1e-3 # Initial learning rate
+dropout_rate = 0 # Default dropout rate
 seed = 1  # Random seed
 
 # Logging
