@@ -116,7 +116,7 @@ class GoePT():
 
     def setLR(self, value):
         """Set the learning rate and propagate it to all layers."""
-        self._lr = value
+        self.lr = value
         self.lm_head.lr = value
         self.transformer["wte"].lr = value
         self.transformer["wpe"].lr = value

@@ -251,8 +251,9 @@ def main():
 
     table_update_func = partial(get_log_output_table,
                                     log_output_buffer=log_output_buffer)
-
-    initial_lr = config.learning_rate
+    
+    # Initialize learning rate decay parameters
+    learning_rate = config.learning_rate
     decay_rate = config.decay_rate  # Example exponential decay
     decay_interval = config.decay_interval  # Decay every epoch
     
@@ -305,8 +306,10 @@ def main():
             # Apply learning rate decay
             if config.use_decay:
                 if iter_num % decay_interval == 0:
-                    model.setLR = initial_lr * (decay_rate ** (iter_num // decay_interval))
+                    new_lr = learning_rate * (decay_rate ** (iter_num // decay_interval))
+                    model.setLR(new_lr)
                     wandb.log({"learning_rate": model.lr})
+                    learning_rate = new_lr
 
             progress_step.remove_task(task_id)
 

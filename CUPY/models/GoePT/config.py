@@ -36,12 +36,12 @@ decay_interval = 1
 ####
 
 
-batch_size = 8  # Default batch size
+batch_size = 7  # Default batch size
 context_length = 512 # Sequence context length
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.0001 # Initial learning rate
-dropout_rate = 0.01 # Default dropout rate
+learning_rate = 0.001 # Initial learning rate
+dropout_rate = 0.2 # Default dropout rate
 n_layer = 4  # Number of layers in the transformer
 n_embd = 784  # Embedding size
 n_heads = 8 # Number of attention heads
