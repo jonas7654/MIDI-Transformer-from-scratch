@@ -254,7 +254,7 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 
 
 
-def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token_id,
+def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id,
                                       output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/",
                                       subset=None,
                                       lengths=None):
@@ -270,8 +270,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
     special_labels = {
         "PAD": pad_token_id,
         "SOS": sos_token_id,
-        "EOS": eos_token_id,
-        "TRUNC": trunc_token_id
+        "EOS": eos_token_id
     }
     special_token_counts = {f"{k} ({v})": token_counts.get(v, 0) for k, v in special_labels.items()}
 
@@ -287,11 +286,11 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
     plt.ylabel("Log Frequency")
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 
-    # Plot 2: Top 20 Frequent Tokens
+    # Plot 2: Full Token Distribution
     plt.subplot(2, 2, 2)
-    top_tokens = token_counts.most_common(20)
-    plt.barh([str(t[0]) for t in top_tokens], [t[1] for t in top_tokens], color="salmon")
-    plt.title("Top 20 Frequent Tokens")
+    all_tokens = sorted(token_counts.items(), key=lambda x: x[1], reverse=True)
+    plt.barh([str(t[0]) for t in all_tokens], [t[1] for t in all_tokens], color="salmon")
+    plt.title("Full Token Distribution")
     plt.xlabel("Count")
     plt.gca().invert_yaxis()  # Highest count at top
     plt.grid(axis="x", linestyle="--", alpha=0.7)
@@ -329,6 +328,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
 
     print("Token Frequency Sample (Top 10):")
     print(dict(Counter(token_flat).most_common(10)))
+
 
 
 

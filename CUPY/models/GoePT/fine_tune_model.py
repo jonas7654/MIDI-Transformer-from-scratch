@@ -35,11 +35,15 @@ ic.disable()
 
 
 
-def load_model(checkpoint_path, vocab_file):
+def load_model(checkpoint_path, vocab_file, batch_size, learning_rate, dropout_rate):
     with open(checkpoint_path, mode = 'r', encoding = 'utf-8') as weights:
         state_dict = json.load(weights)
     
-    model = GoePT.from_state_dict(state_dict)
+    model = GoePT.from_state_dict(state_dict,
+                                  batch_size = batch_size,
+                                  lr = learning_rate,
+                                  dropout = dropout_rate
+                                 )
     
     tokenizer = config.tokenizer_name(params=vocab_file)
     ic(tokenizer)
@@ -190,7 +194,13 @@ def main():
     model_name = os.path.splitext(os.path.basename(weights))[0]
     
     # Load the pre trained weights
-    model, tokenizer = load_model(weights, vocab_file)
+    model, tokenizer = load_model(weights,
+                                  vocab_file,
+                                  batch_size = config.batch_size,
+                                  learning_rate = config.learning_rate,
+                                  dropout_rate = config.dropout_rate
+                                 )
+    
     
     os.makedirs("/csghome/hpdc04/Transformer_Code/checkpoints_fine_tuning/", exist_ok=True)
     
@@ -206,11 +216,11 @@ def main():
             "epochs": config.epochs,
             "gradient_accumulation_steps": config.gradient_accumulation_steps,
             "eval_iters": config.eval_iters,
-            "lr": config.learning_rate,
+            "lr": model.lr,
             "seed": config.seed,
             "log_interval": config.log_interval,
             "eval_interval": config.eval_interval,
-            "dropout rate": config.dropout_rate,
+            "dropout rate": model.dropout,
             "vocab_size": tokenizer.vocab_size,
             "n_layer" : model.n_layer,
             "n_embd" : model.n_embd,

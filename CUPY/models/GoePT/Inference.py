@@ -9,12 +9,56 @@ import numpy as np
 import argparse
 from pathlib import Path
 import sys
+import io
+import pretty_midi
 
 
 sys.path.append('/csghome/hpdc04/Transformer_Code/CUPY/models/utils')
 
 from tokenize_data_fast import tokenize_dataset_to_bin
 import config
+
+def make_monophonic(pretty_midi_stream):
+    for instrument in pretty_midi_stream.instruments:
+        # Sort notes by start time
+        instrument.notes.sort(key=lambda note: note.start)
+        # Prepare a new list to store monophonic notes
+        monophonic_notes = []
+        # Initialize a list to track simultaneous notes
+        chord_group = []
+        # Tolerance for identifying simultaneous notes (in seconds)
+        time_tolerance = 0.01
+
+        # Process notes
+        for note in instrument.notes:
+            # If the chord group is empty, add the first note
+            if not chord_group:
+                chord_group.append(note)
+            else:
+                # If the current note starts within the time tolerance of the first note in the group, add to chord
+                if abs(note.start - chord_group[0].start) <= time_tolerance:
+                    chord_group.append(note)
+                else:
+                    # Process the chord group to keep only the highest note
+                    top_note = max(chord_group, key=lambda n: n.pitch)
+                    # If overlap occurs, cut the previous note's end time
+                    if monophonic_notes and monophonic_notes[-1].end > top_note.start:
+                        monophonic_notes[-1].end = top_note.start
+                    # Add the highest note to the monophonic list
+                    monophonic_notes.append(top_note)
+                    # Start a new chord group with the current note
+                    chord_group = [note]
+
+        # Handle the last chord group
+        if chord_group:
+            top_note = max(chord_group, key=lambda n: n.pitch)
+            # Adjust overlap for the last group
+            if monophonic_notes and monophonic_notes[-1].end > top_note.start:
+                monophonic_notes[-1].end = top_note.start
+            monophonic_notes.append(top_note)
+
+        # Replace the instrument's notes with the monophonic notes
+        instrument.notes = monophonic_notes
 
 def load_model(checkpoint_path, vocab_file, batch_size):
     with open(checkpoint_path, mode = 'r', encoding = 'utf-8') as weights:
@@ -30,39 +74,8 @@ def softmax_with_temperature(logits, temperature=1, axis = -1):
     exp_logits = cp.exp(logits / temperature)
     return exp_logits / cp.sum(exp_logits, axis = axis, keepdims=True)
 
-def top_p_sampling(prob_matrix, p=0.5):
-    
-    batch_x, y, vocab_size = prob_matrix.shape
-    sampled_indices = cp.zeros((batch_x, y), dtype=int)
-    
-    print(prob_matrix.shape)
 
-    for i in range(batch_x):
-        for j in range(y):
-            probs = prob_matrix[i, j].copy()
-
-            # Sort probabilities and get sorted indices
-            sorted_indices = cp.argsort(probs)[::-1]  # Descending order
-            sorted_probs = probs[sorted_indices]
-
-            # Compute cumulative probabilities
-            cumulative_probs = cp.cumsum(sorted_probs)
-
-            # Find the cutoff where cumulative probability exceeds p
-            cutoff = cp.argmax(cumulative_probs > p) + 1  # Keep at least one token
-
-            # Get the subset of valid token indices and their probabilities
-            top_indices = sorted_indices[:cutoff]
-            top_probs = sorted_probs[:cutoff]
-            # Normalize probabilities
-            top_probs /= cp.sum(top_probs)
-
-            # Sample from the filtered distribution
-            sampled_indices[i, j] = cp.random.choice(top_indices, size=1, p=top_probs)[0]
-
-        return cp.asarray(sampled_indices)
-
-def top_p_sampling_NEW(prob_matrix, p=0.2):
+def top_p_sampling(prob_matrix, p=0.2):
     batch_size, vocab_size = prob_matrix.shape
     sampled_indices = cp.zeros((batch_size,1), dtype=int)
     
@@ -162,7 +175,7 @@ def main():
             print(input_sequence.shape)
             
         generated_sequence = cp.asanyarray(input_sequence)
-        cp.expand_dims(generated_sequence, axis=0)
+        generated_sequence = cp.expand_dims(generated_sequence, axis=0)
         
         prediction_start_idx = seq_len
         print("\n --------------------------------------------------------------- \n")
@@ -170,7 +183,7 @@ def main():
             logits, _ = model.forward(input_sequence, targets = None)
             logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
             predictions = softmax_with_temperature(logits, temperature = 0.9)
-            next_tokens = top_p_sampling_NEW(predictions, p = 0.1) 
+            next_tokens = top_p_sampling(predictions, p = 0.1) 
             if next_tokens == 2:
                 print("Encountered a EOS token, stopping prediction")
                 break
@@ -193,7 +206,17 @@ def main():
         predicted_sequence = generated_sequence[:, prediction_start_idx:]
         
         decoded_sequence = tokenizer.decode(predicted_sequence)
-        decoded_sequence.dump_midi(path = Path(args.save_dir, fileName))
+
+    
+        memory_buffer = io.BytesIO()
+        print(f"Type of decoded_sequence: {type(decoded_sequence)}")
+        decoded_sequence.dump_midi(path = memory_buffer)
+        memory_buffer.seek(0)
+
+        pretty_midi_stream = pretty_midi.PrettyMIDI(memory_buffer)
+        make_monophonic(pretty_midi_stream)
+        pretty_midi_stream.write(Path(args.save_dir, fileName))
+
         print(f"{fileName}: {predicted_sequence} \n \n")
     
     

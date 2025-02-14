@@ -63,7 +63,7 @@ class GoePT():
         
         # Change this for cupy compatibility
         self.rng = cp.random
-
+        
         def weight_init(size):
             # Using CuPy's random normal distribution generator
             return cp.random.normal(loc=0.0, scale=0.02, size=size).astype(cp.float32)
@@ -114,8 +114,7 @@ class GoePT():
 
         # assert id(self.transformer['wte'].weight) == id(self.lm_head.weight), "wte and lm_head must share the same weights in memory"
 
-
-
+            
     def forward(self, idx, targets=None):
         b, t = idx.shape
         assert t <= self.context_length, f"Cannot forward sequence of length {t}, block size is only {self.context_length}"
@@ -210,7 +209,9 @@ class GoePT():
 
     @classmethod
     def from_state_dict(cls, state_dict: dict,
-                                batch_size: int | None = None):
+                                batch_size: int | None = None,
+                                lr: float | None = None,
+                                dropout: float | None = None):
 
         goe_pt = cls(state_dict['vocab_size'],
                             state_dict['context_length'],
@@ -218,8 +219,8 @@ class GoePT():
                             state_dict['n_layer'],
                             state_dict['n_embd'],
                             state_dict['n_heads'],
-                            state_dict['dropout'],
-                            state_dict['lr'],
+                            state_dict['dropout'] if isinstance(dropout, NoneType) else dropout,
+                            state_dict['lr'] if isinstance(lr, NoneType) else lr,
                             state_dict['relative_attention'],
                             state_dict['regularization'],
                             state_dict['reg_alpha'])
