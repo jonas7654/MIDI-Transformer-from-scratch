@@ -307,7 +307,10 @@ def main():
             # Apply learning rate decay
             if config.use_decay:
                 if iter_num % decay_interval == 0:
-                    new_lr = learning_rate * (decay_rate ** (iter_num // decay_interval))
+                    # discrete steps
+                    #new_lr = learning_rate * (decay_rate ** (iter_num // decay_interval))
+                    # continious
+                    new_lr = learning_rate * (decay_rate ** (iter_num / decay_interval))
                     model.setLR(new_lr)
                     wandb.log({"learning_rate": model.lr})
                     learning_rate = new_lr

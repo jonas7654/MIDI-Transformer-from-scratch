@@ -9,7 +9,7 @@ tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
 vo_size = 8192
 # Full specifies if we should use the tokenizer which was trained on the clean + unclean midi dataset
-FULL = False #:NOTE Only important for training not for generating datasets via the run scripts
+FULL = False  #:NOTE Only important for training not for generating datasets via the run scripts
 
 vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_{tokenizer_name_str}_{vo_size}_FULL_{FULL}.json"  # Path to the tokenizer vocabulary file
 
@@ -31,23 +31,23 @@ relative_attention = True
 
 ### learning rate decay ###
 use_decay = True
-decay_rate =  0.95
-decay_interval = 1
+decay_rate =  0.98
+decay_interval = 100
 ####
 
 
-batch_size = 7  # Default batch size
-context_length = 512 # Sequence context length
+batch_size = 8  # Default batch size
+context_length = 800 # Sequence context length
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.001 # Initial learning rate
-dropout_rate = 0.2 # Default dropout rate
+learning_rate = 0.01 # Initial learning rate
+dropout_rate = 0.3 # Default dropout rate
 n_layer = 4  # Number of layers in the transformer
-n_embd = 784  # Embedding size
-n_heads = 8 # Number of attention heads
+n_embd = 256  # Embedding size
+n_heads = 4 # Number of attention heads
 seed = 1  # Random seed
 
 # Logging
-log_interval = 50  # Number of steps between log updates
-eval_interval = 50  # Number of steps between evaluations
+log_interval = 25  # Number of steps between log updates
+eval_interval = 25  # Number of steps between evaluations
 eval_iters = 100 

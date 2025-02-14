@@ -171,7 +171,7 @@ def main():
 
     # Initialize Weights & Biases (wandb)
     wandb.init(
-        project=f"MIDI-Transformer", 
+        project=f"MIDI-Transformer-pre-training", 
         config={
             "data_dir": config.data_dir,
             "checkpoint_dir": config.checkpoint_dir,
@@ -256,6 +256,7 @@ def main():
     learning_rate = config.learning_rate
     decay_rate = config.decay_rate  # Example exponential decay
     decay_interval = config.decay_interval  # Decay every epoch
+    min_lr = 1e-6  # Minimum learning rate
     
     # with status_console.screen():
     with Live(header_panel):
@@ -306,7 +307,7 @@ def main():
             # Apply learning rate decay
             if config.use_decay:
                 if iter_num % decay_interval == 0:
-                    new_lr = learning_rate * (decay_rate ** (iter_num // decay_interval))
+                    new_lr = max(min_lr, learning_rate * (decay_rate ** (iter_num / decay_interval)))
                     model.setLR(new_lr)
                     wandb.log({"learning_rate": model.lr})
                     learning_rate = new_lr

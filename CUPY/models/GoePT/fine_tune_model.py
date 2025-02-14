@@ -206,13 +206,13 @@ def main():
     
     # Initialize Weights & Biases (wandb)
     wandb.init(
-        project=f"MIDI-Transformer", 
+        project=f"MIDI-Transformer-fine-tuning", name = f"fine_tuning_{model_name}",
         config={
             "data_dir": config.data_dir,
             "checkpoint_dir": config.checkpoint_dir,
-            "vocab_file": config.vocab_file,
+            "vocab_file": args.vocab_file,
             "batch_size": config.batch_size,
-            "context_length": config.context_length,
+            "context_length": model.context_length,
             "epochs": config.epochs,
             "gradient_accumulation_steps": config.gradient_accumulation_steps,
             "eval_iters": config.eval_iters,
@@ -222,14 +222,14 @@ def main():
             "eval_interval": config.eval_interval,
             "dropout rate": config.dropout_rate,
             "vocab_size": tokenizer.vocab_size,
-            "n_layer" : config.n_layer,
-            "n_embd" : config.n_embd,
-            "n_heads" : config.n_heads,
+            "n_layer" : model.n_layer,
+            "n_embd" : model.n_embd,
+            "n_heads" : model.n_heads,
             "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc,
             "tokenizer": config.tokenizer_name_str,
             "regularization" : config.regularization,
             "reg_alpha" : config.reg_alpha,
-            "relative_attention": config.relative_attention,
+            "relative_attention": model.relative_attention,
             "use_lr_decay" : config.use_decay,
             "decay_rate" : config.decay_rate,
             "decay_intervals" : config.decay_interval
@@ -320,7 +320,7 @@ def main():
             # Apply learning rate decay
             if config.use_decay:
                 if iter_num % decay_interval == 0:
-                    new_lr = learning_rate * (decay_rate ** (iter_num // decay_interval))
+                    new_lr = learning_rate * (decay_rate ** (iter_num / decay_interval))
                     model.setLR(new_lr)
                     wandb.log({"learning_rate": model.lr})
                     learning_rate = new_lr

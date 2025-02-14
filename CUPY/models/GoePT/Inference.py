@@ -11,6 +11,7 @@ from pathlib import Path
 import sys
 import io
 import pretty_midi
+import os
 
 
 sys.path.append('/csghome/hpdc04/Transformer_Code/CUPY/models/utils')
@@ -128,11 +129,12 @@ def main():
     parser.add_argument('--context-length', type = int)
     parser.add_argument('--b', type = int)
     parser.add_argument('--manually-set-sos-eos-trunc', type = bool)
-    
+    parser.add_argument('--p', type = float)
+    parser.add_argument('--temperature', type = float)
 
-    
     args = parser.parse_args()
     
+    model_name = os.path.splitext(os.path.basename(args.weights))[0]
     file_path = Path(args.input)
     number_of_files = len(list(file_path.glob("*.mid")))
     
@@ -145,7 +147,8 @@ def main():
     tokenized_input_sequences = []
     for midifile in list(file_path.glob("*mid")):
         t = tokenizer(midifile)[0].ids
-        sequence = [sos_token] + t + [eos_token]
+        #sequence = [sos_token] + t + [eos_token]
+        sequence = [sos_token] + t 
         
         tokenized_input_sequences.append(sequence)
         
@@ -175,17 +178,16 @@ def main():
             print(input_sequence.shape)
             
         generated_sequence = cp.asanyarray(input_sequence)
-        #generated_sequence = cp.expand_dims(generated_sequence, axis=0)
         
         prediction_start_idx = seq_len
         print("\n --------------------------------------------------------------- \n")
         for idx in range(args.b):
             logits, _ = model.forward(input_sequence, targets = None)
             logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
-            predictions = softmax_with_temperature(logits, temperature = 0.6)
-            next_tokens = top_p_sampling(predictions, p = 0.65) 
+            predictions = softmax_with_temperature(logits, temperature = args.temperature)
+            next_tokens = top_p_sampling(predictions, p = args.p) 
             if next_tokens == eos_token:
-                print("Encountered a EOS token, stopping prediction")
+                print("Encountered an EOS token. Stopping prediction")
                 break
             # Append the predicted token to the sequence
             generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
@@ -200,7 +202,7 @@ def main():
     
     # Just decode the predicted sequence
     for idx, midifile in enumerate(list(file_path.glob("*mid"))):
-        fileName = midifile.name
+        fileName = f"{midifile.name}_{args.p}_{args.temperature}_{model_name}"
         generated_sequence, prediction_start_idx = generated_sequences[idx] # Here we preserve the 2D shape and only take predicted tokens
         print(generated_sequence[:, prediction_start_idx:])
         predicted_sequence = generated_sequence[:, prediction_start_idx:]
@@ -217,6 +219,7 @@ def main():
 
         print(f"{fileName}: \n \n {predicted_sequence}")
     
+    print(f"Generated tokens with p = {args.p} and Temperature = {args.temperature}")
     
 if __name__ == "__main__":
     main()

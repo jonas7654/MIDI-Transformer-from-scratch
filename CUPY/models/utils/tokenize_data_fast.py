@@ -254,68 +254,114 @@ def visualize_tokenized_data(token_array, pad_token_id, sos_token_id, eos_token_
 
 
 
-def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id,
+def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, eos_token_id, trunc_token=None,
                                       output_path="/csghome/hpdc04/Transformer_Code/tokenization_summary_plots/",
                                       subset=None,
                                       lengths=None):
-    
+    output_path = Path(output_path)
     os.makedirs(str(output_path), exist_ok=True)
-    output_path = Path(output_path, f"combined_visualization_{config.vo_size}_{config.tokenizer_name_str}_{subset}_manual_tokens_{config.manually_set_sos_eos_trunc}.png")
+    output_path = output_path / f"combined_visualization_{config.vo_size}_{config.tokenizer_name_str}_{str(subset)}_manual_tokens_{config.manually_set_sos_eos_trunc}.png"
         
     # Token frequencies
     token_flat = token_array.flatten()
     token_counts = Counter(token_flat)
     
-    # Special token counts with labels including IDs
-    special_labels = {
-        "PAD": pad_token_id,
-        "SOS": sos_token_id,
-        "EOS": eos_token_id
-    }
-    special_token_counts = {f"{k} ({v})": token_counts.get(v, 0) for k, v in special_labels.items()}
-
     # Create figure with subplots
-    plt.figure(figsize=(18, 12))
-    plt.suptitle(f"Tokenization Analysis - {subset.capitalize()} Set", y=1.02, fontsize=14)
+    plt.figure(figsize=(20, 20))
+    plt.suptitle(f"Tokenization Analysis - {subset.capitalize()} Set", y=1.02, fontsize=16)
 
     # Plot 1: Sequence Length Distribution (Log Scale)
-    plt.subplot(2, 2, 1)
+    plt.subplot(3, 3, 1)
     plt.hist(lengths, bins=50, color="skyblue", edgecolor="black", log=True)
     plt.title("Sequence Length Distribution (Log Scale)")
     plt.xlabel("Sequence Length (tokens)")
     plt.ylabel("Log Frequency")
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 
-    # Plot 2: Full Token Distribution
-    plt.subplot(2, 2, 2)
+    # Plot 2: Full Token Distribution (excluding tokens 0 and 1)
+    plt.subplot(3, 3, 2)
     all_tokens = sorted(token_counts.items(), key=lambda x: x[1], reverse=True)
-    plt.barh([str(t[0]) for t in all_tokens], [t[1] for t in all_tokens], color="salmon")
-    plt.title("Full Token Distribution")
+    # Filter out tokens 0 and 1
+    all_tokens_filtered = [t for t in all_tokens if t[0] not in {0, 1}]
+    plt.barh([str(t[0]) for t in all_tokens_filtered], [t[1] for t in all_tokens_filtered], color="salmon")
+    plt.title("Full Token Distribution (Excluding Tokens 0 and 1)")
     plt.xlabel("Count")
     plt.gca().invert_yaxis()  # Highest count at top
     plt.grid(axis="x", linestyle="--", alpha=0.7)
 
-    # Plot 3: Special Token Statistics
-    plt.subplot(2, 2, 3)
-    bars = plt.bar(special_token_counts.keys(), special_token_counts.values(), color="lightgreen")
-    plt.title("Special Token Counts")
-    plt.ylabel("Count")
-    plt.xticks(rotation=45, ha="right")
-    # Add value labels
-    for bar in bars:
-        height = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2., height,
-                 f'{height:,}',
-                 ha='center', va='bottom')
-    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    # Plot 3: Cumulative Distribution of Sequence Lengths
+    plt.subplot(3, 3, 3)
+    sorted_lengths = np.sort(lengths)
+    yvals = np.arange(len(sorted_lengths)) / float(len(sorted_lengths) - 1)
+    plt.plot(sorted_lengths, yvals, color="purple", linewidth=2)
+    plt.title("Cumulative Distribution of Sequence Lengths")
+    plt.xlabel("Sequence Length (tokens)")
+    plt.ylabel("Cumulative Proportion")
+    plt.grid(linestyle="--", alpha=0.7)
+    # Add a vertical line at the median
+    median_length = np.median(lengths)
+    plt.axvline(median_length, color="red", linestyle="--", label=f"Median = {median_length}")
+    plt.legend()
 
     # Plot 4: Boxplot of Sequence Lengths
-    plt.subplot(2, 2, 4)
+    plt.subplot(3, 3, 4)
     plt.boxplot(lengths, vert=True, patch_artist=True, 
                boxprops=dict(facecolor="lightblue"), showfliers=False)
-    plt.title("Sequence Length Distribution")
+    plt.title("Sequence Length Distribution (Median = 50)")
     plt.ylabel("Tokens")
     plt.xticks([1], ["All Sequences"])
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    # Plot 5: Token Frequency Distribution (Log Scale, Excluding Special Tokens)
+    plt.subplot(3, 3, 5)
+    token_frequencies = [count for token, count in token_counts.items() if token not in {pad_token_id, sos_token_id, eos_token_id}]
+    plt.hist(token_frequencies, bins=50, color="orange", edgecolor="black", log=True)
+    plt.title("Token Frequency Distribution (Log Scale)")
+    plt.xlabel("Token Frequency")
+    plt.ylabel("Log Count")
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    # Plot 6: Top N Most Frequent Tokens (Excluding Special Tokens)
+    plt.subplot(3, 3, 6)
+    top_n = 20
+    top_tokens = [t for t in all_tokens if t[0] not in {pad_token_id, sos_token_id, eos_token_id}][:top_n]
+    plt.barh([str(t[0]) for t in top_tokens], [t[1] for t in top_tokens], color="green")
+    plt.title(f"Top {top_n} Most Frequent Tokens")
+    plt.xlabel("Count")
+    plt.gca().invert_yaxis()  # Highest count at top
+    plt.grid(axis="x", linestyle="--", alpha=0.7)
+
+    # Plot 7: Token Length vs. Frequency Scatter Plot
+    plt.subplot(3, 3, 7)
+    token_ids = [t[0] for t in all_tokens if t[0] not in {pad_token_id, sos_token_id, eos_token_id}]
+    frequencies = [t[1] for t in all_tokens if t[0] not in {pad_token_id, sos_token_id, eos_token_id}]
+    plt.scatter(token_ids, frequencies, color="blue", alpha=0.5)
+    plt.title("Token ID vs. Frequency")
+    plt.xlabel("Token ID")
+    plt.ylabel("Frequency")
+    plt.grid(linestyle="--", alpha=0.7)
+
+    # Plot 8: Token Position Heatmap
+    plt.subplot(3, 3, 8)
+    max_length = max(lengths)
+    position_counts = np.zeros(max_length)
+    for seq in token_array:
+        for i, token in enumerate(seq):
+            if i < max_length:
+                position_counts[i] += 1
+    plt.imshow(position_counts.reshape(1, -1), cmap="viridis", aspect="auto")
+    plt.title("Token Position Heatmap")
+    plt.xlabel("Position in Sequence")
+    plt.ylabel("Frequency")
+    plt.colorbar(label="Token Count")
+
+    # Plot 9: Token Diversity Analysis
+    plt.subplot(3, 3, 9)
+    unique_tokens_per_seq = [len(set(seq)) for seq in token_array]
+    plt.hist(unique_tokens_per_seq, bins=50, color="teal", edgecolor="black")
+    plt.title("Unique Tokens per Sequence")
+    plt.xlabel("Number of Unique Tokens")
+    plt.ylabel("Frequency")
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 
     # Adjust layout
@@ -328,6 +374,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
 
     print("Token Frequency Sample (Top 10):")
     print(dict(Counter(token_flat).most_common(10)))
+
 
 
 
