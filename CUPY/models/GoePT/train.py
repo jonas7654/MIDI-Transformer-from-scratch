@@ -194,7 +194,10 @@ def main():
             "tokenizer": config.tokenizer_name_str,
             "regularization" : config.regularization,
             "reg_alpha" : config.reg_alpha,
-            "relative_attention": config.relative_attention
+            "relative_attention": config.relative_attention,
+            "use_lr_decay" : config.use_decay,
+            "decay_rate" : config.decay_rate,
+            "decay_intervals" : config.decay_interval
         }
     )
     
@@ -250,6 +253,11 @@ def main():
                                     log_output_buffer=log_output_buffer)
 
 
+    # Initialize learning rate decay parameters
+    initial_lr = config.learning_rate
+    decay_rate = config.decay_rate  # Example exponential decay
+    decay_interval = config.decay_interval  # Decay every epoch
+    
     # with status_console.screen():
     with Live(header_panel):
 
@@ -295,6 +303,12 @@ def main():
             task_id = progress_step.add_task('Updating model')
 
             model.update()
+            
+            # Apply learning rate decay
+            if config.use_decay:
+                if iter_num % decay_interval == 0:
+                    model.setLR = initial_lr * (decay_rate ** (iter_num // decay_interval))
+                    wandb.log({"learning_rate": model.lr})
 
             progress_step.remove_task(task_id)
 

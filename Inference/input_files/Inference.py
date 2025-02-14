@@ -175,16 +175,16 @@ def main():
             print(input_sequence.shape)
             
         generated_sequence = cp.asanyarray(input_sequence)
-        generated_sequence = cp.expand_dims(generated_sequence, axis=0)
+        #generated_sequence = cp.expand_dims(generated_sequence, axis=0)
         
         prediction_start_idx = seq_len
         print("\n --------------------------------------------------------------- \n")
         for idx in range(args.b):
             logits, _ = model.forward(input_sequence, targets = None)
             logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
-            predictions = softmax_with_temperature(logits, temperature = 0.9)
-            next_tokens = top_p_sampling(predictions, p = 0.1) 
-            if next_tokens == 2:
+            predictions = softmax_with_temperature(logits, temperature = 0.6)
+            next_tokens = top_p_sampling(predictions, p = 0.65) 
+            if next_tokens == eos_token:
                 print("Encountered a EOS token, stopping prediction")
                 break
             # Append the predicted token to the sequence
@@ -208,16 +208,14 @@ def main():
         decoded_sequence = tokenizer.decode(predicted_sequence)
 
     
-        memory_buffer = io.BytesIO()
-        print(f"Type of decoded_sequence: {type(decoded_sequence)}")
-        decoded_sequence.dump_midi(path = memory_buffer)
-        memory_buffer.seek(0)
+        decoded_sequence.dump_midi(path = Path(args.save_dir, fileName))
 
-        pretty_midi_stream = pretty_midi.PrettyMIDI(memory_buffer)
+
+        pretty_midi_stream = pretty_midi.PrettyMIDI(midi_file = str(Path(args.save_dir, fileName)))
         make_monophonic(pretty_midi_stream)
-        pretty_midi_stream.write(Path(args.save_dir, fileName))
+        pretty_midi_stream.write(str(Path(args.save_dir, fileName)))
 
-        print(f"{fileName}: {predicted_sequence} \n \n")
+        print(f"{fileName}: \n \n {predicted_sequence}")
     
     
 if __name__ == "__main__":

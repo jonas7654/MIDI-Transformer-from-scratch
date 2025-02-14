@@ -259,7 +259,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
                                       subset=None,
                                       lengths=None):
     
-    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(str(output_path), exist_ok=True)
     output_path = Path(output_path, f"combined_visualization_{config.vo_size}_{config.tokenizer_name_str}_{subset}_manual_tokens_{config.manually_set_sos_eos_trunc}.png")
         
     # Token frequencies

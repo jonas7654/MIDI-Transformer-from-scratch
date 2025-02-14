@@ -102,7 +102,7 @@ class GoePT():
                 c_proj_init_func = c_proj_weight_init,
                 bias_init_func = bias_init,
                 relative_attention = self.relative_attention) for _ in range(self.n_layer)],
-            "ln_f": scr.LayerNorm(self.n_embd, weight_init_func=weight_init),
+            "ln_f": scr.LayerNorm(self.n_embd, weight_init_func=weight_init, lr = self.lr),
             }
 
         # with weight tying when using torch.compile() some warnings get generated:
@@ -114,6 +114,15 @@ class GoePT():
 
         # assert id(self.transformer['wte'].weight) == id(self.lm_head.weight), "wte and lm_head must share the same weights in memory"
 
+    def setLR(self, value):
+        """Set the learning rate and propagate it to all layers."""
+        self._lr = value
+        self.lm_head.lr = value
+        self.transformer["wte"].lr = value
+        self.transformer["wpe"].lr = value
+        for block in self.transformer["h"]:
+            block.lr = value
+        self.transformer["ln_f"].lr = value
             
     def forward(self, idx, targets=None):
         b, t = idx.shape

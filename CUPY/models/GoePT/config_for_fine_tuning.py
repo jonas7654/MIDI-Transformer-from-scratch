@@ -26,10 +26,17 @@ reg_alpha = 2.5
 relative_attention = True
 #####
 
-batch_size = 8  # Default batch size
+### learning rate decay ###
+use_decay = True
+decay_rate =  0.95
+decay_interval = 1
+####
+
+
+batch_size = 24  # Default batch size
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 5 # Initial learning rate
+learning_rate = 0.00001 # Initial learning rate
 dropout_rate = 0 # Default dropout rate
 seed = 1  # Random seed
 

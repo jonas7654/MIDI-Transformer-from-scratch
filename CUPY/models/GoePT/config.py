@@ -7,7 +7,7 @@ checkpoint_dir = "/csghome/hpdc04/Transformer_Code/checkpoints/"  # Path to save
 
 tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
-vo_size = 2048
+vo_size = 8192
 # Full specifies if we should use the tokenizer which was trained on the clean + unclean midi dataset
 FULL = False #:NOTE Only important for training not for generating datasets via the run scripts
 
@@ -28,14 +28,22 @@ reg_alpha = 2.5
 relative_attention = True
 #####
 
-batch_size = 32  # Default batch size
-context_length = 256 # Sequence context length
+
+### learning rate decay ###
+use_decay = True
+decay_rate =  0.95
+decay_interval = 1
+####
+
+
+batch_size = 8  # Default batch size
+context_length = 512 # Sequence context length
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.0005 # Initial learning rate
-dropout_rate = 0 # Default dropout rate
+learning_rate = 0.0001 # Initial learning rate
+dropout_rate = 0.01 # Default dropout rate
 n_layer = 4  # Number of layers in the transformer
-n_embd = 512  # Embedding size
+n_embd = 784  # Embedding size
 n_heads = 8 # Number of attention heads
 seed = 1  # Random seed
 

@@ -206,30 +206,33 @@ def main():
     
     # Initialize Weights & Biases (wandb)
     wandb.init(
-        project=f"MIDI-Transformer-fine-tuning", name = f"fine_tuning_{model_name}",
+        project=f"MIDI-Transformer", 
         config={
             "data_dir": config.data_dir,
-            "checkpoint_dir": "/csghome/hpdc04/Transformer_Code/checkpoints_fine_tuning/",
-            "vocab_file": vocab_file,
-            "batch_size": model.batch_size,
-            "context_length": model.context_length,
+            "checkpoint_dir": config.checkpoint_dir,
+            "vocab_file": config.vocab_file,
+            "batch_size": config.batch_size,
+            "context_length": config.context_length,
             "epochs": config.epochs,
             "gradient_accumulation_steps": config.gradient_accumulation_steps,
             "eval_iters": config.eval_iters,
-            "lr": model.lr,
+            "lr": config.learning_rate,
             "seed": config.seed,
             "log_interval": config.log_interval,
             "eval_interval": config.eval_interval,
-            "dropout rate": model.dropout,
+            "dropout rate": config.dropout_rate,
             "vocab_size": tokenizer.vocab_size,
-            "n_layer" : model.n_layer,
-            "n_embd" : model.n_embd,
-            "n_heads" : model.n_heads,
+            "n_layer" : config.n_layer,
+            "n_embd" : config.n_embd,
+            "n_heads" : config.n_heads,
             "manually_set_sos_eos_trunc": config.manually_set_sos_eos_trunc,
             "tokenizer": config.tokenizer_name_str,
-            "regularization" : model.regularization,
-            "reg_alpha" : model.reg_alpha,
-            "relative_attention": model.relative_attention
+            "regularization" : config.regularization,
+            "reg_alpha" : config.reg_alpha,
+            "relative_attention": config.relative_attention,
+            "use_lr_decay" : config.use_decay,
+            "decay_rate" : config.decay_rate,
+            "decay_intervals" : config.decay_interval
         }
     )
     
@@ -263,7 +266,11 @@ def main():
     table_update_func = partial(get_log_output_table,
                                     log_output_buffer=log_output_buffer)
 
-
+    # Initialize learning rate decay parameters
+    initial_lr = config.learning_rate
+    decay_rate = config.decay_rate  # Example exponential decay
+    decay_interval = config.decay_interval  # Decay every epoch
+    
     # with status_console.screen():
     with Live(header_panel):
 
@@ -309,7 +316,13 @@ def main():
             task_id = progress_step.add_task('Updating model')
 
             model.update()
-
+            
+            # Apply learning rate decay
+            if config.use_decay:
+                if iter_num % decay_interval == 0:
+                    model.setLR = initial_lr * (decay_rate ** (iter_num // decay_interval))
+                    wandb.log({"learning_rate": model.lr})
+        
             progress_step.remove_task(task_id)
 
             # Evaluate the loss on train/val sets and write checkpoints
