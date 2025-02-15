@@ -36,11 +36,11 @@ decay_interval = 15
 batch_size = 32  # Default batch size
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 1e-3 # Initial learning rate
-dropout_rate = 0 # Default dropout rate
+learning_rate = 0.00005 # Initial learning rate
+dropout_rate = 0.35 # Default dropout rate
 seed = 1  # Random seed
 
 # Logging
-log_interval = 50  # Number of steps between log updates
-eval_interval = 50  # Number of steps between evaluations
+log_interval = 15  # Number of steps between log updates
+eval_interval = 15  # Number of steps between evaluations
 eval_iters = 100 

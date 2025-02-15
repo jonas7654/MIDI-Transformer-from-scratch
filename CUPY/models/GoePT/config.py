@@ -30,20 +30,20 @@ relative_attention = True
 
 
 ### learning rate decay ###
-use_decay = True
+use_decay = False
 decay_rate =  0.95
 decay_interval = 15
 ####
 
 
 batch_size = 32  # Default batch size
-context_length = 256 # Sequence context length
+context_length = 128 # Sequence context length
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.001 # Initial learning rate
-dropout_rate = 0.35 # Default dropout rate
+learning_rate = 0.00005 # Initial learning rate
+dropout_rate = 0.15 # Default dropout rate
 n_layer = 4  # Number of layers in the transformer
-n_embd = 256  # Embedding size
+n_embd = 512  # Embedding size
 n_heads = 8 # Number of attention heads
 seed = 1  # Random seed
 

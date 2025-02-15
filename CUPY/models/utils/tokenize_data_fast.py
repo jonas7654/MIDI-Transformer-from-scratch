@@ -280,8 +280,8 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
 
     # Plot 1: Sequence Length Distribution (Log Scale)
     plt.subplot(3, 3, 1)
-    plt.hist(lengths, bins=50, color="skyblue", edgecolor="black", log=True)
-    plt.title("Sequence Length Distribution (Log Scale)")
+    plt.hist(lengths, bins=np.arange(0, max(lengths)+50, 50), color="skyblue", log=False)
+    plt.title("Sequence Length Distribution")
     plt.xlabel("Sequence Length (tokens)")
     plt.ylabel("Log Frequency")
     plt.grid(axis="y", linestyle="--", alpha=0.7)
@@ -290,7 +290,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
     plt.subplot(3, 3, 2)
     all_tokens = sorted(token_counts.items(), key=lambda x: x[1], reverse=True)
     # Filter out tokens 0 and 1
-    all_tokens_filtered = [t for t in all_tokens if t[0] not in {0, 1}]
+    all_tokens_filtered = [t for t in all_tokens if t[0] not in {0, 1, 2}]
     plt.barh([str(t[0]) for t in all_tokens_filtered], [t[1] for t in all_tokens_filtered], color="salmon")
     plt.title("Full Token Distribution (Excluding Tokens 0 and 1)")
     plt.xlabel("Count")
@@ -315,17 +315,26 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
     plt.subplot(3, 3, 4)
     plt.boxplot(lengths, vert=True, patch_artist=True, 
                boxprops=dict(facecolor="lightblue"), showfliers=False)
-    plt.title("Sequence Length Distribution (Median = 50)")
+    plt.title("Sequence Length Distribution")
     plt.ylabel("Tokens")
     plt.xticks([1], ["All Sequences"])
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 
-    # Plot 5: Token Frequency Distribution (Log Scale, Excluding Special Tokens)
+    # Plot 5: Token Frequency Distribution (Log-Log Scale)
     plt.subplot(3, 3, 5)
-    token_frequencies = [count for token, count in token_counts.items() if token not in {pad_token_id, sos_token_id, eos_token_id}]
-    plt.hist(token_frequencies, bins=50, color="orange", edgecolor="black", log=True)
-    plt.title("Token Frequency Distribution (Log Scale)")
-    plt.xlabel("Token Frequency")
+    token_frequencies = [count for token, count in token_counts.items() 
+                         if token not in {pad_token_id, sos_token_id, eos_token_id}]
+
+    # Generate log-spaced bins (adjust min/max as needed)
+    bins = np.logspace(np.log10(min(token_frequencies)), 
+                   np.log10(max(token_frequencies)), 
+                   50)
+
+    plt.hist(token_frequencies, bins=bins, color="orange", edgecolor="black", 
+             alpha=0.7, log=True)
+    plt.xscale("log")  # Log-scale x-axis
+    plt.title("Token Frequency Distribution (Log-Log)")
+    plt.xlabel("Token Frequency (log)")
     plt.ylabel("Log Count")
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 

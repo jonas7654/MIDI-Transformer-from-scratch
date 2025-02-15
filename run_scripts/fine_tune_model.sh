@@ -14,6 +14,6 @@ conda activate eml
 echo "Running Training (with CUPY)"
 
 python ../CUPY/models/GoePT/fine_tune_model.py \
-    --weights "/csghome/hpdc04/Transformer_Code/checkpoints/dedicated-quiver-27_650.json" \
-    --vocab-file "/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_REMI_4096_FULL_True.json"
+    --weights "/csghome/hpdc04/Transformer_Code/checkpoints/resolute-chocolate-355_1775.json" \
+    --vocab-file "/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_REMI_4096_FULL_False.json"
                                      

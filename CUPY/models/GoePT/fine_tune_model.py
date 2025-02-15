@@ -320,10 +320,9 @@ def main():
             
             # Apply learning rate decay
             if config.use_decay:
-                current_step = iter_num % decay_interval  # For cyclic restarts
-                progress = cp.array(current_step / decay_interval, dtype=cp.float32)  # Convert to CuPy array
+                progress = cp.array(iter_num / decay_interval, dtype=cp.float32)  # Progress over the decay interval
                 new_lr = min_lr + 0.5 * (learning_rate - min_lr) * (1 + cp.cos(cp.pi * progress))
-                new_lr = float(new_lr)  # Convert back to Python float for setLR and logging
+                new_lr = float(new_lr)  # Convert back to Python float
                 model.setLR(new_lr)
                 wandb.log({"learning_rate": new_lr})
         
