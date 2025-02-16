@@ -44,7 +44,6 @@ def train_tokenizer(vocab_size):
         "ac_note_density_track": True,
         "ac_repetition_track": True,
         "ac_repetition_track_num_bins": 8
-        #"max_bar_embedding" : 8
     }
     
     tok_config = TokenizerConfig(**TOKENIZER_PARAMS)

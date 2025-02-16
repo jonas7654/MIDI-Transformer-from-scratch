@@ -29,14 +29,14 @@ relative_attention = True
 ### learning rate decay ###
 use_decay = True
 decay_rate =  0.95
-decay_interval = 15
+decay_interval = 1
 ####
 
 
-batch_size = 32  # Default batch size
+batch_size = 40  # Default batch size
 epochs = 10000  # Number of epochs to train
 gradient_accumulation_steps = 32  # Steps for gradient accumulation
-learning_rate = 0.00005 # Initial learning rate
+learning_rate = 0.005 # Initial learning rate
 dropout_rate = 0.35 # Default dropout rate
 seed = 1  # Random seed
 

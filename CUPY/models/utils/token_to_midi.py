@@ -6,8 +6,8 @@ import numpy as np
 
 tokenizer_name = REMI
 tokenizer_name_str = tokenizer_name.__name__
-vo_size = 2048
-vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_{tokenizer_name_str}_{vo_size}.json"  # Path to the tokenizer vocabulary file
+vo_size = 4096
+vocab_file = f"/csghome/hpdc04/Transformer_Code/CUPY/models/tokenizers/tokenizer_{tokenizer_name_str}_{vo_size}_FULL_False.json"  # Path to the tokenizer vocabulary file
 output_file = "/csghome/hpdc04/Transformer_Code/tokens_txt/vocab_midi_output.txt"  # Output text file
 
 

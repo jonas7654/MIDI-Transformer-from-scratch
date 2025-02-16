@@ -270,8 +270,9 @@ def main():
     learning_rate = config.learning_rate
     decay_rate = config.decay_rate  # Example exponential decay
     decay_interval = config.decay_interval  # Decay every epoch
-    min_lr = 0.00001
-    
+    # Add warm-up phase
+
+
     # with status_console.screen():
     with Live(header_panel):
 
@@ -320,9 +321,20 @@ def main():
             
             # Apply learning rate decay
             if config.use_decay:
-                progress = cp.array(iter_num / decay_interval, dtype=cp.float32)  # Progress over the decay interval
-                new_lr = min_lr + 0.5 * (learning_rate - min_lr) * (1 + cp.cos(cp.pi * progress))
-                new_lr = float(new_lr)  # Convert back to Python float
+                warmup_epochs = 100  # Convert warmup_iters to epochs
+                decay_epochs = decay_interval  # Total decay duration in epochs
+                min_lr = 1e-6
+    
+                if iter_num < warmup_epochs:
+                    # Linear warm-up
+                    new_lr = min_lr + (config.learning_rate - min_lr) * (iter_num / warmup_epochs)
+                else:
+                    # Cosine decay after warm-up
+                    progress = (iter_num - warmup_epochs) / (decay_epochs - warmup_epochs)
+                    progress = min(progress, 1.0)  # Clamp progress to 1.0
+                    new_lr = min_lr + 0.5 * (config.learning_rate - min_lr) * (1 + math.cos(math.pi * progress))
+    
+                new_lr = float(new_lr)
                 model.setLR(new_lr)
                 wandb.log({"learning_rate": new_lr})
         
