@@ -9,6 +9,9 @@ from icecream import ic
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 import os
+import pandas as pd
+import matplotlib.ticker as ticker  # Import ticker for AutoMinorLocator
+plt.style.use('fivethirtyeight')
 
 import sys
 sys.path.insert(0, '/csghome/hpdc04/Transformer_Code/CUPY/models/GoePT/')
@@ -349,30 +352,69 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
     plt.grid(axis="x", linestyle="--", alpha=0.7)
 
     # Plot 7: Token Length vs. Frequency Scatter Plot
+    #plt.subplot(3, 3, 7)
+    #token_ids = [t[0] for t in all_tokens if t[0] not in {pad_token_id, sos_token_id, eos_token_id}]
+    #frequencies = [t[1] for t in all_tokens if t[0] not in {pad_token_id, sos_token_id, eos_token_id}]
+    #plt.scatter(token_ids, frequencies, color="blue", alpha=0.5)
+    #plt.title("Token ID vs. Frequency")
+    #plt.xlabel("Token ID")
+    #plt.ylabel("Frequency")
+    #plt.grid(linestyle="--", alpha=0.7)
+
+    # Plot 7: Token Length vs. Frequency (Elegant Version)
     plt.subplot(3, 3, 7)
+
+    # Filter data (as before)
     token_ids = [t[0] for t in all_tokens if t[0] not in {pad_token_id, sos_token_id, eos_token_id}]
     frequencies = [t[1] for t in all_tokens if t[0] not in {pad_token_id, sos_token_id, eos_token_id}]
-    plt.scatter(token_ids, frequencies, color="blue", alpha=0.5)
-    plt.title("Token ID vs. Frequency")
-    plt.xlabel("Token ID")
-    plt.ylabel("Frequency")
-    plt.grid(linestyle="--", alpha=0.7)
 
-    # Plot 8: Token Position Heatmap
-    plt.subplot(3, 3, 8)
-    max_length = max(lengths)
-    position_counts = np.zeros(max_length)
-    for seq in sequences:
-        if isinstance(seq, (int, np.integer)):  # If seq is a single integer, make it a list
-            seq = [seq]
-        for i, token in enumerate(seq):
-            if i < max_length:
-                position_counts[i] += 1
-    plt.imshow(position_counts.reshape(1, -1), cmap="viridis", aspect="auto")
-    plt.title("Token Position Heatmap")
-    plt.xlabel("Position in Sequence")
-    plt.ylabel("Frequency")
-    plt.colorbar(label="Token Count")
+    # Create dataframe for easy handling
+    df = pd.DataFrame({'token_id': token_ids, 'frequency': frequencies}).sort_values('token_id')
+
+    # Plot with a line (no markers)
+    plt.plot(df['token_id'], df['frequency'], 
+         color='royalblue', 
+         linewidth=1.5,
+         alpha=0.8)
+
+    # Set axis limits to match vocabulary size
+    #plt.xlim(0, 4095)  # Explicitly constrain to your vocab size
+    #plt.ylim(0, max(df['frequency']) * 1.1)  # Add 10% padding to y-axis
+
+    # Formatting
+    plt.title("Token Frequency by ID", fontsize=14, pad=15)
+    plt.xlabel("Token ID", fontsize=12)
+    plt.ylabel("Frequency", fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.6)
+
+    # Optional: Add minor gridlines for better readability
+    plt.gca().xaxis.set_minor_locator(ticker.MultipleLocator(500))  # Minor ticks every 500 tokens
+    plt.gca().yaxis.set_minor_locator(ticker.AutoMinorLocator())
+
+    # Improve clarity
+    plt.gca().set_facecolor('#f7f7f7')  # Light background
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.tight_layout()
+
+
+    
+
+    # Plot 8: bar plot 
+    
+    # Use tiny bars (width=1 to prevent gaps)
+    plt.bar(df['token_id'], df['frequency'], 
+        width=1,  # No gaps between bars
+        color='royalblue', 
+        alpha=0.5, 
+        edgecolor='none')
+
+    plt.xlim(0, 4095)
+    plt.title("Token Frequency by ID", fontsize=14, pad=15)
+    plt.xlabel("Token ID", fontsize=12)
+    plt.ylabel("Frequency", fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.6, axis='y')  # Only horizontal grid
+    plt.tight_layout()
 
     # Plot 9: Token Diversity Analysis
     plt.subplot(3, 3, 9)
