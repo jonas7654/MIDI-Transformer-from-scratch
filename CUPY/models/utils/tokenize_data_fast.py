@@ -120,10 +120,24 @@ def tokenize_dataset_to_bin(self, files_paths: str | Path | Sequence[str | Path]
     """
     Create a flat array
     """
-    if (manually_add_sos_eos):                    
+    if (manually_add_sos_eos and not config.use_random_padding_token):                    
         sequences = [np.concatenate(([sos_token], ids, [eos_token])).astype(np.int16) for ids in all_ids]
-        token_array = np.concatenate(sequences)    
-        
+    elif (manually_add_sos_eos and config.use_random_padding_token):
+        sequences = []
+        max_pad = config.max_pad
+        for ids in all_ids:
+            # Randomly select number of padding tokens (0 to max_pad)
+            num_pads = np.random.randint(0, max_pad + 1)
+
+            # Create sequence with padding + SOS + tokens + EOS
+            padded_sequence = [pad_token] * num_pads + [sos_token] + ids + [eos_token]
+            sequences.append(np.array(padded_sequence, dtype=np.int16))  
+            
+            total_number_of_tokens = sum(len(seq) for seq in sequences)
+            individual_sequence_lengths = [len(seq) for seq in sequences]  
+               
+    token_array = np.concatenate(sequences)
+
     # Convert to numpy 
     print(f"Final array length: {len(token_array)}")
     
@@ -271,7 +285,7 @@ def visualize_tokenized_data_combined(token_array, pad_token_id, sos_token_id, e
                                       sequences=None):
     output_path = Path(output_path)
     os.makedirs(str(output_path), exist_ok=True)
-    output_path = output_path / f"combined_visualization_{config.vo_size}_{config.tokenizer_name_str}_{str(subset)}_manual_tokens_{config.manually_set_sos_eos_trunc}.png"
+    output_path = output_path / f"combined_visualization_{config.vo_size}_{config.tokenizer_name_str}_{str(subset)}_manual_tokens_{config.manually_set_sos_eos_trunc}_random_padding_{config.use_random_padding_token}.png"
         
     # Token frequencies
     token_flat = token_array.flatten()

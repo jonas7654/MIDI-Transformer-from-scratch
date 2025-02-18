@@ -143,7 +143,7 @@ for subset in train_val_test_path:
     ic(tokenized_data.shape)
 
     # SAVE
-    save_dir = os.path.join(output_path, f"{config.vo_size}_{subset}_{config.tokenizer_name_str}_manual_tokens_{config.manually_set_sos_eos_trunc}.bin")
+    save_dir = os.path.join(output_path, f"{config.vo_size}_{subset}_{config.tokenizer_name_str}_manual_tokens_{config.manually_set_sos_eos_trunc}_random_padding_{config.use_random_padding_token}.bin")
     Path(output_path).mkdir(parents = True, exist_ok = True)
     tokenized_data.astype(np.uint16).tofile(save_dir)
     
