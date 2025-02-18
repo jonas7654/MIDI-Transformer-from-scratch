@@ -47,7 +47,8 @@ class GoePT():
                     lr: float=1e-3,
                     relative_attention = True,
                     regularization = False,
-                    reg_alpha = 0.1) -> None:
+                    reg_alpha = 0.1,
+                    use_pad_mask: bool = False) -> None:
 
         self.vocab_size = vocab_size
         self.context_length = context_length
@@ -60,6 +61,7 @@ class GoePT():
         self.regularization = regularization
         self.reg_alpha = reg_alpha
         self.relative_attention = relative_attention
+        self.pad_mask = use_pad_mask
         
         # Change this for cupy compatibility
         self.rng = cp.random
@@ -158,7 +160,7 @@ class GoePT():
                 loss = cross_entropy_loss_regularized(logits_for_loss, targets_for_loss,
                                                          alpha = self.reg_alpha)
             else:
-                loss = cross_entropy_loss(logits_for_loss, targets_for_loss)
+                loss = cross_entropy_loss(logits_for_loss, targets_for_loss, self.pad_mask)
         else:
             # inference-time mini-optimization: only forward the lm_head on the very last position
             logits = self.lm_head.forward(x[:, [-1], :]) # note: using list [-1] to preserve the time dim

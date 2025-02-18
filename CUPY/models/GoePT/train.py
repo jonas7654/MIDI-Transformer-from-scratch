@@ -197,7 +197,9 @@ def main():
             "relative_attention": config.relative_attention,
             "use_lr_decay" : config.use_decay,
             "decay_rate" : config.decay_rate,
-            "decay_intervals" : config.decay_interval
+            "decay_intervals" : config.decay_interval,
+            "use_random_pad_token" :  config.use_random_padding_token,
+            "max_pad_tokens" : config.max_pad
         }
     )
     
@@ -212,7 +214,8 @@ def main():
                   n_heads = config.n_heads,
                   regularization = config.regularization,
                   reg_alpha = config.reg_alpha,
-                  relative_attention = config.relative_attention)
+                  relative_attention = config.relative_attention,
+                  use_pad_mask = config.use_random_padding_token)
 
     # state_dict = model.state_dict()
     # with open(os.path.join(args.checkpoint_dir, 'test_checkpoint.json'), mode='w', encoding='utf-8') as out_file:
