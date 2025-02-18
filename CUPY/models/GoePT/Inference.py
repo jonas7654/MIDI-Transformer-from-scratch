@@ -160,7 +160,6 @@ def main():
     generated_sequences = []
     for input_sequence in tokenized_input_sequences:
         length_input = len(input_sequence)
-        # :TODO
         if length_input > seq_len:
             print("Truncated")
             input_sequence = input_sequence[0:seq_len]

@@ -14,7 +14,8 @@ def cross_entropy_loss(y_pred: ArrayLike, y_true: ArrayLike, use_pad_mask : bool
     loss = -cp.sum(y_true * cp.log(y_pred), axis = 1)
     
     if use_pad_mask:
-        mask = (y_true != 0).astype(cp.float32)
+        token_indice = cp.argmax(y_true, axis=1) # Get the predicted token
+        mask = (token_indice != 0).astype(cp.float32) # 0 : padding token
         masked_loss = loss * mask
         return cp.sum(masked_loss) / cp.sum(mask) # Compute the mean ignoring the pad token    
     
