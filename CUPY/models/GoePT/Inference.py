@@ -68,7 +68,7 @@ def load_model(checkpoint_path, vocab_file, batch_size):
     model = GoePT.from_state_dict(state_dict, batch_size=batch_size)
     
     tokenizer = config.tokenizer_name(params=vocab_file)
-    ic(tokenizer)
+    print(tokenizer.vocab_size)
     return model, tokenizer
 
 def softmax_with_temperature(logits, temperature=1, axis = -1):
@@ -118,28 +118,16 @@ def decode_tokens(midi_input, tokenizer):
     decoded_midi = tokenizer(midi_input)
     return decoded_midi
 
-def main():
-    parser = argparse.ArgumentParser(description='Midi GPT inference')
-    parser.add_argument('--weights', type = str,
-                        default = '')
-    parser.add_argument('--vocab-file', type = str)   
-    parser.add_argument('--input', type = str,
-                        help = "Path to the Input midi file") 
-    parser.add_argument('--save-dir', type = str)
-    parser.add_argument('--context-length', type = int)
-    parser.add_argument('--b', type = int)
-    parser.add_argument('--manually-set-sos-eos-trunc', type = bool)
-    parser.add_argument('--p', type = float)
-    parser.add_argument('--temperature', type = float)
 
-    args = parser.parse_args()
+def generate_sequence(model_weights: str, input_sequences: Path, vocab_file, max_tokens : int, p : float, T : float) -> np.array: 
     
-    model_name = os.path.splitext(os.path.basename(args.weights))[0]
-    file_path = Path(args.input)
+    model_name = os.path.splitext(os.path.basename(model_weights))[0]
+    file_path = Path(input_sequences)
     number_of_files = len(list(file_path.glob("*.mid")))
     
-    model, tokenizer = load_model(args.weights, args.vocab_file, batch_size = 1)
+    model, tokenizer = load_model(model_weights, vocab_file, batch_size = 1)
     seq_len = model.context_length
+    print(tokenizer.vocab_size)
     pad_token = tokenizer.pad_token_id
     sos_token = tokenizer.special_tokens_ids[1]
     eos_token = tokenizer.special_tokens_ids[2]
@@ -180,31 +168,57 @@ def main():
         
         prediction_start_idx = seq_len
         print("\n --------------------------------------------------------------- \n")
-        for idx in range(args.b):
+        for idx in range(max_tokens):
             logits, _ = model.forward(input_sequence, targets = None)
             logits = cp.squeeze(logits, axis = 1) # Transform to 2D shape b, vocab
-            predictions = softmax_with_temperature(logits, temperature = args.temperature)
-            next_tokens = top_p_sampling(predictions, p = args.p) 
+            predictions = softmax_with_temperature(logits, temperature = T)
+            next_tokens = top_p_sampling(predictions, p = p) 
             if next_tokens == eos_token:
                 print("Encountered an EOS token. Stopping prediction")
                 break
             # Append the predicted token to the sequence
             generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
-            print(generated_sequence)
         
         # convert back to numpy
         generated_sequence = generated_sequence.get()
         generated_sequences.append((generated_sequence, prediction_start_idx))
+        
+    return generated_sequences, model_name, tokenizer
+
+def main():
+    parser = argparse.ArgumentParser(description='Midi GPT inference')
+    parser.add_argument('--weights', type = str,
+                        default = '')
+    parser.add_argument('--vocab-file', type = str)   
+    parser.add_argument('--input', type = str,
+                        help = "Path to the Input midi file") 
+    parser.add_argument('--save-dir', type = str)
+    parser.add_argument('--context-length', type = int)
+    parser.add_argument('--b', type = int)
+    parser.add_argument('--manually-set-sos-eos-trunc', type = bool)
+    parser.add_argument('--p', type = float)
+    parser.add_argument('--temperature', type = float)
+
+    args = parser.parse_args()
+    
+    generated_sequences, model_name, tokenizer = generate_sequence(args.weights,
+                                                       args.input,
+                                                       args.vocab_file,
+                                                       args.b,
+                                                       p = args.p,
+                                                       T = args.temperature)
     
     
     print("---------------------")
-    
     # Just decode the predicted sequence
+    file_path = Path(args.input)
+
     for idx, midifile in enumerate(list(file_path.glob("*mid"))):
         fileName = f"{midifile.name}_{args.p}_{args.temperature}_{model_name}"
         generated_sequence, prediction_start_idx = generated_sequences[idx] # Here we preserve the 2D shape and only take predicted tokens
         print(generated_sequence[:, prediction_start_idx:])
         predicted_sequence = generated_sequence[:, prediction_start_idx:]
+        
         
         decoded_sequence = tokenizer.decode(predicted_sequence)
 

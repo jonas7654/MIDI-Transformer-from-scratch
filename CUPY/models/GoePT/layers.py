@@ -804,7 +804,7 @@ class RelativeMultiHeadAttention():
         
         grad_ktrans = ((1.0/math.sqrt(self.k.shape[-1])) * (self.q.transpose(0, 1, 3, 2) @ grad_mask))
         grad_k = grad_ktrans.transpose(0, 1, 3, 2) #No difference here
-        grad_q = (1.0/math.sqrt(self.k.shape[-1]))  * (grad_mask @ self.k) #This must be somehow updated later
+        grad_q = (1.0/math.sqrt(self.k.shape[-1]))  * (grad_mask @ self.k) #This is be updated later
         grad_s_rel = (1.0/math.sqrt(self.k.shape[-1])) * grad_mask
 
         grad_x3 = cp.pad(grad_s_rel, ((0, 0), (0, 0), (1, 0), (0, 0)), mode='constant', constant_values=0) #pad top row

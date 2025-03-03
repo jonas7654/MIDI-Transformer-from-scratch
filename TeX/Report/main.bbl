@@ -1,0 +1,470 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global}
+    \entry{miditok2021}{inproceedings}{}
+      \name{author}{5}{}{%
+        {{un=0,uniquepart=base,hash=7fc06a7b7d8a508968c9ed9ac0d65fb2}{%
+           family={Fradet},
+           familyi={F\bibinitperiod},
+           given={Nathan},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=84898617ee952f11d2b52ff06b3661f4}{%
+           family={Briot},
+           familyi={B\bibinitperiod},
+           given={Jean-Pierre},
+           giveni={J\bibinithyphendelim P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=53f77762e5abe192dea2d9cf99ffe263}{%
+           family={Chhel},
+           familyi={C\bibinitperiod},
+           given={Fabien},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=a3b1c38066308730dba754561f284266}{%
+           family={El\bibnamedelima Fallah\bibnamedelima Seghrouchni},
+           familyi={E\bibinitperiod\bibinitdelim F\bibinitperiod\bibinitdelim S\bibinitperiod},
+           given={Amal},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=779cab42ef1b31d2944f69d793113938}{%
+           family={Gutowski},
+           familyi={G\bibinitperiod},
+           given={Nicolas},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{17e6b59120c9e1dcff2ef8ba6354ace3}
+      \strng{fullhash}{4efb550ac04a92cfa41e089e9f6ded02}
+      \strng{bibnamehash}{17e6b59120c9e1dcff2ef8ba6354ace3}
+      \strng{authorbibnamehash}{17e6b59120c9e1dcff2ef8ba6354ace3}
+      \strng{authornamehash}{17e6b59120c9e1dcff2ef8ba6354ace3}
+      \strng{authorfullhash}{4efb550ac04a92cfa41e089e9f6ded02}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Extended Abstracts for the Late-Breaking Demo Session of the 22nd International Society for Music Information Retrieval Conference}
+      \field{title}{{MidiTok}: A Python package for {MIDI} file tokenization}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://archives.ismir.net/ismir2021/latebreaking/000005.pdf
+      \endverb
+      \verb{url}
+      \verb https://archives.ismir.net/ismir2021/latebreaking/000005.pdf
+      \endverb
+    \endentry
+    \entry{holtzman2020curiouscaseneuraltext}{misc}{}
+      \name{author}{5}{}{%
+        {{un=0,uniquepart=base,hash=c32ace2a5a2590ef3542c3713e05925d}{%
+           family={Holtzman},
+           familyi={H\bibinitperiod},
+           given={Ari},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=1533f1cf0dd23eb2455b7f4474f71c42}{%
+           family={Buys},
+           familyi={B\bibinitperiod},
+           given={Jan},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=3ffd1c81347892a13f6981e6a2dc5bc3}{%
+           family={Du},
+           familyi={D\bibinitperiod},
+           given={Li},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=3f1422819251aef48c5ed5efd7dbbea4}{%
+           family={Forbes},
+           familyi={F\bibinitperiod},
+           given={Maxwell},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=64d48b2f4b0370b6692c87cfc65f19b9}{%
+           family={Choi},
+           familyi={C\bibinitperiod},
+           given={Yejin},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{280f40af56334147e3a90e9ccb4ce854}
+      \strng{fullhash}{7e3258d2294a0f1380b15e0027255658}
+      \strng{bibnamehash}{280f40af56334147e3a90e9ccb4ce854}
+      \strng{authorbibnamehash}{280f40af56334147e3a90e9ccb4ce854}
+      \strng{authornamehash}{280f40af56334147e3a90e9ccb4ce854}
+      \strng{authorfullhash}{7e3258d2294a0f1380b15e0027255658}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.CL}
+      \field{eprinttype}{arXiv}
+      \field{title}{The Curious Case of Neural Text Degeneration}
+      \field{year}{2020}
+      \verb{eprint}
+      \verb 1904.09751
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/1904.09751
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/1904.09751
+      \endverb
+    \endentry
+    \entry{DBLP:journals/corr/abs-1809-04281}{article}{}
+      \name{author}{8}{}{%
+        {{un=1,uniquepart=given,hash=9406d3118ff06a9e9b1fc218f4106061}{%
+           family={Huang},
+           familyi={H\bibinitperiod},
+           given={Cheng{-}Zhi\bibnamedelima Anna},
+           giveni={C\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=7f28e84700536646dd6620a0db07ad09}{%
+           family={Vaswani},
+           familyi={V\bibinitperiod},
+           given={Ashish},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=831027ee0ebf22375e2a86afc1881909}{%
+           family={Uszkoreit},
+           familyi={U\bibinitperiod},
+           given={Jakob},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=62efade83d70f0323fe248755e6c90c5}{%
+           family={Shazeer},
+           familyi={S\bibinitperiod},
+           given={Noam},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=4102bf268c4922002c51584dbb63c959}{%
+           family={Hawthorne},
+           familyi={H\bibinitperiod},
+           given={Curtis},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=978bf3b58698c55cce487279eb72f59f}{%
+           family={Dai},
+           familyi={D\bibinitperiod},
+           given={Andrew\bibnamedelima M.},
+           giveni={A\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=937991c72400f4d0e0252027c8c03f67}{%
+           family={Hoffman},
+           familyi={H\bibinitperiod},
+           given={Matthew\bibnamedelima D.},
+           giveni={M\bibinitperiod\bibinitdelim D\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=b2c4631ad93e93115d9b3ceea6587550}{%
+           family={Eck},
+           familyi={E\bibinitperiod},
+           given={Douglas},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{846702913775459b5c07326b808a97d4}
+      \strng{fullhash}{3b5c8a19ca7e5e221ab3a47ada4aa444}
+      \strng{bibnamehash}{846702913775459b5c07326b808a97d4}
+      \strng{authorbibnamehash}{846702913775459b5c07326b808a97d4}
+      \strng{authornamehash}{846702913775459b5c07326b808a97d4}
+      \strng{authorfullhash}{3b5c8a19ca7e5e221ab3a47ada4aa444}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{CoRR}
+      \field{title}{An Improved Relative Self-Attention Mechanism for Transformer with Application to Music Generation}
+      \field{volume}{abs/1809.04281}
+      \field{year}{2018}
+      \verb{eprint}
+      \verb 1809.04281
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1809.04281
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1809.04281
+      \endverb
+    \endentry
+    \entry{huang_remi_2020}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{un=1,uniquepart=given,hash=cea28bfa1795079755eb7becc3c90966}{%
+           family={Huang},
+           familyi={H\bibinitperiod},
+           given={Yu-Siang},
+           giveni={Y\bibinithyphendelim S\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=dc4d44f6814797864181d8ee2756517f}{%
+           family={Yang},
+           familyi={Y\bibinitperiod},
+           given={Yi-Hsuan},
+           giveni={Y\bibinithyphendelim H\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Seattle, WA, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{914ef31345e0bc338408e854ab273106}
+      \strng{fullhash}{914ef31345e0bc338408e854ab273106}
+      \strng{bibnamehash}{914ef31345e0bc338408e854ab273106}
+      \strng{authorbibnamehash}{914ef31345e0bc338408e854ab273106}
+      \strng{authornamehash}{914ef31345e0bc338408e854ab273106}
+      \strng{authorfullhash}{914ef31345e0bc338408e854ab273106}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 28th ACM International Conference on Multimedia}
+      \field{isbn}{9781450379885}
+      \field{series}{MM '20}
+      \field{title}{Pop Music Transformer: Beat-Based Modeling and Generation of Expressive Pop Piano Compositions}
+      \field{year}{2020}
+      \field{pages}{1180\bibrangedash 1188}
+      \range{pages}{9}
+      \verb{doi}
+      \verb 10.1145/3394171.3413671
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3394171.3413671
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3394171.3413671
+      \endverb
+      \keyw{transformer,neural sequence model,automatic music composition}
+    \endentry
+    \entry{GenreDistr}{online}{}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labeltitlesource}{title}
+      \field{note}{Accessed: 2025-02-27}
+      \field{title}{Lakh Clean Midi Dataset Analysis}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://lakhcleananalysis.sourceforge.io/
+      \endverb
+      \verb{url}
+      \verb https://lakhcleananalysis.sourceforge.io/
+      \endverb
+    \endentry
+    \entry{Raffel2016LearningBasedMF}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=81a5a94e2388c149a73a86381db45e07}{%
+           family={Raffel},
+           familyi={R\bibinitperiod},
+           given={Colin},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{81a5a94e2388c149a73a86381db45e07}
+      \strng{fullhash}{81a5a94e2388c149a73a86381db45e07}
+      \strng{bibnamehash}{81a5a94e2388c149a73a86381db45e07}
+      \strng{authorbibnamehash}{81a5a94e2388c149a73a86381db45e07}
+      \strng{authornamehash}{81a5a94e2388c149a73a86381db45e07}
+      \strng{authorfullhash}{81a5a94e2388c149a73a86381db45e07}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Learning-Based Methods for Comparing Sequences, with Applications to Audio-to-MIDI Alignment and Matching}
+      \field{year}{2016}
+      \verb{urlraw}
+      \verb https://api.semanticscholar.org/CorpusID:63439223
+      \endverb
+      \verb{url}
+      \verb https://api.semanticscholar.org/CorpusID:63439223
+      \endverb
+    \endentry
+    \entry{shaw2018selfattentionrelativepositionrepresentations}{misc}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=ceeaea67125df5871dea8bc3aa7f4c6e}{%
+           family={Shaw},
+           familyi={S\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=831027ee0ebf22375e2a86afc1881909}{%
+           family={Uszkoreit},
+           familyi={U\bibinitperiod},
+           given={Jakob},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=7f28e84700536646dd6620a0db07ad09}{%
+           family={Vaswani},
+           familyi={V\bibinitperiod},
+           given={Ashish},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{6db6eb79750629e49986ca7a62a3b97f}
+      \strng{fullhash}{6db6eb79750629e49986ca7a62a3b97f}
+      \strng{bibnamehash}{6db6eb79750629e49986ca7a62a3b97f}
+      \strng{authorbibnamehash}{6db6eb79750629e49986ca7a62a3b97f}
+      \strng{authornamehash}{6db6eb79750629e49986ca7a62a3b97f}
+      \strng{authorfullhash}{6db6eb79750629e49986ca7a62a3b97f}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.CL}
+      \field{eprinttype}{arXiv}
+      \field{title}{Self-Attention with Relative Position Representations}
+      \field{year}{2018}
+      \verb{eprint}
+      \verb 1803.02155
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/1803.02155
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/1803.02155
+      \endverb
+    \endentry
+    \entry{TopPWebsite}{online}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=cb4ce9fd64986dae276d3c20ec51462d}{%
+           family={Stokes},
+           familyi={S\bibinitperiod},
+           given={Jackson},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{cb4ce9fd64986dae276d3c20ec51462d}
+      \strng{fullhash}{cb4ce9fd64986dae276d3c20ec51462d}
+      \strng{bibnamehash}{cb4ce9fd64986dae276d3c20ec51462d}
+      \strng{authorbibnamehash}{cb4ce9fd64986dae276d3c20ec51462d}
+      \strng{authornamehash}{cb4ce9fd64986dae276d3c20ec51462d}
+      \strng{authorfullhash}{cb4ce9fd64986dae276d3c20ec51462d}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Accessed: 2025-02-27}
+      \field{title}{A guide to language model sampling in AllenNLP}
+      \field{year}{2020}
+      \verb{urlraw}
+      \verb https://medium.com/ai2-blog/a-guide-to-language-model-sampling-in-allennlp-3b1239274bc3
+      \endverb
+      \verb{url}
+      \verb https://medium.com/ai2-blog/a-guide-to-language-model-sampling-in-allennlp-3b1239274bc3
+      \endverb
+    \endentry
+    \entry{DBLP:journals/corr/VaswaniSPUJGKP17}{article}{}
+      \name{author}{8}{}{%
+        {{un=0,uniquepart=base,hash=7f28e84700536646dd6620a0db07ad09}{%
+           family={Vaswani},
+           familyi={V\bibinitperiod},
+           given={Ashish},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=62efade83d70f0323fe248755e6c90c5}{%
+           family={Shazeer},
+           familyi={S\bibinitperiod},
+           given={Noam},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=06649ebab1ea5cac0250746a19764975}{%
+           family={Parmar},
+           familyi={P\bibinitperiod},
+           given={Niki},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=831027ee0ebf22375e2a86afc1881909}{%
+           family={Uszkoreit},
+           familyi={U\bibinitperiod},
+           given={Jakob},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=2fd2982e30ebcec93ec1cf76e0d797fd}{%
+           family={Jones},
+           familyi={J\bibinitperiod},
+           given={Llion},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=27b07e4eacbf4ef7a1438e3badb7dd8d}{%
+           family={Gomez},
+           familyi={G\bibinitperiod},
+           given={Aidan\bibnamedelima N.},
+           giveni={A\bibinitperiod\bibinitdelim N\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=f2bc899b1160163417da7bf510f15d33}{%
+           family={Kaiser},
+           familyi={K\bibinitperiod},
+           given={Lukasz},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=95595a0fefb86187cbc36e551017d332}{%
+           family={Polosukhin},
+           familyi={P\bibinitperiod},
+           given={Illia},
+           giveni={I\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{ee273ab30cfb889666f8c4d806eb9ce7}
+      \strng{fullhash}{f82970bbd2bdd7a002d2af62b743d5cc}
+      \strng{bibnamehash}{ee273ab30cfb889666f8c4d806eb9ce7}
+      \strng{authorbibnamehash}{ee273ab30cfb889666f8c4d806eb9ce7}
+      \strng{authornamehash}{ee273ab30cfb889666f8c4d806eb9ce7}
+      \strng{authorfullhash}{f82970bbd2bdd7a002d2af62b743d5cc}
+      \field{sortinit}{V}
+      \field{sortinithash}{afb52128e5b4dc4b843768c0113d673b}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{CoRR}
+      \field{title}{Attention Is All You Need}
+      \field{volume}{abs/1706.03762}
+      \field{year}{2017}
+      \verb{eprint}
+      \verb 1706.03762
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1706.03762
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1706.03762
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
