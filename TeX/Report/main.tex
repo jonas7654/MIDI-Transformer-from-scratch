@@ -749,7 +749,7 @@ Our final model is summarized in table (\ref{tab:parameters}).
 \end{tabular}
 \end{center}
 In general we observed that increasing the number of layers, heads or the embedding size did not yield a lower loss.
-The context size was chosen given the information we obtained from our token statistics \ref{seq:token_stats}.
+The context size was chosen given the information we obtained from our token statistics (\ref{sec:token_stats}).
 It is important to note again that the way we feed the data into the model does not rely heavily on the most accurate context size given the sequence length distribution of the data.
 By randomly selecting data from our input array chances are high that we input two incomplete sequences at once. This is not a problem since the model learns to distinguish between sequences due to the start and end token.
 
@@ -807,9 +807,10 @@ def generate_sequence(model, input_sequence, tokenizer, max_tokens, p, T):
         # Append predicted token
         generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1)
     
-    return generated_sequence.get()  # Move to CPU
+    return generated_sequence.get()  # Move to main memory
 \end{lstlisting}
 
+For our purposes
 
 \subsubsection{Post-processing}
 After generation, the token sequences are decoded back into MIDI format. Additionally, we apply a monophonic constraint to ensure that only the highest-pitched note is retained in overlapping chords.
@@ -874,7 +875,28 @@ def top_p_sampling(prob_matrix, p=0.2): #Author: both
     return sampled_indices
 \end{lstlisting}
 This is how we implemented the sampling method for our use case. The steps strictly follow the algorithm described in "Overview", any additional explanitions are given in the comments. 
-\subsection{Effects Of Hyperparameters}
+\subsection{Top-p and Temperature Effects on Melodic Outputs}
+Lower \textit{top-p} and \textit{temperature} were found to generate more coherent, melody-like sequences. 
+This behavior likely arises from the inherent structure of the tokenizer's vocabulary and the probabilistic nature of the decoding process:
+
+\begin{enumerate}
+    \item \textbf{Token Distribution Skew:}   \\
+    While individual note tokens may have high probabilities during inference, the training data contains a disproportionate number of time-related tokens (tempo, bar, time signature).
+    We assume this skew causes these non-melodic tokens to collectively dominate the probability mass, even if no single time token appears in the absolute top ranks.
+
+    \item \textbf{Impact of High p:}  
+    When increasing \textit{p}, the sampling pool expands to include lower-ranked tokens. Due to the dataset's structural bias,
+    note tokens become statistically "drowned out" by the sheer quantity of tempo/metadata tokens in the expanded pool.
+    This results in degenerate sequences overpopulated with non-musical events.
+
+    \item \textbf{Effect of Lower Temperature:}  
+    Lower temperature focuses the model on the most likely tokens, which are often notes because they fit the melody best. This helps avoid distractions from less important tokens like tempo markers, keeping the output more musical.
+
+    \item \textbf{Why Lower Settings Work Better:}  
+    By reducing both \textit{p} and \textit{temperature}, the decoding process effectively filters out non-essential time tokens, skewing the model toward the smaller subset of tokens that encode pitch, rhythm, and articulation.
+    This aligns with the simplicity of monophonic hooks. But if choosing \textit{p} and \textit{temperature} to small, the generated sequence will not sound like any recognisable melody.
+    In our specific case we used \textit{p}-values of 0.1 to 0.4 and \text{temperate}-values of 0.6 to 0.8.
+\end{enumerate}
 
 \section{Conclusion}
 
