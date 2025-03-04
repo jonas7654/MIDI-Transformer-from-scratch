@@ -775,7 +775,7 @@ By randomly selecting data from our input array chances are high that we input t
 Our inference pipeline generates MIDI sequences based on a given input MIDI file using a trained transformer model. The key steps involved in the process are:
 
 \subsubsection{Model Loading}
-We load a pre-trained model from a checkpoint file along with the corresponding vocabulary file. The tokenizer, specified in our the configuration, is initialized to handle MIDI tokenization. The code can be found in \textit{Transformer\_Code/CUPY/models/GoePT/Inference.py}.
+We load a pre-trained model from a checkpoint file along with the corresponding vocabulary file. The tokenizer, specified in our the configuration, is initialized to handle MIDI tokenization.
 \begin{lstlisting}[language=Python, caption=Loading the pre-trained model and tokenizer]
 def load_model(checkpoint_path, vocab_file, batch_size):
     with open(checkpoint_path, mode='r', encoding='utf-8') as weights:
@@ -786,6 +786,7 @@ def load_model(checkpoint_path, vocab_file, batch_size):
     tokenizer = config.tokenizer_name(params=vocab_file)
     return model, tokenizer
 \end{lstlisting}
+Code Location: \textit{Transformer\_Code/CUPY/models/GoePT/Inference.py}
 
 \subsubsection{Tokenization}
 The input MIDI files are tokenized using the REMI tokenizer, converting musical events into a sequence of tokens. Special tokens such as Start-of-Sequence (SOS) and End-of-Sequence (EOS) are appended as needed.
