@@ -178,7 +178,7 @@ def generate_sequence(model_weights: str, input_sequences: Path, vocab_file, max
                 break
             # Append the predicted token to the sequence
             generated_sequence = cp.concatenate([generated_sequence, next_tokens], axis=1) # add new column
-        
+            print(generated_sequence)
         # convert back to numpy
         generated_sequence = generated_sequence.get()
         generated_sequences.append((generated_sequence, prediction_start_idx))

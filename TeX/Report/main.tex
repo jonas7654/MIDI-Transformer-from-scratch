@@ -18,6 +18,9 @@
 \usepackage{booktabs}
 \usepackage{microtype}
 \usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
 \usepackage{svg}
 \usepackage[backend=biber,style=authoryear]{biblatex}
 \addbibresource{references.bib}
@@ -127,7 +130,7 @@ The Lakh MIDI dataset is a collection of 176,581 multi-track MIDI files. Its goa
 
 \subsection{Prefiltering The MIDI Files}
 \begin{lstlisting}
-def check_time_sig(pretty_midi_stream): #Author: Julian Napier
+def check_time_sig(pretty_midi_stream):
     # Get the list of time signature changes
     time_signature_changes = pretty_midi_stream.time_signature_changes
     tempos = get_tempo(pretty_midi_stream)
@@ -162,7 +165,7 @@ Now, how do we now extract actual hooks from the dataset? First of all, each tra
     \item \textit{If bass track, skip.} \\[0.2cm]
     Bass tracks aren't as bad as drum tracks regarding melodic information, however they often just hold the root note of the chord being played currently and don't have any significant melody of their own. There are of course exceptions to this, but they are rare. That's why we try to reduce the number of bass hooks by skipping tracks that contain a note lower than F2 after steps 2 and 3. It is important that these steps come first, step 2 so certain keys aren't favoured and step 3 so polyphonic tracks with chord accompaniment (including bass notes) aren't put at a disadvantage.
     \item \textit{Cut out 8 bars after first note played.} \\[0.2cm]
-    This point is for sure the most controversial. This is the greedy solution, being most runtime efficient. In application it worked surprisingly well, since a lot of songs tease their hooks in the intro. Otherwise, hooks of instruments that come in later are still captured this way. Other solutions are discussed in the section "Evaluation And Potential Improvements".
+    This point is for sure the most controversial. This is the greedy solution, being most runtime efficient. In application it worked surprisingly well, since a lot of songs tease their hooks in the intro. Otherwise, hooks of instruments that come in later are still captured this way. Other solutions are discussed in the section "Potential Improvements".
     \item \textit{If required note density, continue.}\\[0.2cm]
     Cutting out 8 bars after the first note is played can be risky, one could only end up with a few notes, or only notes in the first 4 bars for instance. To counteract this, we introduce the following note density criteria for our hooks:
     Firstly, at least 12 notes have to be played in the 8 bar section. And secondly, a note has to start in 6 out of 8 bars. If one of these criteria isn't met, we skip the track.
@@ -176,9 +179,9 @@ In the following sections, we will take an in-depth look at some implementations
 
 
 \subsubsection{Transposition To C/Am}
-A key part of our algorithm is to transpose major melodies into C major and minor melodies into A minor, which makes it easier for the transformer to comprehend. \newline
+A key part of our algorithm is to transpose major melodies into C major and minor melodies into A minor, which makes it easier for the transformer to comprehend. \vspace{0.2cm}
 \begin{lstlisting}
-def detect_transpose_interval(music21_stream): #Author: Julian Napier
+def detect_transpose_interval(music21_stream):
     key_signature = music21_stream.analyze('key')
     if key_signature.mode == "major":
         target_key = key.Key("C")
@@ -193,6 +196,7 @@ def detect_transpose_interval(music21_stream): #Author: Julian Napier
         transpose_interval = transpose_interval.complement
     return transpose_interval.semitones
 \end{lstlisting}
+\vspace{0.2cm}
 The first thing we do is to detect the transpose interval (line 1). For this task we use the music21 library, a library for symbolic music analysis. First we analyze the key signature with music21 (line 2). If the the melody is in major our target key is C major (line 3, 4) and if it is in minor our target key is A minor (line 5, 6). The reason that this works is because A minor is the parallel minor key of C major, meaning their scales contain the same notes (in this case only white keys), just in different order. If the melody has a different mode than major or minor, we skip it (line 7, 8), since it is uncommon for Western music and would only confuse the transformer. We then use the in-built Interval class to determine a possible transpose interval (line 9). However this isn't always the optimal solution, and often the melody was being transposed at a unnecessarily high interval where $|s| > 6$, s the number of semitones transposed. There is always a way to transpose to another key with $s \in [-6, 6]$ (Figure \ref{fig:transp}), in lines 10 to 13 we address this issue. Then we return the optimal ($|s|$ minimal) semitone value for transposing into the target key. \newline
 
 \begin{figure}[H] % 'h' means here
@@ -204,7 +208,6 @@ The first thing we do is to detect the transpose interval (line 1). For this tas
 
 \begin{lstlisting}
 def transpose_midi(pretty_midi_stream, interval):
-#Author: Julian Napier
     # Transpose the MIDI using pretty_midi
     transposed_midi = pretty_midi.PrettyMIDI()
 
@@ -238,7 +241,7 @@ Making our training input monophonic is essential for hook generation. Only this
 To achieve this task, we need to make the following differentiation: For one, if a chord is being played, we want to take the top note. If a melody is being played, it could potentially overlap with other notes. To fix this, we want to cut off the old note when the new note starts. When to do which of these is decided by a time tolerance parameter (line 10), in our case 0.01 seconds. This is illustrated in Figure \ref{fig:mon}. \newline
 
 \begin{lstlisting}
-def make_monophonic(pretty_midi_stream): #Author: Julian Napier
+def make_monophonic(pretty_midi_stream):
     for instrument in pretty_midi_stream.instruments:
         # Sort notes by start time
         instrument.notes.sort(key=lambda note: note.start)
@@ -287,7 +290,6 @@ All in all, the function loops through all tracks and performs the task separate
 \subsubsection{The Collection Method}
 \begin{lstlisting}
 def greedy_collect(pretty_midi_stream, tempo, output_path_pref):
-#Author: Julian Napier
     tracks_coll = 0
     tracks_skipped = 0
     for i, instr in enumerate(pretty_midi_stream.instruments):
@@ -333,7 +335,7 @@ def greedy_collect(pretty_midi_stream, tempo, output_path_pref):
 \end{lstlisting}
 This function handles steps 5-7 of the algorithm.
 After initializing counters (lines 3, 4) , we iterate through all remaining tracks/instruments that still have notes (lines 5, 6). For each of them, we create a target file in 120 bpm (line 7). We calculate the seconds pear beat and bar considering the original tempo (lines 8, 9), which was given to the function as a parameter. From these results we then calculate the length of 8 bars (line 10). After that, we compute the time when the first note starts and the time where the 8 bar phrase should end (lines 12, 14). We then create an instrument with the notes from the 8 bars after the first note is played (lines 16, 17). Then we create a list of 8 lists for each bar, which we fill with the corresponding notes by using integer division (lines 19-25). After that, we calculate how many bars have notes (line 27). This we use to check one of our note density criteria (line 29). If this criterion is met, we shift the note start and end times so that the first note starts at the beginning of the sequence and not somewhere else, respecting all edge cases (lines 31, 32). 
-After doing that we stretch all note start and end times by a factor of tempo/120 to actually be in 120 bpm (lines 33, 34). This is necessary because we imported the notes in to a 120 bpm track, even though there were still in the original tempo of the song. Next we check our second note density criterion (line 35). If it is met, we append the created instrument to a MIDI file and write it (lines 36-40). If either criterion isn't met, we skip the track/instrument (lines 41, 42). In the end we return some counters for statistics (line 44).
+After doing that we stretch all note start and end times by a factor of $\frac{\text{tempo}}{120}$ to actually be in 120 bpm (lines 33, 34). This is necessary because we imported the notes in to a 120 bpm track, even though there were still in the original tempo of the song. Next we check our second note density criterion (line 35). If it is met, we append the created instrument to a MIDI file and write it (lines 36-40). If either criterion isn't met, we skip the track/instrument (lines 41, 42). In the end we return some counters for statistics (line 44).
 
 
 \subsection{Evaluation}
@@ -383,7 +385,7 @@ In this section we will list some positive and negative results from our Hook Co
     \item In "Dance (While the Music Still Goes on)1\_track0" the vocal hook from the beginning is captured well.
     \item In "Mamma Mia\_track0" the piano hook from the intro is captured perfectly.
     \item In "Name of the Game.1\_track4" a nice accompanying string melody is captured.
-    \item In "Name of the Game.1\_track8" an vocal interesting accompaniment arppegio is captured.
+    \item In "Name of the Game.1\_track8" a interesting accompaniment arppegio is captured.
     \item In "Summer Night City\_track4" a minimalistic, but good hook is captured.
 \end{itemize}
 
@@ -408,14 +410,14 @@ However, the next steps of our algorithm can be questioned: \newline
 First of all, skipping tracks with notes lower than F2 after steps 2 and 3 gets rid
 of more tracks than it actually should; as can be seen in "Collection Statistics",
 about every fifth track is classified as a bass track, even though every file usually has 6 or more tracks, only one of them being a bass track.
-This could be solved by training a classifier (Binary Logistic Regression, Neural Network or Transformer) to detect whether a track is a bass track or not.
+This issue could be solved by training a classifier (Binary Logistic Regression, Neural Network or Transformer) to detect whether a track is a bass track or not.
 Another possibly useful feature is that bass tracks are always monophonic. Tracks that aren't monophonic (before making everything monophonic) are therfore definitely never a bass track and wouldn't have to be skipped. \newline
 
 Secondly, the approach of cutting out 8 bars after the first played note in a so far accepted track isn't the best solution.
 It ignores the fact that a better hook could theoretically could be in the middle of the track. 
 Another approach would be slicing the input into 8 bar pieces after the first played note and checking certain note density criteria for each.
 This would have the advantage that more data is collected and the disadvantage that many 8 bar sequences wouldn't be hooks, since songs also have a lot of other melodies.
-Another possibility without this disadvantage would be to training a neural network to predict the 8 bars most likely to be a hook in a MIDI sequence and then collecting that. \newline
+Another possibility without this disadvantage would be training a neural network to predict the 8 bars most likely to be a hook in a MIDI sequence and then collecting that. \newline
 
 And thirdly, our note density criteria are rather strict. It can be argued that a note played in 4 or 5 out of 8 bars would suffice.
 However, at the with those settings we generated a lot of pauses and this was an easy and effective way for us to counteract this.
@@ -423,7 +425,44 @@ However, at the with those settings we generated a lot of pauses and this was an
 
 \section{Tokenization}
 \subsection{The REMI Tokenizer}
-In order to tokenize our midi events we use the REMI tokenizer, implemented in the miditok (\cite{miditok2021}) library, which was first introduced in the Pop Music Transformer paper written by \cite{huang_remi_2020}. The REMI tokenizer provides a structured approach to representing musical events in MIDI format by breaking down the sequence of notes into a series of tokens. This tokenization method captures essential musical features such as Bar, Pitch and Note Duration. Therefore it is well fit for our task.
+In order to tokenize our MIDI events we use the REMI tokenizer, implemented in the MidiTok (\cite{miditok2021}) library, which was first introduced in the Pop Music Transformer paper written by \cite{huang_remi_2020}. The REMI tokenizer provides a structured approach to representing musical events in MIDI format by breaking down the sequence of notes into a series of tokens. This tokenization method captures essential musical features such as Bar, Pitch, Tempo, Position, Velocity and Note Duration. Therefore it is well fit for our task. \vspace{0.15cm}
+
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        scale=1, transform shape,
+        font=\footnotesize,
+        node distance=0.2cm,
+        every node/.style={
+            draw,
+            rectangle,
+            minimum width=1.0cm,  
+            minimum height=0.6cm, 
+            align=center
+        }
+    ]
+    
+    % First row of boxes
+    \node[fill=green!30] (n1) {Bar};
+    \node[fill=yellow!30, right=of n1] (n2) {Pos};
+    \node[fill=blue!30,   right=of n2] (n3) {Tempo};
+    \node[fill=red!30,    right=of n3] (n4) {Pitch};
+    \node[fill=orange!30, right=of n4] (n5) {Vel.};
+    \node[fill=green!30,  right=of n5] (n6) {Dur.};
+    
+    
+    % Arrow underneath
+    \draw[->, thick]
+      (n1.south west) ++(0,-0.5)
+      -- ($(n6.south east)+(0,-0.5)$)
+      node[midway, below] {time};
+    
+    \end{tikzpicture}
+    \caption{REMI tokenization example}
+\end{figure}
+
+
 
 \subsection{Important Configuration Parameters}
 \begin{lstlisting}
@@ -459,7 +498,7 @@ This setting enables the tokenizer to capture notes up to 32nd notes in the firs
 \begin{lstlisting}
 "num_velocities": 1
 \end{lstlisting}
-We don't care about different velocities in melodies, since these have nothing to do with the notes played. That's why we downsample everything to have the same velocity. \newline
+We don't care about different velocities in melodies, since these have nothing to do with the melody played. That's why we downsample everything to have the same velocity. \newline
 
 \begin{lstlisting}
 "use_chords": False
@@ -470,7 +509,7 @@ Since our input is monophonic, there are no chords, so we don't want the tokeniz
 "use_rests": True,
 "beat_res_rest": {(0, 32): 8}
 \end{lstlisting}
-Rests are important to capture the rhythm of the hooks correctly. That's why we capture them at the same beat resolution as played notes. \newline
+Rests are important to capture the rhythm of the hooks correctly. That's why we capture them at the same beat resolution as notes. \newline
 
 \begin{lstlisting}
 "use_tempos": False,
@@ -492,6 +531,7 @@ The default setting here was 'bar', meaning that tokens weren't able to go beyon
 "ac_repetition_track_num_bins": 8
 \end{lstlisting}
 These parameters allow the tokenizer to use extra tokens to track certain behaviours in our hooks like note duration (important for capturing rhythm correctly), repetition (very important in hooks due to the repetitiveness) and note density development.
+\subsection{Vocabulary Size}
 In monophonic melodies, only one note is active at a time, so the vocabulary doesn’t need to account for simultaneous note combinations (e.g., chords).
 We opted for a vocabulary size of 4096 which might be very generous given that out data consists of single-note melodies.
 In addition to that we expect short sequences: An 8-bar melody is relatively short, especially in monophonic form. For example, in 4/4 time at 120 BPM, an 8-bar melody lasts 16 seconds.
@@ -502,11 +542,12 @@ In order to enlarge our training data we choose to augment the midi tracks by sh
 \label{sec:token_stats}
 In this section we summarise the tokenization procedure by showing distributional information. \newline
 
-Firstly we observed that the top 20 tokens are all tokens which encode Tempo events.
-REMI insert tempo tokens at regular intervals (e.g., every bar or every beat) to ensure the timing information is preserved.
-We opted for capturing a 32nd note resolution and therefore many Tempo tokens are used in order to capture this granulated beat resolution.
-Figure (\ref{fig:token_distribution}) depicts the total token distribution. The top 20 token are responsible for the spike at around 350. Starting from token 696 we observed token ids which actually encode Note events. These are responsible for the second peak which flattens out.
-It is important to note that the Note Events do also encode time, duration, pitch and velocity. In total the vocabulary has 2955 tokens for Note events and 1141 tokens for Tempo events.
+Firstly we observed that the top 20 tokens are all tokens which encode Tempo, Positional or Bar events.
+REMI insert these tokens at regular intervals (e.g., every bar or every beat) to ensure the timing information is preserved.
+We opted for capturing a 32nd note resolution and therefore many these tokens are used in order to capture this detailed beat resolution.
+Figure (\ref{fig:token_distribution}) depicts the total token distribution. The top 20 tokens are responsible for the spike at around 350. Starting from token 696 we observed token ids which actually encode Note events. These are responsible for the second peak which flattens out toward the maximum vocabulary size.
+It is important to note that the Note Events do also encode time, duration, pitch and velocity. In total the vocabulary has 2955 tokens for Note events and 1141 tokens for Tempo, Positional
+or Bar events.
 
 With regard to the sequence length distribution we see that 50\% of the input files have a sequence length smaller than 103.
 Nevertheless the variance of sequence lengths is quite high as seen in Figure (\ref{fig:log_seq_len}) and (\ref{fig:cumulative_seq_len}). We used this information to choose the models context size which is discussed in section \ref{sec:Training}. \newline
@@ -548,11 +589,11 @@ Nevertheless the variance of sequence lengths is quite high as seen in Figure (\
 \section{Relative Attention}
 \subsection{Overview}
 
-\textit{Note: As an abbreviation for the matrix dimensions we will be using B for the batch size, H for the number of heads, L for the sequence length and D for the head depth.} \newline
+\textit{Note: As an abbreviation for the matrix dimensions we will be using B for the batch size, H for the number of heads, T for the sequence length and D for the head depth.} \newline
 
 Since we are dealing with music in this task, the Absolute Attention mechanism commonly used in transformers \parencite{DBLP:journals/corr/VaswaniSPUJGKP17} doesn't quite cut it. This mechanism only captures the relationship of tokens at absolute positions with one another. However, we also need to capture general relationships between notes. For example: How do adjacent notes/tokens correlate in general, can we infer anything from our data? \newline
 
-A solution to this problem was first introduced by \textcite{shaw2018selfattentionrelativepositionrepresentations} and then refined by \textcite{DBLP:journals/corr/abs-1809-04281}. The main objective is to capture these relationships in the form of learnable relative positional embeddings $E$ (of dimensions $1 \times H \times L \times D$) in every attention block. Each row of such a matrix corresponds to a certain key-query distance, as can be seen in Figure \ref{fig:relatt}. 
+A solution to this problem was first introduced by \textcite{shaw2018selfattentionrelativepositionrepresentations} and then refined by \textcite{DBLP:journals/corr/abs-1809-04281}. The main objective is to capture these relationships in the form of learnable relative positional embeddings $E$ (of dimensions $1 \times H \times T \times D$) in every attention block. Each row of such a matrix corresponds to a certain key-query distance, as can be seen in Figure \ref{fig:relatt}. 
 \newline
 
 \begin{figure}[H] % 'h' means here
@@ -562,13 +603,13 @@ A solution to this problem was first introduced by \textcite{shaw2018selfattenti
     \label{fig:relatt}
 \end{figure}
 \vspace{0.1cm}
-The first step of the attention process is to multiply $Q$ by $E^T$, resulting in a matrix of dimensions $B \times H \times L \times L$ ($E$ is broadcasted over $B$ beforehand). Its $(i_q, r)$ entry contains the dot product of the query in position $i_q$ with the embedding of relative distance $r$. However, each relative logit $(i_q, j_k)$ in the matrix $S_\text{rel}$  should be the dot product of the query in position $i_q$ and the corresponding key $j_k$ with relative distance $r$, to match up with the indexing in $QK^T$.
+The first step of the attention process is to multiply $Q$ by $E^T$, resulting in a matrix of dimensions $B \times H \times T \times T$ ($E$ is broadcasted over $B$ beforehand). Its $(i_q, r)$ entry contains the dot product of the query in position $i_q$ with the embedding of relative distance $r$. However, each relative logit $(i_q, j_k)$ in the matrix $S_\text{rel}$  should be the dot product of the query in position $i_q$ and the corresponding key $j_k$ with relative distance $r$, to match up with the indexing in $QK^T$.
 \textcite{DBLP:journals/corr/abs-1809-04281} propose the "skewing" algorithm to move the relative logits of $QE^T$ to their correct positions, as illustrated in Figure \ref{fig:relatt}:
 
 \begin{enumerate}
-\item Pad a dummy column vector before the leftmost column (shape: $B$, $H$, $L$, $L + 1$).
-\item Reshape the matrix to have shape ($B$, $H$, $L + 1$, $L$).
-\item Discard the top row of the third dimension (shape: $B$, $H$, $L$, $L$).
+\item Pad a dummy column vector before the leftmost column (shape: $B$, $H$, $T$, $T + 1$).
+\item Reshape the matrix to have shape ($B$, $H$, $T + 1$, $T$).
+\item Discard the top row of the third dimension (shape: $B$, $H$, $T$, $T$).
 \end{enumerate}
 
 The result of this process is the relative attention score matrix $S_\text{rel}$ with correct indexing, as outlined in Equation (1). This matrix is now added to the conventional attention scores $QK^T$. This sum then goes through the normal attention process from \textcite{DBLP:journals/corr/VaswaniSPUJGKP17}, as outlined in Eq. 2.\vspace{0.15cm}
@@ -593,7 +634,7 @@ Step 1 of the Skewing Algorithm: \( X_2 = \text{pad\_left\_column}(X_1) \).\newl
 \begin{lstlisting}
     self.x3 = self.x2.reshape(B, self.n_heads, T + 1, T) #reshape to (B, nh, T + 1, T) matrix
 \end{lstlisting}
-Step 2 of the Skewing Algorithm: \( X_3 = \text{reshape } X_2\) to ($B$, $H$, $L + 1$, $L$). \newline
+Step 2 of the Skewing Algorithm: \( X_3 = \text{reshape } X_2\) to ($B$, $H$, $T + 1$, $T$). \newline
 
 \begin{lstlisting}
     self.s_rel = self.x3[:, :, 1:, :] #discard first row of 3rd dim, new dim: (B, nh, T, T)
@@ -629,7 +670,7 @@ In this section, we will go through all relevant differences to Absolute Attenti
 \frac{\partial L}{\partial X_3}&=\text{pad\_top\_row}\left(\frac{\partial L}{\partial S_\text{rel}}\right)
 \end{align}
 
-The gradient of $L$ with respect to $X_3$ can be received by performing the reverse operation of step 3 of the Skewing Algorithm. There we discarded the top row, now we pad the top row of our current gradient $\frac{\partial L}{\partial S_\text{rel}}$ with 0's (Eq. 5). This results in a tensor of shape $(B, H, L + 1, L)$. \newline
+The gradient of $L$ with respect to $X_3$ can be received by performing the reverse operation of step 3 of the Skewing Algorithm. There we discarded the top row, now we pad the top row of our current gradient $\frac{\partial L}{\partial S_\text{rel}}$ with 0's (Eq. 5). This results in a tensor of shape $(B, H, T + 1, T)$. \newline
 \vspace{0.1cm}
 
 \begin{lstlisting}
@@ -639,7 +680,7 @@ The gradient of $L$ with respect to $X_3$ can be received by performing the reve
 \frac{\partial L}{\partial X_2}=\text{reshape } \frac{\partial L}{\partial X_3} \text{ to ($B$, $H$, $L$, $L + 1$)}
 \end{align}
 
-The gradient of $L$ with respect to $X_2$ can be received by performing the reverse operation of step 2 of the Skewing Algorithm. There we reshaped the tensor $X_2$ to $(B, H, L + 1, L)$, now we reshape the gradient with respect to $X_3$ to the shape $(B, H, L, L + 1)$ (Eq. 6).\newline
+The gradient of $L$ with respect to $X_2$ can be received by performing the reverse operation of step 2 of the Skewing Algorithm. There we reshaped the tensor $X_2$ to $(B, H, T + 1, T)$, now we reshape the gradient with respect to $X_3$ to the shape $(B, H, T, T + 1)$ (Eq. 6).\newline
 \vspace{0.1 cm}
 
 \begin{lstlisting}
@@ -649,7 +690,7 @@ The gradient of $L$ with respect to $X_2$ can be received by performing the reve
 \frac{\partial L}{\partial X_1}&=\text{discard\_left\_column}\left(\frac{\partial L}{\partial X_2}\right)
 \end{align}
 
-The gradient of $L$ with respect to $X_1$ can be received by performing the reverse operation of step 1 of the Skewing Algorithm. There we padded the tensor $X_1$ with 0's on its left column, now we discard the current gradient's $\frac{\partial L}{\partial X_2}$ left column (Eq. 7). This results in a tensor of shape $(B, H, L, L)$.\newline
+The gradient of $L$ with respect to $X_1$ can be received by performing the reverse operation of step 1 of the Skewing Algorithm. There we padded the tensor $X_1$ with 0's on its left column, now we discard the current gradient's $\frac{\partial L}{\partial X_2}$ left column (Eq. 7). This results in a tensor of shape $(B, H, T, T)$.\newline
 \vspace{0.1 cm}
 
 
@@ -664,7 +705,7 @@ The gradient of $L$ with respect to $X_1$ can be received by performing the reve
 &= \frac{\partial L}{\partial X_1}E_b + \frac{1}{\sqrt{d_k}} \cdot\frac{\partial L}{\partial M}K
 \end{align}
 
-The right summand of this gradient is identical to $\frac{\partial L}{\partial Q}$ in Absolute Attention (line 1), that's why there is no need to explain it any further. With Relative Attention however, there is another path (over $S_\text{rel}$) to derive this gradient that also needs to be taken into account. We know that $X_1 = Q(E_b)^T$, according the the matrix multiplication rule the derivative with respect to Q on this path is equal to the matrix product of the derivative with respect to $X_1$ and $E_b$ (line 3). This summand is now added to receive the complete formula (line 4, Eq. 8). Both summands and the end result have the shape $(B, H, L, D)$.
+The right summand of this gradient is identical to $\frac{\partial L}{\partial Q}$ in Absolute Attention (line 1), that's why there is no need to explain it any further. With Relative Attention however, there is another path (over $S_\text{rel}$) to derive this gradient that also needs to be taken into account. We know that $X_1 = Q(E_b)^T$, according the the matrix multiplication rule the derivative with respect to Q on this path is equal to the matrix product of the derivative with respect to $X_1$ and $E_b$ (line 3). This summand is now added to receive the complete formula (line 4, Eq. 8). Both summands and the end result have the shape $(B, H, T, D)$.
 \newline
 \vspace{0.1cm}
 \begin{lstlisting}
@@ -680,7 +721,7 @@ The right summand of this gradient is identical to $\frac{\partial L}{\partial Q
 \frac{\partial L}{\partial E}
 &= \sum_B\left(Q^T\frac{\partial L}{\partial X_1}\right)^T
 \end{align}
-In this section, we will step by step derive $\frac{\partial L}{\partial E}$. We already know that  $X_1 = Q(E_b)^T$, from previous sections. This time we derive with respect to $(E_b)^T$. Using the matrix multiplication rule we receive the result from Eq. 9 with shape $(B, H, D, L)$ (line 1). Transposing the result, we get the gradient with respect to $E_b$ with shape $(B, H, L, D)$ (Eq. 10, line 2). To reach the final result, we must now contract the tensor over the batch dimension (Eq. 11, line 3), since we indirectly broadcasted it in the forward pass. The resulting tensor now has the correct shape $(1, H, D, L)$.
+In this section, we will step by step derive $\frac{\partial L}{\partial E}$. We already know that  $X_1 = Q(E_b)^T$, from previous sections. This time we derive with respect to $(E_b)^T$. Using the matrix multiplication rule we receive the result from Eq. 9 with shape $(B, H, D, T)$ (line 1). Transposing the result, we get the gradient with respect to $E_b$ with shape $(B, H, T, D)$ (Eq. 10, line 2). To reach the final result, we must now contract the tensor over the batch dimension (Eq. 11, line 3), since we indirectly broadcasted it in the forward pass. The resulting tensor now has the correct shape $(1, H, T, D)$.
 \section{Training And Inference}
 \subsection{Training}
     \label{sec:Training}
@@ -691,9 +732,9 @@ To finally train our model we used the following procedure:
         \item[3)] Generate a Train-, Validation and Testset and perform Data augmentation.
         \item[4)] Tokenize the datasets using the pre-trained REMI-tokenizer.
         \item[5)] Save the tokenized datasets to disk.
-        \item[5)] Run the training routine which is based on a nano-GPT implementation.
+        \item[6)] Run the training routine which is based on a nano-GPT implementation.
     \end{itemize}
-Initially, we organized the data into a matrix structure, where each row corresponds to a MIDI file and each column represents a sequence of tokens. The column size was bounded by the model's context size.
+Initially, we organized the data into a matrix structure, where each row corresponds to a MIDI file and the columns represents a sequence of tokens. The column size was bounded by the model's context size.
 \[
 M =
 \begin{bmatrix}
@@ -705,9 +746,12 @@ M =
 \end{bmatrix}
 \]
 As it turned out this initial approach had a major problem.
-The sequence length of the tokenized midi files is not fixed. Every file could have a different sequence length. Either greater or smaller than the models context size. Due to that we either needed to truncate many sequences or add padding tokens based on the context size of the model. Choosing a context size that is very large resulted in to many padding tokens which dominated the data. Making the context size small resulted in to many truncations such that we weren't able to fully supply the 8 bar hooks to the model in many cases. Using this approach and especially smaller context sizes for training yielded excellent loss curves just after a few epochs where we observed loss values of 0.1 to 0.001. In hindsight, this is not really surprising since padding tokens dominated our dataset and the model could just predict padding tokens. 
+The sequence length of the tokenized midi files is not fixed. Every file could have a different sequence length. Either greater or smaller than the models context size. Due to that we either needed to truncate many sequences or add padding tokens based on the context size of the model. Choosing a context size that is very large resulted in to many padding tokens which dominated the data. Making the context size small resulted in to many truncations such that we weren't able to fully supply the 8 bar hooks to the model in many cases. Using this approach and especially smaller context sizes for training yielded excellent loss curves and just after a few epochs we observed loss values of 0.1 to 0.001. In hindsight, this is not really surprising since padding tokens dominated our dataset and the model could just predict padding tokens.
+With regard to hook generation this  excellent loss values were completely useless since the model only produced padding tokens during inference.
 
-In order to solve this problem we changed the datastructure from a matrix to a flat array. This approach has two advantages. We are not constrained by the models context size and we do not need to include too many padding tokens. Now our input data looks like this (example data)
+
+
+In order to solve this problem we changed the data structure from a matrix to a flat array. This approach has two advantages. We are not constrained by the models context size and we do not need to include too many padding tokens. Now our input data looks like this (example data) \vspace{0.15cm}
 \[
 M =
 \left[
@@ -727,23 +771,23 @@ M =
 \right]
 \]
 
-
+\vspace{0.15cm}
 where $1$ represents the start token, $2$ represents the end token and $0$ represents the padding token.
 We randomly add padding tokens before each sequence in order to improve the inference procedure.
 The training routine then loads a random subset of this array of the size of the context size.
 Figure (\ref{fig:val_loss}) and (\ref{fig:train_loss}) depicts a few of our training runs. In total we trained the models for two days using different parameter configurations. As shown we managed to achieve a stable training process without indications of overfitting.
 \begin{figure}[H]
-  \label{fig:val_loss}
   \centering
-  \includegraphics[width=\textwidth]{val_loss.png}
+  \includegraphics[width=0.95\textwidth]{val_loss.png}
   \caption{Validation Loss}
+  \label{fig:val_loss}
 \end{figure}
 
 \begin{figure}[H]
-  \label{fig:train_loss}
   \centering
-  \includegraphics[width=\textwidth]{train_loss.png}
+  \includegraphics[width=0.95\textwidth]{train_loss.png}
   \caption{Training Loss}
+  \label{fig:train_loss}
 \end{figure}
 Our final model is summarized in table (\ref{tab:parameters}).
 
@@ -775,7 +819,7 @@ By randomly selecting data from our input array chances are high that we input t
 Our inference pipeline generates MIDI sequences based on a given input MIDI file using a trained transformer model. The key steps involved in the process are:
 
 \subsubsection{Model Loading}
-We load a pre-trained model from a checkpoint file along with the corresponding vocabulary file. The tokenizer, specified in our the configuration, is initialized to handle MIDI tokenization.
+We load a pre-trained model from a checkpoint file along with the corresponding vocabulary file.
 \begin{lstlisting}[language=Python, caption=Loading the pre-trained model and tokenizer]
 def load_model(checkpoint_path, vocab_file, batch_size):
     with open(checkpoint_path, mode='r', encoding='utf-8') as weights:
@@ -827,11 +871,9 @@ def generate_sequence(model, input_sequence, tokenizer, max_tokens, p, T):
     return generated_sequence.get()  # Move to main memory
 \end{lstlisting}
 
-For our purposes
-
 \subsubsection{Post-processing}
-After generation, the token sequences are decoded back into MIDI format. Additionally, we apply a monophonic constraint to ensure that only the highest-pitched note is retained in overlapping chords.
-This is necessary because we chose not to quantize our MIDI input for tokenization.
+After generation, the token sequences are decoded back into MIDI format using MidiTok. Additionally, we apply a monophonic constraint to ensure that only the highest-pitched note is retained in overlapping chords.
+This is necessary because we chose not to quantize our MIDI input for tokenization, in order to leave the rhythm as human as possible. With notes faster than 32nd notes (our beat resolution) polyphonic tokens are unfortunately still possible.
 
 \subsection{Top-p Sampling}
 \label{sec:6_9}
@@ -859,7 +901,7 @@ For our example: We choose $p = 0.75$. The first tokens in the sorted list excee
 
 \subsubsection{Implementation}
 \begin{lstlisting}
-def top_p_sampling(prob_matrix, p=0.2): #Author: both
+def top_p_sampling(prob_matrix, p=0.2):
     batch_size, vocab_size = prob_matrix.shape
     sampled_indices = cp.zeros((batch_size,1), dtype=int)
     
@@ -917,6 +959,12 @@ This behavior likely arises from the inherent structure of the tokenizer's vocab
 
 \section{Conclusion}
 
+Due to our adaptions, our transformer manages to output good sounding melody snippets (about 2 bars).
+However, it didn't quite manage capture the overall structure of hooks, making it sound a little random and strange at some points.
+Our top 3 generations can be found at \textit{Transformer\_Code/Top3Generations}.
+All in all, we got a good insight into the world of Music Transformers and we were able to apply our knowledge from class and other courses.
+
+\newpage
 % References
 \printbibliography
 
