@@ -375,7 +375,7 @@ The clean MIDI subset contains 34518 files, 17526 of these were able to be proce
 In total, 98440 tracks were processed. We collected hooks from 37875 (38\%) of these. 16651 (16.9\%) drum tracks were skipped. 19392 (19.7\%) suspected bass tracks were skipped. 25012 (25.4\%) were skipped because the first 8 bars after the first played note didn't fulfill our note density criteria.
 
 \subsubsection{Positive/Negative Examples}
-In this section we will list some positive and negative results from our Hook Collection. As a test set we used ABBA songs. The corresponding MIDI files can be found in ... \newline
+In this section we will list some positive and negative results from our Hook Collection. They can be found in \textit{Transformer\_Code/paper\_data}. As a test set we used ABBA songs. The corresponding MIDI files can be found in ... \newline
 
 \textit{Positive Examples:}
 
@@ -775,7 +775,7 @@ By randomly selecting data from our input array chances are high that we input t
 Our inference pipeline generates MIDI sequences based on a given input MIDI file using a trained transformer model. The key steps involved in the process are:
 
 \subsubsection{Model Loading}
-We load a pre-trained model from a checkpoint file along with the corresponding vocabulary file. The tokenizer, specified in our the configuration, is initialized to handle MIDI tokenization.
+We load a pre-trained model from a checkpoint file along with the corresponding vocabulary file. The tokenizer, specified in our the configuration, is initialized to handle MIDI tokenization. The code can be found in \textit{Transformer\_Code/CUPY/models/GoePT/Inference.py}.
 \begin{lstlisting}[language=Python, caption=Loading the pre-trained model and tokenizer]
 def load_model(checkpoint_path, vocab_file, batch_size):
     with open(checkpoint_path, mode='r', encoding='utf-8') as weights:

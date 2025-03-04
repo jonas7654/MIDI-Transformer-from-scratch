@@ -5,7 +5,8 @@ Note: all functions are specified to run on the `hpdc04` user on the cluster.
 - To pre process the data you need to run `run_scripts/transpose_midi.sh`
 - Model configuration is specified within `CUPY/models/GoePT/config.py`.
 - After specifying the configuration setting up the training- validation and testdataset can be done by executing `run_scripts/generate_train_val_test.sh`.
-- To finally run the training process you can either run `run_scripts/run_train_in_console.sh`to start training in the current bash or `run_scripts/train_model.sh` which let slurm allocate ressources for the training process. The Training process is logged via `wandb`.
+- To finally run the training process you can either run `run_scripts/run_train_in_console.sh`to start training in the current bash or `run_scripts/train_model.sh` which let slurm allocate ressources for the training process. The Training process is logged via `wandb`. 
+
 - Model checkpoints will be saved to `checkpoints/`.
 - To proceed with inference given a pre-trained model you can use the inference script in `run_scripts/inference.sh`. The following parameters can be specified:
     - weights: Path to the json-checkpoint
@@ -14,6 +15,9 @@ Note: all functions are specified to run on the `hpdc04` user on the cluster.
     - b: maximum amount of tokens to be generated
     - save-dir: Path to a directory where the generated sequences will be saved (default: `Inference/output/`)
     - manually-set-sos-eos-trunc: default: true (This should not be changed)
+
+
+
 Once the parameters are set, you can execute the script by running the following command in the terminal:  
 
 ```bash
