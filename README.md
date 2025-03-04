@@ -1,7 +1,7 @@
 # MIDI-Transformer from Scratch
 Note: all functions are specified to run on the `hpdc04` user on the cluster.
 ## How to use the model
-- In order to execute this repository one has to download the clean_midi data first and save it under `CUPY/models/datasets/`.
+- In order to execute this repository you have to download the clean_midi data first and save it under `CUPY/models/datasets/`.
 - To pre process the data you need to run `run_scripts/transpose_midi.sh`
 - Model configuration is specified within `CUPY/models/GoePT/config.py`.
 - After specifying the configuration setting up the training- validation and testdataset can be done by executing `run_scripts/generate_train_val_test.sh`.
