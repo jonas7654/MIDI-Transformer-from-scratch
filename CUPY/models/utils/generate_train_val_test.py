@@ -22,9 +22,8 @@ seed(256)
 Here we specify the folder structure.
 
 1) data_path is the path to the datasets folder located in CUPY/models/
-2) name_of_midi_data is the acutal name of the folder which contains the raw midi data. 
+2) name_of_midi_data is the actual name of the folder which contains the raw midi data. 
 3) tokenizer_path corresponds to the pre trained tokenizer
-4) :TODO how should we set seq_length?
 
 ---------------------------------------------------------------
 

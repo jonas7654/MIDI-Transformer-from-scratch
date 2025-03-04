@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Debian) (preloaded format=pdflatex 2024.12.11)  3 MAR 2025 20:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Debian) (preloaded format=pdflatex 2024.12.11)  4 MAR 2025 14:28
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -986,168 +986,167 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
  [3] [4]
-<transposing2.png, id=269, 670.00313pt x 351.56343pt>
+<transposing2.png, id=264, 670.00313pt x 351.56343pt>
 File: transposing2.png Graphic file (type png)
 <use transposing2.png>
-Package pdftex.def Info: transposing2.png  used on input line 204.
+Package pdftex.def Info: transposing2.png  used on input line 200.
 (pdftex.def)             Requested size: 407.66833pt x 213.91156pt.
  [5]
-<monophonic.png, id=294, 839.38594pt x 427.5975pt>
+<monophonic.png, id=288, 839.38594pt x 427.5975pt>
 File: monophonic.png Graphic file (type png)
 <use monophonic.png>
-Package pdftex.def Info: monophonic.png  used on input line 237.
+Package pdftex.def Info: monophonic.png  used on input line 233.
 (pdftex.def)             Requested size: 407.66833pt x 207.67162pt.
  [6
 pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.240 \end{figure}
+l.236 \end{figure}
                    <./transposing2.png>] [7
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.269                     if 
+l.265                     if 
                              monophonic_notes and monophonic_notes[-1].end >... <./monophonic.png>] [8] [9] Excluding 'comment' comment.
-<fileproc.png, id=424, 520.94624pt x 305.64188pt>
+<fileproc.png, id=419, 520.94624pt x 305.64188pt>
 File: fileproc.png Graphic file (type png)
 <use fileproc.png>
-Package pdftex.def Info: fileproc.png  used on input line 365.
+Package pdftex.def Info: fileproc.png  used on input line 361.
 (pdftex.def)             Requested size: 317.07614pt x 186.03085pt.
-<trackproc.png, id=425, 516.42938pt x 310.91156pt>
+<trackproc.png, id=420, 516.42938pt x 310.91156pt>
 File: trackproc.png Graphic file (type png)
 <use trackproc.png>
-Package pdftex.def Info: trackproc.png  used on input line 374.
+Package pdftex.def Info: trackproc.png  used on input line 370.
 (pdftex.def)             Requested size: 317.07614pt x 190.89871pt.
  [10
 pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.378 
+l.374 
        <./fileproc.png>] [11
 pdfTeX warning (ext4): destination with the same identifier (name{figure.4}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.402 \end{itemize}
-                    <./trackproc.png>] [12] [13]
-<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png, id=496, 547.5657pt x 424.4658pt>
+l.398 \end{itemize}
+                    <./trackproc.png>] [12] [13] [14]
+<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png, id=500, 547.5657pt x 424.4658pt>
 File: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png Graphic file (type png)
 <use visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png>
-Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png  used on input line 497.
-(pdftex.def)             Requested size: 407.66833pt x 316.0169pt.
- [14]
-<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png, id=505, 594.7821pt x 424.4658pt>
+Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png  used on input line 515.
+(pdftex.def)             Requested size: 294.42636pt x 228.2301pt.
+<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png, id=501, 594.7821pt x 424.4658pt>
 File: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png Graphic file (type png)
 <use visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png>
-Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png  used on input line 504.
-(pdftex.def)             Requested size: 407.66833pt x 290.94514pt.
+Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png  used on input line 522.
+(pdftex.def)             Requested size: 294.42636pt x 210.1274pt.
  [15
 pdfTeX warning (ext4): destination with the same identifier (name{figure.5}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.508 
+l.526 
        <./visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png>]
-<seq_len_box_plot.png, id=515, 567.8013pt x 404.2302pt>
+<seq_len_box_plot.png, id=512, 567.8013pt x 404.2302pt>
 File: seq_len_box_plot.png Graphic file (type png)
 <use seq_len_box_plot.png>
-Package pdftex.def Info: seq_len_box_plot.png  used on input line 513.
-(pdftex.def)             Requested size: 407.66833pt x 290.2375pt.
-<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png, id=516, 563.4651pt x 424.4658pt>
+Package pdftex.def Info: seq_len_box_plot.png  used on input line 529.
+(pdftex.def)             Requested size: 294.42636pt x 209.61494pt.
+<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png, id=513, 563.4651pt x 424.4658pt>
 File: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png Graphic file (type png)
 <use visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png>
-Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png  used on input line 519.
-(pdftex.def)             Requested size: 407.66833pt x 307.11128pt.
+Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png  used on input line 535.
+(pdftex.def)             Requested size: 294.42636pt x 221.8051pt.
  [16
 pdfTeX warning (ext4): destination with the same identifier (name{figure.6}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.522 \end{figure}
-                   <./visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png>] [17
+l.539 
+      
 pdfTeX warning (ext4): destination with the same identifier (name{figure.7}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.523 
-       <./seq_len_box_plot.png>]
-<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png, id=530, 585.6279pt x 424.4658pt>
+l.539 
+       <./visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png> <./seq_len_box_plot.png>]
+<visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png, id=521, 585.6279pt x 424.4658pt>
 File: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png Graphic file (type png)
 <use visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png>
-Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png  used on input line 526.
-(pdftex.def)             Requested size: 407.66833pt x 295.47891pt.
- [18
+Package pdftex.def Info: visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png  used on input line 542.
+(pdftex.def)             Requested size: 294.42636pt x 213.3982pt.
+ [17
 pdfTeX warning (ext4): destination with the same identifier (name{figure.8}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.530 
-       <./visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png>]
-<relative_attn_skewing.png, id=541, 872.25874pt x 300.12125pt>
-File: relative_attn_skewing.png Graphic file (type png)
-<use relative_attn_skewing.png>
-Package pdftex.def Info: relative_attn_skewing.png  used on input line 544.
-(pdftex.def)             Requested size: 407.66833pt x 140.26476pt.
- [19
+l.554 
+      
 pdfTeX warning (ext4): destination with the same identifier (name{figure.9}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.549 T
-       he first step of the attention process is to multiply $Q$ by $E^T$, r... <./visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png>] [20
+l.554 
+       <./visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png> <./visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png>]
+<relative_attn_skewing.png, id=533, 872.25874pt x 300.12125pt>
+File: relative_attn_skewing.png Graphic file (type png)
+<use relative_attn_skewing.png>
+Package pdftex.def Info: relative_attn_skewing.png  used on input line 560.
+(pdftex.def)             Requested size: 407.66833pt x 140.26476pt.
+ [18
 pdfTeX warning (ext4): destination with the same identifier (name{figure.10}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.572 \begin{lstlisting}
-                         <./relative_attn_skewing.png>] [21] [22] [23]
-<val_loss.png, id=621, 2938.98pt x 1935.23pt>
+l.584 \begin{lstlisting}
+                         <./relative_attn_skewing.png>] [19] [20] [21]
+<val_loss.png, id=608, 2938.98pt x 1935.23pt>
 File: val_loss.png Graphic file (type png)
 <use val_loss.png>
-Package pdftex.def Info: val_loss.png  used on input line 722.
+Package pdftex.def Info: val_loss.png  used on input line 738.
 (pdftex.def)             Requested size: 452.9679pt x 298.24486pt.
- [24]
-<train_loss.png, id=628, 3139.73pt x 1935.23pt>
+ [22]
+<train_loss.png, id=614, 3139.73pt x 1935.23pt>
 File: train_loss.png Graphic file (type png)
 <use train_loss.png>
-Package pdftex.def Info: train_loss.png  used on input line 729.
+Package pdftex.def Info: train_loss.png  used on input line 745.
 (pdftex.def)             Requested size: 452.9679pt x 279.16899pt.
- [25
+ [23
 pdfTeX warning (ext4): destination with the same identifier (name{figure.11}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.732 O
-       ur final model is summarized in table (\ref{tab:parameters}). <./val_loss.png>] [26
+l.748 O
+       ur final model is summarized in table (\ref{tab:parameters}). <./val_loss.png>] [24
 pdfTeX warning (ext4): destination with the same identifier (name{figure.12}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.761 \subsubsection
+l.777 \subsubsection
                     {Model Loading} <./train_loss.png>]
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 763.
- [27]
-<top p.png, id=666, 868.74562pt x 593.21625pt>
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 779.
+ [25]
+<top p.png, id=653, 868.74562pt x 593.21625pt>
 File: top p.png Graphic file (type png)
 <use top p.png>
-Package pdftex.def Info: top p.png  used on input line 827.
+Package pdftex.def Info: top p.png  used on input line 843.
 (pdftex.def)             Requested size: 271.7835pt x 185.58781pt.
- [28] [29
+ [26] [27
 pdfTeX warning (ext4): destination with the same identifier (name{figure.13}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.854         sorted_probs 
-                           = probs[sorted_indices] <./top p.png>] [30] [31] (./main.aux)
+l.870         sorted_probs 
+                           = probs[sorted_indices] <./top p.png>] [28] [29] (./main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: AE121B72E4477006A09E18004C86D340;5605.
+(rerunfilecheck)             Checksum: 9B35037134F203908BC3354FF6A6EEC0;5457.
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 29737 strings out of 476091
- 572797 string characters out of 5794080
+ 29735 strings out of 476091
+ 572779 string characters out of 5794080
  2170330 words of memory out of 5000000
- 49177 multiletter control sequences out of 15000+600000
- 525520 words of font info for 127 fonts, out of 8000000 for 9000
+ 49176 multiletter control sequences out of 15000+600000
+ 525629 words of font info for 128 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  94i,14n,95p,1267b,2567s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on main.pdf (32 pages, 3269692 bytes).
+Output written on main.pdf (30 pages, 3271865 bytes).
 PDF statistics:
- 922 PDF objects out of 1000 (max. 8388607)
- 820 compressed objects within 9 object streams
- 419 named destinations out of 1000 (max. 500000)
- 36206 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 908 PDF objects out of 1000 (max. 8388607)
+ 808 compressed objects within 9 object streams
+ 416 named destinations out of 1000 (max. 500000)
+ 36198 words of extra memory for PDF output out of 42996 (max. 10000000)
 
