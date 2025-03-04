@@ -553,34 +553,34 @@ With regard to the sequence length distribution we see that 50\% of the input fi
 Nevertheless the variance of sequence lengths is quite high as seen in Figure (\ref{fig:log_seq_len}) and (\ref{fig:cumulative_seq_len}). We used this information to choose the models context size which is discussed in section \ref{sec:Training}. \newline
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png}
+    \includegraphics[width=0.55\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_top_frequent_tokens.png}
     \caption{Top 20 tokens}
     \label{fig:top_20_tokens}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png}
+    \includegraphics[width=0.55\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_token_frequency_by_id.png}
     \caption{Token distribution}
     \label{fig:token_distribution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{seq_len_box_plot.png}
+    \includegraphics[width=0.55\textwidth]{seq_len_box_plot.png}
     \caption{Sequence Length Box Plot}
     \label{fig:seq_len_box_plot}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png}
+    \includegraphics[width=0.55\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_cumulative_length_distribution.png}
     \caption{Cumulative Distribution of Sequence Lengths}
     \label{fig:cumulative_seq_len}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png}
+    \includegraphics[width=0.55\textwidth]{visualization_4096_REMI_train_manual_tokens_True_random_padding_True_seq_length_distribution.png}
     \caption{Log Distribution of Sequence Lenghts}
     \label{fig:log_seq_len}
 \end{figure}
@@ -677,7 +677,7 @@ The gradient of $L$ with respect to $X_3$ can be received by performing the reve
     grad_x2 = grad_x3.reshape(B, self.n_heads, T, T + 1) #reverse reshaping
 \end{lstlisting}
 \begin{align}
-\frac{\partial L}{\partial X_2}=\text{reshape } \frac{\partial L}{\partial X_3} \text{ to ($B$, $H$, $L$, $L + 1$)}
+\frac{\partial L}{\partial X_2}=\text{reshape } \frac{\partial L}{\partial X_3} \text{ to ($B$, $H$, $T$, $T + 1$)}
 \end{align}
 
 The gradient of $L$ with respect to $X_2$ can be received by performing the reverse operation of step 2 of the Skewing Algorithm. There we reshaped the tensor $X_2$ to $(B, H, T + 1, T)$, now we reshape the gradient with respect to $X_3$ to the shape $(B, H, T, T + 1)$ (Eq. 6).\newline
