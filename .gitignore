@@ -13,3 +13,4 @@ run_scripts/train_losses.csv
 /csghome/hpdc04/Transformer_Code/CUPY/models/datasets/tokenized/
 checkpoints_fine_tuning/
 Inference/
+wandb/
