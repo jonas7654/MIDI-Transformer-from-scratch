@@ -1,5 +1,5 @@
 # MIDI-Transformer from Scratch
-Note: all functions are specified to run on the `hpdc04` user on the cluster.
+Note: all functions are specified to run on the `hpdc04` user on the cluster. Change corresponding paths in order to run on a different machine
 ## How to use the model
 - In order to execute this repository you have to download the clean_midi data first and save it under `CUPY/models/datasets/`.
 - To pre process the data you need to run `run_scripts/transpose_midi.sh`
