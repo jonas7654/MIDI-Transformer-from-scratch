@@ -27,9 +27,19 @@ Once the parameters are set, you can execute the script by running the following
 ```bash
 ./inference.sh -p -T
 ```
+
 Example for $p = 0.15$ and $T = 0.7$:
 ```bash
 ./inference.sh 0.15 0.7
 ```
 ## Lakh Dataset
-- http://hog.ee.columbia.edu/craffel/lmd/clean_midi.tar.gz
+
+- Dataset: http://hog.ee.columbia.edu/craffel/lmd/clean_midi.tar.gz  
+- Source: http://hog.ee.columbia.edu/craffel/lmd/  
+
+If you use this dataset, please cite:
+
+Raffel, C. (2016). *Learning-Based Methods for Comparing Sequences, with Applications to Audio-to-MIDI Alignment and Matching*. PhD Thesis.
+
+Licensed under CC-BY 4.0.
+
