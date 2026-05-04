@@ -41,5 +41,12 @@ If you use this dataset, please cite:
 
 Raffel, C. (2016). *Learning-Based Methods for Comparing Sequences, with Applications to Audio-to-MIDI Alignment and Matching*. PhD Thesis.
 
+### Model Architecture
+
+The model architecture is inspired by:
+
+Huang, C.-Z. A., Vaswani, A., Uszkoreit, J., Shazeer, N., Simon, I., Hawthorne, C., Dai, A., Hoffman, M., Dinculescu, M., & Eck, D. (2019).  
+*Music Transformer: Generating Music with Long-Term Structure*. ICLR 2019.
+
 Licensed under CC-BY 4.0.
 
