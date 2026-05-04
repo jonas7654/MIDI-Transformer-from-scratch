@@ -8,8 +8,8 @@ Note: all functions are specified to run on the `hpdc04` user on the cluster. Ch
 - In order to execute this repository you have to download the clean_midi data first and save it under `CUPY/models/datasets/`.
 - To pre process the data you need to run `run_scripts/transpose_midi.sh`
 - Model configuration is specified within `CUPY/models/GoePT/config.py`.
-- After specifying the configuration setting up the training- validation and test dataset can be done by executing `run_scripts/generate_train_val_test.sh`.
-- To finally run the training process you can either run `run_scripts/run_train_in_console.sh`to start training in the current bash or `run_scripts/train_model.sh` which let slurm allocate ressources for the training process. The Training process is logged via `wandb`. 
+- After specifying the configuration, setting up the training- validation and test dataset can be done by executing `run_scripts/generate_train_val_test.sh`.
+- In order to finally run the training process, you can either run `run_scripts/run_train_in_console.sh`to start training in the current bash or `run_scripts/train_model.sh` which let slurm allocate ressources for the training process. The training process is logged via `wandb`. 
 
 - Model checkpoints will be saved to `checkpoints/`.
 - To proceed with inference given a pre-trained model you can use the inference script in `run_scripts/inference.sh`. The following parameters can be specified:
