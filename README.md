@@ -1,5 +1,5 @@
 # MIDI-Transformer from Scratch
-Note: all functions are specified to run on the `hpdc04` user on the cluster. Change corresponding paths in order to run on a different machine
+Note: all functions are specified to run on the `hpdc04` user on the cluster. Change corresponding paths in order to run on a different machine.
 
 ## Validation Loss
 ![Val Loss](val_loss.png)
