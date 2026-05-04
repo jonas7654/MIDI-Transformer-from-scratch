@@ -47,6 +47,5 @@ Licensed under CC-BY 4.0.
 
 Inspired by the Music Transformer:
 
-Huang et al. (2019).  
-*Music Transformer: Generating Music with Long-Term Structure*.  
+Huang et al. (2019). *Music Transformer: Generating Music with Long-Term Structure*.  
 https://arxiv.org/abs/1809.04281
