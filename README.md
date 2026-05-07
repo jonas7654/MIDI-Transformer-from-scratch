@@ -33,9 +33,7 @@ Example for $p = 0.15$ and $T = 0.7$:
 ./inference.sh 0.15 0.7
 ```
 ## Lakh Dataset
-
-- Dataset: http://hog.ee.columbia.edu/craffel/lmd/clean_midi.tar.gz  
-- Source: http://hog.ee.columbia.edu/craffel/lmd/  
+Source: https://colinraffel.com/projects/lmd
 
 If you use this dataset, please cite:
 
