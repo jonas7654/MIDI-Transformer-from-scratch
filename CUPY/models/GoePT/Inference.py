@@ -14,7 +14,7 @@ import pretty_midi
 import os
 
 
-sys.path.append('/csghome/hpdc04/Transformer_Code/CUPY/models/utils')
+sys.path.append('../../utils')
 
 from tokenize_data_fast import tokenize_dataset_to_bin
 import config
